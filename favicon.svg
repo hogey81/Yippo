@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="52 52 408 408" width="408" height="408">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7b2cbf"/><stop offset=".55" stop-color="#5a189a"/><stop offset="1" stop-color="#240046"/>
+    </linearGradient>
+    <clipPath id="tile"><rect x="56" y="56" width="400" height="400" rx="96"/></clipPath>
+    <g id="horn">
+      <path d="M176 186 C128 190 92 168 84 124 C82 108 90 94 100 88 C104 116 128 142 192 146 Z" fill="#f6ecd2" stroke="#bfa974" stroke-width="9" stroke-linejoin="round"/>
+      <path d="M100 96 C106 118 126 138 160 144" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="9" stroke-linecap="round"/>
+    </g>
+    <g id="ear">
+      <ellipse cx="108" cy="226" rx="34" ry="20" transform="rotate(-24 108 226)" fill="#a8461a"/>
+      <ellipse cx="112" cy="228" rx="19" ry="10" transform="rotate(-24 112 228)" fill="#f4a6a0"/>
+    </g>
+    <path id="lock" d="M0 0 C-26 30 -30 70 -12 108 C-6 120 6 120 12 108 C30 70 26 30 0 0 Z"/>
+  </defs>
+
+  
+
+  <!-- Tile, like the game blocks -->
+  <rect x="56" y="56" width="400" height="400" rx="96" fill="#3a86ff"/>
+  <g clip-path="url(#tile)">
+    <rect x="56" y="412" width="400" height="60" fill="#000" opacity=".22"/>
+    <ellipse cx="200" cy="80" rx="190" ry="70" fill="#fff" opacity=".13"/>
+  </g>
+  <rect x="56" y="56" width="400" height="400" rx="96" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="9"/>
+
+  <!-- Highland cow -->
+  <use href="#horn"/><use href="#horn" transform="translate(512 0) scale(-1 1)"/>
+  <use href="#ear"/><use href="#ear" transform="translate(512 0) scale(-1 1)"/>
+
+  <!-- shaggy hair behind face -->
+  <path d="M256 128 C170 128 130 190 132 262 C134 320 160 372 200 396 L312 396 C352 372 378 320 380 262 C382 190 342 128 256 128 Z" fill="#c9561b"/>
+
+  <!-- long face -->
+  <path d="M206 214 C206 190 306 190 306 214 L316 330 C320 380 296 412 256 412 C216 412 192 380 196 330 Z" fill="#f0c8a0"/>
+  <!-- nose bridge light strip -->
+  <path d="M240 200 C246 196 266 196 272 200 L276 320 L236 320 Z" fill="#f9dcc0" opacity=".85"/>
+
+  <!-- eyes -->
+  <g>
+    <ellipse cx="206" cy="262" rx="19" ry="21" fill="#fff"/><ellipse cx="206" cy="266" rx="12" ry="14" fill="#2a1a12"/><circle cx="210" cy="260" r="4.5" fill="#fff"/>
+    <ellipse cx="306" cy="262" rx="19" ry="21" fill="#fff"/><ellipse cx="306" cy="266" rx="12" ry="14" fill="#2a1a12"/><circle cx="310" cy="260" r="4.5" fill="#fff"/>
+  </g>
+
+  <!-- shaggy fringe over forehead and eyes -->
+  <g fill="#e8782a" stroke="#a8461a" stroke-width="9" stroke-linejoin="round">
+    <use href="#lock" transform="translate(172 128) rotate(22) scale(.95)"/>
+    <use href="#lock" transform="translate(340 128) rotate(-22) scale(.95)"/>
+    <use href="#lock" transform="translate(206 120) rotate(8) scale(1.05)"/>
+    <use href="#lock" transform="translate(306 120) rotate(-8) scale(1.05)"/>
+    <use href="#lock" transform="translate(256 116) scale(1.1)"/>
+    <use href="#lock" transform="translate(150 176) rotate(14) scale(.7)"/>
+    <use href="#lock" transform="translate(362 176) rotate(-14) scale(.7)"/>
+  </g>
+
+
+  <g fill="#e8782a" stroke="#a8461a" stroke-width="9" stroke-linejoin="round">
+    <use href="#lock" transform="translate(166 262) rotate(8) scale(.62)"/>
+    <use href="#lock" transform="translate(346 262) rotate(-8) scale(.62)"/>
+    <use href="#lock" transform="translate(176 318) rotate(12) scale(.5)"/>
+    <use href="#lock" transform="translate(336 318) rotate(-12) scale(.5)"/>
+  </g>
+
+  <!-- muzzle -->
+  <ellipse cx="256" cy="370" rx="62" ry="44" fill="#f4a6a0"/>
+  <ellipse cx="256" cy="360" rx="38" ry="18" fill="#fff" opacity=".18"/>
+  <ellipse cx="232" cy="372" rx="9" ry="13" transform="rotate(14 232 372)" fill="#a8454c"/>
+  <ellipse cx="280" cy="372" rx="9" ry="13" transform="rotate(-14 280 372)" fill="#a8454c"/>
+  <path d="M236 402 Q256 414 276 402" fill="none" stroke="#a8454c" stroke-width="9" stroke-linecap="round"/>
+</svg>
