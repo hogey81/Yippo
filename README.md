@@ -14,13 +14,15 @@ Open `index.html` in je browser.
 ## Vercel
 Framework Preset: **Other**, geen build command, geen output directory. Vercel serveert `index.html` direct.
 
-## Wereldwijd scorebord en leagues (Supabase)
-Het scorebord staat uit zolang `SB_URL` en `SB_KEY` in `index.html` leeg zijn.
+## Accounts, scorebord, leagues en cloud-opslag (Supabase)
+Spelers krijgen automatisch een **gastaccount** (anoniem inloggen). Daaraan hangen hun naam, scores, leagues en voortgang.
+De online functies staan uit zolang `SB_URL` en `SB_KEY` in `index.html` leeg zijn.
 
-1. Maak een gratis project op supabase.com (of gebruik een bestaand project, alle namen beginnen met `yippo_`).
-2. Open **SQL Editor**, plak de inhoud van `supabase/yippo.sql` en klik **Run**.
-3. Ga naar **Project Settings → API** en kopieer de **Project URL** en de **anon public key**.
-4. Zet ze bovenin het scriptdeel `online: scorebord + leagues` van `index.html` bij `SB_URL` en `SB_KEY`.
+1. Maak een gratis project op supabase.com (of gebruik een bestaand project; alle namen beginnen met `yippo_`).
+2. **Authentication → Sign In / Providers → Allow anonymous sign-ins**: aanzetten.
+3. **SQL Editor**: plak de inhoud van `supabase/yippo.sql` en klik **Run** (opnieuw draaien is veilig).
+4. **Project Settings → API Keys**: kopieer de Project URL en de publishable (of anon) key naar `SB_URL` en `SB_KEY` in `index.html`.
 
-De tabellen zijn niet rechtstreeks te lezen of te schrijven (Row Level Security); alles loopt via de `yippo_*`-functies,
-die namen, scores (0 tot 50.000) en datums controleren.
+De tabellen zijn niet rechtstreeks te lezen of te schrijven (Row Level Security). Alles loopt via de `yippo_*`-functies,
+die controleren wie je bent (`auth.uid()`), en namen, scores (0 tot 50.000) en datums valideren.
+Spelers kunnen hun account en alle gegevens verwijderen via **Account** in het menu.
