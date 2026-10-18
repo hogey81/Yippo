@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#5a189a">
 <meta name="description" content="Yippo: een verslavend match-3 spel met speciale dieren, ijs, levels en een dagelijkse puzzel.">
+<link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -258,16 +259,24 @@ function closeModal(){$('#modal').classList.remove('on')}
 /* ============ level definitions ============ */
 function levelDef(L){
   const r=mulberry32(L*7919+13);
-  const types=L<=8?5:6;
-  let moves=Math.max(18,27-Math.floor(L/5));
+  const hard=Math.max(0,L-2);                 // level 1-2 zijn de uitleg-levels, daarna wordt het steeds pittiger
+  const types=L<=2?5:6;
+  let moves=L<=2?28-L:Math.max(20,22-Math.floor(hard/4));
   const goals=[];let ice=0;
   const pickT=(ex=[])=>{let t;do{t=Math.floor(r()*types)}while(ex.includes(t));return t};
-  const base=8+Math.floor(L*.25),k=L%5;
-  if(k===1){goals.push({kind:'collect',type:pickT(),n:base+2})}
-  else if(k===2){const a=pickT(),b=pickT([a]);goals.push({kind:'collect',type:a,n:base-2},{kind:'collect',type:b,n:base-2})}
-  else if(k===3){ice=Math.min(26,6+Math.floor(L*.6));goals.push({kind:'ice',n:ice},{kind:'collect',type:pickT(),n:base-2})}
-  else if(k===4){goals.push({kind:'special',n:2+Math.floor(L/10)},{kind:'collect',type:pickT(),n:base-3})}
-  else{ice=Math.min(20,4+Math.floor(L*.4));goals.push({kind:'score',n:2500+L*100},{kind:'ice',n:ice});moves+=2}
+  const base=L===1?10:L===2?8:12+Math.min(7,Math.floor(hard*.4)),k=L%5;
+  if(L<=2){
+    if(L===1)goals.push({kind:'collect',type:pickT(),n:base});
+    else{const a=pickT(),b=pickT([a]);goals.push({kind:'collect',type:a,n:base-2},{kind:'collect',type:b,n:base-2})}
+  }else if(k===1){goals.push({kind:'collect',type:pickT(),n:base+4})}
+  else if(k===2){
+    const a=pickT(),b=pickT([a]);
+    goals.push({kind:'collect',type:a,n:base},{kind:'collect',type:b,n:base});
+    if(L>=12){const c=pickT([a,b]);goals.push({kind:'collect',type:c,n:base-2})}
+  }
+  else if(k===3){ice=Math.min(13,5+Math.floor(hard*.45));goals.push({kind:'ice',n:ice},{kind:'collect',type:pickT(),n:base-2});moves+=2}
+  else if(k===4){goals.push({kind:'special',n:3+Math.floor(hard/6)},{kind:'collect',type:pickT(),n:base-2})}
+  else{ice=Math.min(12,4+Math.floor(hard*.4));goals.push({kind:'score',n:Math.min(3200,1500+L*50)},{kind:'ice',n:ice});moves+=3}
   return {L,types,moves,goals,ice,seed:L*104729+1};
 }
 function dailyDef(){
@@ -447,7 +456,7 @@ async function clearSet(set,combo,spawns,nAct){
   const f=[...set][0];fxAt(Math.floor(f/COLS),f%COLS,'+'+pts,'#ffe066');
   sfx.match(combo);buzz(12);
   if(nAct){sfx.special();board.classList.remove('shake');void board.offsetWidth;board.classList.add('shake');buzz(60)}
-  if(combo>=2)comboText('COMBO x'+combo+'!');
+  if(combo>=2)comboText(GAME_NAME.toUpperCase()+' x'+combo+'!');
   await sleep(230);
   spawns.forEach(s=>{
     const t=mkTile(-1,s.s,s.dir);grid[s.r][s.c]=t;attach(t,s.r,s.c,true);
