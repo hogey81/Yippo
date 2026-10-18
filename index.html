@@ -241,7 +241,7 @@ function levelDef(L){
 }
 function dailyDef(){
   const d=today(),h=hashStr(d);
-  return {daily:true,date:d,types:6,moves:20,ice:8,seed:h,goals:[{kind:'score',n:5000+(h%2000)}]};
+  return {daily:true,date:d,types:6,moves:25,ice:8,seed:h,goals:[]};
 }
 
 /* ============ game state ============ */
@@ -499,6 +499,14 @@ function hud(){
   $('#gLevel').textContent=G.mode==='daily'?'📅 Dagelijks':'Level '+G.def.L;
   $('#gMoves').textContent='Zetten '+G.moves;
   $('#gScore').textContent='⭐ '+fmt(G.score);
+  if(G.mode==='daily'){
+    const best=S.daily[G.def.date]||0;
+    $('#goals').innerHTML=`<span class="goal">🏆 Beste vandaag: ${fmt(Math.max(best,G.score))}</span>`;
+    $('#barfill').style.width=Math.round((G.def.moves-G.moves)/G.def.moves*100)+'%';
+    $('#tHammer span').textContent=G.hammers;$('#tShuffle span').textContent=G.shuffles;
+    $('#tHammer').classList.toggle('on',G.hammerOn);
+    return;
+  }
   $('#goals').innerHTML=G.def.goals.map(g=>{
     const h=Math.min(goalHave(g),g.n),done=h>=g.n;
     const ic=g.kind==='collect'?ANIMALS[g.type].e:g.kind==='ice'?'🧊':g.kind==='special'?'🦁':'🎯';
@@ -624,15 +632,16 @@ function lose(){
 }
 function finishDaily(){
   G.over=true;
-  const target=G.def.goals[0].n,ok=G.score>=target,date=G.def.date;
+  const date=G.def.date,prev=S.daily[date]||0,record=G.score>prev;
   if(S.streak.last!==date){S.streak.count=S.streak.last===yesterday()?S.streak.count+1:1;S.streak.last=date}
-  S.daily[date]=Math.max(S.daily[date]||0,G.score);save();
-  ok?sfx.win():sfx.lose();
+  S.daily[date]=Math.max(prev,G.score);save();
+  sfx.win();
   const m=G.made;
-  const txt=`🐾 ${GAME_NAME} ${date}\n⭐ ${fmt(G.score)} punten ${ok?'✅':'(doel '+fmt(target)+')'}\n🦁${m.lion} 🐘${m.elephant} 🐉${m.dragon} 🦄${m.unicorn}\n🔥 Reeks: ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}\n${location.href.split('#')[0]}`;
-  setTimeout(()=>modal(`<h2>${ok?'🏆 Doel gehaald!':'📅 Dag gespeeld'}</h2>
-    <p>Score: <b>${fmt(G.score)}</b> / ${fmt(target)}</p><p>Beste van vandaag: <b>${fmt(S.daily[date])}</b></p>
-    <p>🔥 Reeks: <b>${S.streak.count}</b> ${S.streak.count===1?'dag':'dagen'}</p><p><small>Morgen staat er een nieuwe puzzel klaar.</small></p>`,
+  const txt=`🐾 ${GAME_NAME} ${date}\n⭐ ${fmt(G.score)} punten in ${G.def.moves} zetten\n🦁${m.lion} 🐘${m.elephant} 🐉${m.dragon} 🦄${m.unicorn}\n🔥 Reeks: ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}\n${location.href.split('#')[0]}`;
+  setTimeout(()=>modal(`<h2>${record&&prev?'🏆 Nieuw record!':'📅 Klaar!'}</h2>
+    <div class="stars">⭐ ${fmt(G.score)}</div><p>punten in ${G.def.moves} zetten</p>
+    <p>Beste van vandaag: <b>${fmt(S.daily[date])}</b></p>
+    <p>🔥 Reeks: <b>${S.streak.count}</b> ${S.streak.count===1?'dag':'dagen'}</p><p><small>Morgen staat er een nieuwe puzzel klaar. Kun jij vandaag nog meer punten halen?</small></p>`,
     [['📤 Delen','',async()=>{
         try{if(navigator.share){await navigator.share({text:txt})}else{await navigator.clipboard.writeText(txt);toast('Gekopieerd! Plak het in je chat.')}}catch(e){}
       }],['↻ Nog een keer','dim',()=>startGame(dailyDef(),'daily')],['Menu','dim',toMenu]]),500);
