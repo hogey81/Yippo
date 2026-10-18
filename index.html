@@ -697,7 +697,10 @@ $('#tShuffle').onclick=async()=>{
   await endCheck();if(!G.over){G.busy=false;scheduleHint()}
 };
 $('#gMenu').onclick=()=>{
-  if(!G||G.busy)return;sfx.ui();
+  if(!G)return;
+  if(G.over){sfx.ui();toMenu();return}
+  if(G.busy){toast('Even wachten…');return}
+  sfx.ui();
   modal('<h2>Pauze</h2>',[
     ['Verder spelen','',()=>{}],
     ['↻ Opnieuw','dim',()=>G.mode==='daily'?startGame(dailyDef(),'daily'):startLevel(G.def.L)],
