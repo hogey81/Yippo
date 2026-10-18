@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#5a189a">
-<meta name="description" content="Wildlings: een verslavend match-3 spel met speciale dieren, ijs, levels en een dagelijkse puzzel.">
-<title>Wildlings</title>
+<meta name="description" content="Yippo: een verslavend match-3 spel met speciale dieren, ijs, levels en een dagelijkse puzzel.">
+<title>Yippo</title>
 <style>
 :root{--cell:44px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -100,7 +100,7 @@ table.help td:first-child{white-space:nowrap}
 
 <div id="menu" class="screen on">
   <div id="zoo">🐶🐱🐸🐼</div>
-  <h1 id="gameName">Wildlings</h1>
+  <h1 id="gameName">Yippo</h1>
   <p class="sub">Wissel dieren, maak setjes, bouw een dierentuin vol combo's!</p>
   <button class="btn" id="mPlay">▶ Spelen</button>
   <button class="btn alt" id="mDaily">📅 Dagelijkse puzzel</button>
@@ -139,7 +139,7 @@ table.help td:first-child{white-space:nowrap}
 <script>
 'use strict';
 /* ============ constants ============ */
-const GAME_NAME='Wildlings'; // één plek om de naam te wijzigen (ook in <title> en <h1 id="gameName">)
+const GAME_NAME='Yippo'; // één plek om de naam te wijzigen (ook in <title> en <h1 id="gameName">)
 const COLS=7, ROWS=8, MAX_LEVEL=40;
 const ANIMALS=[
   {e:'🐶',c:'#e9c46a'},{e:'🐱',c:'#e76f51'},{e:'🐸',c:'#52b788'},

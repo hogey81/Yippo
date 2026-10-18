@@ -1,4 +1,4 @@
-# 🐾 Wildlings
+# 🐾 Yippo
 
 Een match-3 spel met dieren. Eén bestand (`index.html`), geen build nodig.
 
