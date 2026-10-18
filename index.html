@@ -94,6 +94,29 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 #toast{position:fixed;left:50%;top:14%;transform:translateX(-50%);background:#000b;padding:10px 18px;border-radius:14px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s;z-index:60;text-align:center}
 #toast.on{opacity:1}
 
+/* scoreboard */
+#lb{gap:8px}
+#lb h2{margin:6px 0 0}
+.tabs{display:flex;gap:8px}
+.tab{background:#ffffff26;border-radius:14px;padding:9px 14px;font-weight:800;font-size:15px}
+.tab.on{background:#ffd23f;color:#5b3a00}
+.lbBody{width:min(430px,100%);flex:1;overflow:auto;padding:4px 2px}
+.lbBtns{display:flex;gap:10px}
+.lbBtns .btn{padding:10px 16px;font-size:16px}
+.muted{opacity:.8;text-align:center;margin:14px 0}
+.lbhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 2px 10px;font-weight:800}
+.lbhead small{font-weight:600;opacity:.85}
+.lbrow{display:flex;align-items:center;gap:10px;background:#ffffff1f;border-radius:14px;padding:10px 12px;margin-bottom:6px;font-weight:700}
+.lbrow.me{background:#ffd23f;color:#3d2800}
+.lbrow .rk{width:34px;text-align:center;font-size:18px}
+.lbrow .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lbrow .sc{min-width:64px;text-align:right}
+.lbrow .sc2{min-width:70px;text-align:right;opacity:.75;font-size:13px}
+.lbrow.click{cursor:pointer}
+.chip{background:#0000004d;border-radius:10px;padding:2px 8px;font-size:13px;letter-spacing:1px}
+.lbact{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.lbact .btn{padding:9px 14px;font-size:15px}
+.inp{width:100%;padding:12px 14px;border-radius:12px;border:0;font-size:18px;font-weight:700;text-align:center;margin-top:8px;color:#2b0057;-webkit-user-select:text;user-select:text}
 /* modal */
 #modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
 #modal.on{display:flex}
@@ -116,6 +139,7 @@ table.help td:first-child{white-space:nowrap}
   <button class="btn" id="mPlay">▶ Spelen</button>
   <button class="btn alt" id="mDaily">📅 Dagelijkse puzzel</button>
   <div class="streak" id="streakTxt"></div>
+  <button class="btn dim" id="mBoard" style="display:none">🏅 Scorebord &amp; leagues</button>
   <button class="btn dim" id="mLevels">🗺 Levels</button>
   <button class="btn dim" id="mHelp">❓ Hoe werkt het?</button>
   <button class="btn dim" id="mSound">🔊 Geluid aan</button>
@@ -125,6 +149,13 @@ table.help td:first-child{white-space:nowrap}
   <h2>Kies een level</h2>
   <div id="lvgrid"></div>
   <button class="btn dim" id="lvBack">← Terug</button>
+</div>
+
+<div id="lb" class="screen">
+  <h2>🏅 Scorebord</h2>
+  <div class="tabs"><button class="tab on" id="tabWorld">🌍 Wereld</button><button class="tab" id="tabLeagues">👨‍👩‍👧 Mijn leagues</button></div>
+  <div class="lbBody" id="lbBody"></div>
+  <div class="lbBtns"><button class="btn dim" id="lbName">✏️ Naam</button><button class="btn dim" id="lbBack">← Menu</button></div>
 </div>
 
 <div id="game" class="screen">
@@ -169,7 +200,7 @@ const yesterday=()=>dateStr(new Date(Date.now()-864e5));
 const fmt=n=>n.toLocaleString('nl-NL');
 
 /* ============ save ============ */
-let S={unlocked:1,stars:{},best:{},daily:{},streak:{count:0,last:''},sound:true,seenHelp:false};
+let S={unlocked:1,stars:{},best:{},daily:{},streak:{count:0,last:''},sound:true,seenHelp:false,player:null,leagues:[],pending:null};
 try{Object.assign(S,JSON.parse(localStorage.getItem('dm_save')||'{}'))}catch(e){}
 function save(){try{localStorage.setItem('dm_save',JSON.stringify(S))}catch(e){}}
 
@@ -634,17 +665,28 @@ function finishDaily(){
   G.over=true;
   const date=G.def.date,prev=S.daily[date]||0,record=G.score>prev;
   if(S.streak.last!==date){S.streak.count=S.streak.last===yesterday()?S.streak.count+1:1;S.streak.last=date}
-  S.daily[date]=Math.max(prev,G.score);save();
+  S.daily[date]=Math.max(prev,G.score);
+  if(online()){ensurePlayer();S.pending={day:date,score:S.daily[date]}}
+  save();
   sfx.win();
-  const m=G.made;
-  const txt=`🐾 ${GAME_NAME} ${date}\n⭐ ${fmt(G.score)} punten in ${G.def.moves} zetten\n🦁${m.lion} 🐘${m.elephant} 🐉${m.dragon} 🦄${m.unicorn}\n🔥 Reeks: ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}\n${location.href.split('#')[0]}`;
-  setTimeout(()=>modal(`<h2>${record&&prev?'🏆 Nieuw record!':'📅 Klaar!'}</h2>
-    <div class="stars">⭐ ${fmt(G.score)}</div><p>punten in ${G.def.moves} zetten</p>
-    <p>Beste van vandaag: <b>${fmt(S.daily[date])}</b></p>
-    <p>🔥 Reeks: <b>${S.streak.count}</b> ${S.streak.count===1?'dag':'dagen'}</p><p><small>Morgen staat er een nieuwe puzzel klaar. Kun jij vandaag nog meer punten halen?</small></p>`,
-    [['📤 Delen','',async()=>{
-        try{if(navigator.share){await navigator.share({text:txt})}else{await navigator.clipboard.writeText(txt);toast('Gekopieerd! Plak het in je chat.')}}catch(e){}
-      }],['↻ Nog een keer','dim',()=>startGame(dailyDef(),'daily')],['Menu','dim',toMenu]]),500);
+  const m=G.made,score=G.score;
+  const txt=`🐾 ${GAME_NAME} ${date}\n⭐ ${fmt(score)} punten in ${G.def.moves} zetten\n🦁${m.lion} 🐘${m.elephant} 🐉${m.dragon} 🦄${m.unicorn}\n🔥 Reeks: ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}\n${location.href.split('#')[0].split('?')[0]}`;
+  const showResult=()=>{
+    modal(`<h2>${record&&prev?'🏆 Nieuw record!':'📅 Klaar!'}</h2>
+      <div class="stars">⭐ ${fmt(score)}</div><p>punten in ${G.def.moves} zetten</p>
+      <p>Beste van vandaag: <b>${fmt(S.daily[date])}</b></p>
+      ${online()?'<p id="rankLine">🌍 Score versturen…</p>':''}
+      <p>🔥 Reeks: <b>${S.streak.count}</b> ${S.streak.count===1?'dag':'dagen'}</p><p><small>Morgen staat er een nieuwe puzzel klaar. Kun jij vandaag nog meer punten halen?</small></p>`,
+      [...(online()?[['🏅 Scorebord','alt',()=>openLB('world')]]:[]),
+       ['📤 Delen','',async()=>{
+          try{if(navigator.share){await navigator.share({text:txt})}else{await navigator.clipboard.writeText(txt);toast('Gekopieerd! Plak het in je chat.')}}catch(e){}
+        }],['↻ Nog een keer','dim',()=>startGame(dailyDef(),'daily')],['Menu','dim',toMenu]]);
+    if(online())submitPending().then(r=>{
+      const el=$('#rankLine');if(!el)return;
+      el.textContent=r?`🌍 Plek ${fmt(+r.rank)} van ${fmt(+r.total)} wereldwijd`:'📡 Geen verbinding, je score wordt later verstuurd';
+    });
+  };
+  setTimeout(()=>{ensurePlayer();(online()&&!S.player.name)?askName(showResult):showResult()},500);
 }
 
 /* ============ hints ============ */
@@ -657,6 +699,161 @@ function scheduleHint(){
     const mv=list[Math.floor(Math.random()*list.length)];
     grid[mv.a.r][mv.a.c].el.classList.add('hint');grid[mv.b.r][mv.b.c].el.classList.add('hint');
   },6000);
+}
+
+/* ============ online: scorebord + leagues ============ */
+// Vul hier de gegevens van je Supabase-project in (Project Settings -> API). De anon-sleutel is bedoeld om openbaar te zijn.
+const SB_URL='';
+const SB_KEY='';
+const online=()=>!!(SB_URL&&SB_KEY);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function ensurePlayer(){
+  if(S.player&&S.player.id)return;
+  const id=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:r&3|8).toString(16)});
+  S.player={id,name:''};save();
+}
+async function rpc(fn,args){
+  const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),8000);
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:'POST',signal:ctl.signal,
+      headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(args)});
+    const data=await res.json().catch(()=>null);
+    if(!res.ok)throw new Error((data&&data.message)||'http_'+res.status);
+    return data;
+  }catch(e){
+    if(e.name==='AbortError'||e instanceof TypeError)throw new Error('offline');
+    throw e;
+  }finally{clearTimeout(t)}
+}
+const ERR={offline:'Geen verbinding. Probeer het later opnieuw.',league_not_found:'Die code bestaat niet.',league_full:'Deze league zit vol (max. 50 spelers).',
+  too_many:'Je zit al in 10 leagues.',bad_name:'Vul een geldige naam in.',bad_day:'Deze score is te oud om te versturen.',bad_score:'Deze score kan niet worden verstuurd.'};
+const errText=e=>ERR[e.message]||'Er ging iets mis. Probeer het later opnieuw.';
+
+async function submitPending(){
+  if(!online()||!S.pending||!S.player||!S.player.name)return null;
+  try{
+    const r=await rpc('yippo_submit_score',{p_day:S.pending.day,p_player:S.player.id,p_name:S.player.name,p_score:S.pending.score});
+    S.pending=null;save();return r&&r[0];
+  }catch(e){
+    if(['bad_day','bad_score','bad_name'].includes(e.message)){S.pending=null;save()}
+    return null;
+  }
+}
+function askName(cb){
+  ensurePlayer();
+  modal(`<h2>Jouw naam</h2><p>Zo zien anderen je op het scorebord.</p>
+    <input id="nameIn" class="inp" maxlength="20" placeholder="bijv. Sander" value="${esc(S.player.name||'')}" autocomplete="nickname">`,
+    [['Opslaan','',()=>{
+      const v=($('#nameIn').value||'').trim().slice(0,20);
+      if(!v){askName(cb);return}
+      const changed=S.player.name!==v;S.player.name=v;save();
+      if(changed&&S.daily[today()]!==undefined&&online()){S.pending={day:today(),score:S.daily[today()]};save();submitPending()}
+      cb&&cb();
+    }]]);
+  setTimeout(()=>{const i=$('#nameIn');i&&i.focus()},60);
+}
+const inviteUrl=code=>location.origin+location.pathname+'?league='+code;
+async function shareText(text){
+  try{if(navigator.share){await navigator.share({text})}else{await navigator.clipboard.writeText(text);toast('Gekopieerd! Plak het in je chat.')}}catch(e){}
+}
+function inviteLeague(code,name){
+  shareText(`Doe mee met mijn ${GAME_NAME}-league "${name}"! 🐾\nCode: ${code}\n${inviteUrl(code)}`);
+}
+function addLeague(code,name){
+  if(!S.leagues.some(l=>l.code===code))S.leagues.push({code,name});
+  save();
+}
+
+let lbTab='world',lbTok=0;
+function openLB(tab){show('lb');lbTab=tab||'world';renderLB()}
+async function renderLB(){
+  const tok=++lbTok,body=$('#lbBody');
+  $('#tabWorld').classList.toggle('on',lbTab==='world');
+  $('#tabLeagues').classList.toggle('on',lbTab!=='world');
+  body.innerHTML='<p class="muted">Laden…</p>';
+  try{
+    if(lbTab==='world')await renderWorld(body,tok);
+    else if(lbTab.startsWith('league:'))await renderLeague(body,lbTab.slice(7),tok);
+    else renderLeagues(body);
+  }catch(e){if(tok===lbTok)body.innerHTML=`<p class="muted">${esc(errText(e))}</p><div class="lbact"><button class="btn" id="lbRetry">↻ Opnieuw</button></div>`;const b=$('#lbRetry');if(b)b.onclick=renderLB}
+}
+const medal=r=>r===1?'🥇':r===2?'🥈':r===3?'🥉':r;
+async function renderWorld(body,tok){
+  const day=today(),rows=await rpc('yippo_global',{p_day:day,p_limit:50});
+  if(tok!==lbTok)return;
+  const total=rows.length?+rows[0].total:0,me=S.player&&S.player.id;
+  let h=`<div class="lbhead"><span>📅 Vandaag</span><small>${fmt(total)} ${total===1?'speler':'spelers'}</small></div>`;
+  if(!rows.length)h+='<p class="muted">Nog niemand vandaag. Wees de eerste!</p>';
+  rows.forEach(r=>{h+=`<div class="lbrow${r.player_id===me?' me':''}"><span class="rk">${medal(+r.rank)}</span><span class="nm">${esc(r.name)}</span><span class="sc">${fmt(+r.score)}</span></div>`});
+  if(S.daily[day]===undefined)h+='<div class="lbact"><button class="btn" id="lbPlay">▶ Speel de dagelijkse puzzel</button></div>';
+  body.innerHTML=h;
+  const b=$('#lbPlay');if(b)b.onclick=()=>{sfx.ui();startGame(dailyDef(),'daily')};
+}
+function renderLeagues(body){
+  let h='<div class="lbhead"><span>Jouw leagues</span></div>';
+  if(!S.leagues.length)h+='<p class="muted">Speel met familie of vrienden in je eigen league. Maak er een en deel de code, of doe mee met de code van iemand anders.</p>';
+  S.leagues.forEach(l=>{h+=`<div class="lbrow click" data-code="${esc(l.code)}"><span class="rk">🏠</span><span class="nm">${esc(l.name)}</span><span class="chip">${esc(l.code)}</span></div>`});
+  h+='<div class="lbact"><button class="btn" id="lgNew">➕ Nieuwe league</button><button class="btn alt" id="lgJoin">🔑 Meedoen met code</button></div>';
+  body.innerHTML=h;
+  body.querySelectorAll('.lbrow.click').forEach(r=>r.onclick=()=>{sfx.ui();openLB('league:'+r.dataset.code)});
+  $('#lgNew').onclick=()=>{sfx.ui();newLeague()};
+  $('#lgJoin').onclick=()=>{sfx.ui();joinLeagueDialog()};
+}
+async function renderLeague(body,code,tok){
+  const rows=await rpc('yippo_league',{p_code:code,p_day:today()});
+  if(tok!==lbTok)return;
+  if(!rows.length){S.leagues=S.leagues.filter(l=>l.code!==code);save();lbTab='leagues';toast('Deze league bestaat niet meer.');return renderLB()}
+  const name=rows[0].league_name,me=S.player&&S.player.id;
+  addLeague(code,name);
+  let h=`<div class="lbhead"><span>🏠 ${esc(name)}</span><span class="chip">${esc(code)}</span></div>
+    <div class="lbrow" style="background:none;padding:0 12px;font-size:12px;opacity:.8"><span class="rk"></span><span class="nm">Speler</span><span class="sc2">Vandaag</span><span class="sc2">7 dagen</span></div>`;
+  rows.forEach((r,i)=>{h+=`<div class="lbrow${r.player_id===me?' me':''}"><span class="rk">${medal(i+1)}</span><span class="nm">${esc(r.name)}</span><span class="sc2">${r.today===null?'–':fmt(+r.today)}</span><span class="sc">${fmt(+r.week)}</span></div>`});
+  h+='<div class="lbact"><button class="btn" id="lgInvite">📤 Uitnodigen</button><button class="btn dim" id="lgLeave">Verlaat league</button></div>';
+  if(S.daily[today()]===undefined)h+='<div class="lbact"><button class="btn alt" id="lbPlay">▶ Speel de dagelijkse puzzel</button></div>';
+  body.innerHTML=h;
+  $('#lgInvite').onclick=()=>{sfx.ui();inviteLeague(code,name)};
+  $('#lgLeave').onclick=()=>modal(`<h2>League verlaten?</h2><p>Je verdwijnt uit "${esc(name)}". Je kunt later opnieuw meedoen met de code.</p>`,
+    [['Ja, verlaat','',async()=>{try{await rpc('yippo_leave_league',{p_code:code,p_player:S.player.id});S.leagues=S.leagues.filter(l=>l.code!==code);save();openLB('leagues')}catch(e){toast(errText(e))}}],['Blijven','dim',()=>{}]]);
+  const b=$('#lbPlay');if(b)b.onclick=()=>{sfx.ui();startGame(dailyDef(),'daily')};
+}
+function newLeague(){
+  ensurePlayer();
+  const go=()=>modal(`<h2>Nieuwe league</h2><p>Geef je league een naam, bijvoorbeeld je familie.</p>
+    <input id="lgIn" class="inp" maxlength="24" placeholder="Familie Jansen">`,
+    [['Maak league','',async()=>{
+      const n=($('#lgIn').value||'').trim();if(!n){go();return}
+      try{
+        const code=await rpc('yippo_create_league',{p_name:n,p_player:S.player.id,p_player_name:S.player.name});
+        addLeague(code,n);openLB('league:'+code);
+        modal(`<h2>🎉 League gemaakt!</h2><p>Deel deze code met je familie en vrienden:</p><div class="stars" style="letter-spacing:6px">${esc(code)}</div>`,
+          [['📤 Uitnodigen','',()=>inviteLeague(code,n)],['Later','dim',()=>{}]]);
+      }catch(e){toast(errText(e))}
+    }],['Annuleren','dim',()=>{}]]);
+  S.player.name?go():askName(go);
+  if(S.player.name)setTimeout(()=>{const i=$('#lgIn');i&&i.focus()},60);
+}
+async function joinLeague(code){
+  try{
+    const name=await rpc('yippo_join_league',{p_code:code,p_player:S.player.id,p_player_name:S.player.name});
+    addLeague(code.toUpperCase().trim(),name);openLB('league:'+code.toUpperCase().trim());toast('Welkom bij '+name+'!');
+  }catch(e){toast(errText(e))}
+}
+function joinLeagueDialog(prefill){
+  ensurePlayer();
+  const go=()=>modal(`<h2>Meedoen met een league</h2><p>Vul de code van 5 tekens in.</p>
+    <input id="lgCode" class="inp" maxlength="5" placeholder="ABCDE" value="${esc(prefill||'')}" style="letter-spacing:6px;text-transform:uppercase">`,
+    [['Meedoen','',()=>{const c=($('#lgCode').value||'').trim().toUpperCase();if(c.length!==5){toast('Een code heeft 5 tekens.');go();return}joinLeague(c)}],['Annuleren','dim',()=>{}]]);
+  S.player.name?go():askName(go);
+}
+function handleInvite(){
+  let code=null;
+  try{code=(new URLSearchParams(location.search).get('league')||'').toUpperCase().slice(0,5)}catch(e){}
+  if(!code||!online())return;
+  try{history.replaceState(null,'',location.pathname)}catch(e){}
+  ensurePlayer();
+  const go=()=>modal(`<h2>Uitnodiging 🐾</h2><p>Je bent uitgenodigd voor een league met de code <b>${esc(code)}</b>. Meedoen?</p>`,
+    [['Ja, meedoen','',()=>joinLeague(code)],['Nee, bedankt','dim',()=>{}]]);
+  S.player.name?go():askName(go);
 }
 
 /* ============ menus ============ */
@@ -677,6 +874,8 @@ function toMenu(){
   $('#streakTxt').textContent=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count?`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'} op rij`:'';
   $('#mDaily').textContent=S.daily[today()]!==undefined?`📅 Dagelijks (beste: ${fmt(S.daily[today()])})`:'📅 Dagelijkse puzzel';
   $('#mSound').textContent=S.sound?'🔊 Geluid aan':'🔇 Geluid uit';
+  $('#mBoard').style.display=online()?'':'none';
+  submitPending();
 }
 function toLevels(){
   closeModal();show('levels');
@@ -693,6 +892,11 @@ function toLevels(){
 $('#mPlay').onclick=()=>{sfx.ui();startLevel(Math.min(S.unlocked,MAX_LEVEL))};
 $('#mDaily').onclick=()=>{sfx.ui();startGame(dailyDef(),'daily')};
 $('#mLevels').onclick=()=>{sfx.ui();toLevels()};
+$('#mBoard').onclick=()=>{sfx.ui();openLB('world')};
+$('#tabWorld').onclick=()=>{sfx.ui();lbTab='world';renderLB()};
+$('#tabLeagues').onclick=()=>{sfx.ui();lbTab='leagues';renderLB()};
+$('#lbBack').onclick=toMenu;
+$('#lbName').onclick=()=>{sfx.ui();ensurePlayer();askName(()=>{})};
 $('#mHelp').onclick=()=>{sfx.ui();showHelp()};
 $('#mSound').onclick=()=>{S.sound=!S.sound;save();toMenu();sfx.ui()};
 $('#lvBack').onclick=toMenu;
@@ -718,6 +922,7 @@ $('#gMenu').onclick=()=>{
 };
 
 toMenu();
+handleInvite();
 </script>
 </body>
 </html>
