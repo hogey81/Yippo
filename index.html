@@ -703,8 +703,8 @@ function scheduleHint(){
 
 /* ============ online: scorebord + leagues ============ */
 // Vul hier de gegevens van je Supabase-project in (Project Settings -> API). De anon-sleutel is bedoeld om openbaar te zijn.
-const SB_URL='';
-const SB_KEY='';
+const SB_URL='https://ovymejnayklmcrdncpjj.supabase.co';
+const SB_KEY='sb_publishable_m6bghNYvHTTst6N9iyVBsg_SiE6zlnk';
 const online=()=>!!(SB_URL&&SB_KEY);
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function ensurePlayer(){
@@ -716,7 +716,7 @@ async function rpc(fn,args){
   const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),8000);
   try{
     const res=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:'POST',signal:ctl.signal,
-      headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(args)});
+      headers:{apikey:SB_KEY,...(SB_KEY.startsWith('eyJ')?{Authorization:'Bearer '+SB_KEY}:{}),'Content-Type':'application/json'},body:JSON.stringify(args)});
     const data=await res.json().catch(()=>null);
     if(!res.ok)throw new Error((data&&data.message)||'http_'+res.status);
     return data;
