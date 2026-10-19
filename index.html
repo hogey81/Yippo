@@ -118,6 +118,10 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 .lbact{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
 .lbact .btn{padding:9px 14px;font-size:15px}
 .inp{width:100%;padding:12px 14px;border-radius:12px;border:0;font-size:18px;font-weight:700;text-align:center;margin-top:8px;color:#2b0057;-webkit-user-select:text;user-select:text}
+/* e-mail dialog */
+.msg{min-height:20px;margin:8px 0 0;font-weight:700;color:#ffe066}
+.code{font-size:30px!important;letter-spacing:10px;font-variant-numeric:tabular-nums}
+.linkbtn{background:none;color:#ffffffcc;text-decoration:underline;font-size:15px;padding:6px}
 /* modal */
 #modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
 #modal.on{display:flex}
@@ -144,6 +148,7 @@ table.help td:first-child{white-space:nowrap}
   <button class="btn dim" id="mAccount" style="display:none">👤 Account</button>
   <button class="btn dim" id="mLevels">🗺 Levels</button>
   <button class="btn dim" id="mHelp">❓ Hoe werkt het?</button>
+  <button class="linkbtn" id="mLogin" style="display:none">🔑 Heb je al een account? Inloggen</button>
   <button class="btn dim" id="mSound">🔊 Geluid aan</button>
 </div>
 
@@ -662,6 +667,7 @@ function win(){
   setTimeout(()=>modal(`<h2>🎉 Level gehaald!</h2><div class="stars">${'⭐'.repeat(st)}${'☆'.repeat(3-st)}</div>
     <p>Score: <b>${fmt(G.score)}</b>${bonus?`<br><small>(inclusief ${fmt(bonus)} bonus voor overgebleven zetten)</small>`:''}</p>`,
     [last?['🏆 Alle levels klaar! Menu','',toMenu]:['Volgend level ▶','',()=>startLevel(L+1)],
+     ...(isGuest()&&(L===5||L%10===0)?[['💾 Bewaar je voortgang','alt',()=>emailDialog(false)]]:[]),
      ['↻ Opnieuw','dim',()=>startLevel(L)],['Levels','dim',toLevels]]),500);
 }
 function lose(){
@@ -687,7 +693,8 @@ function finishDaily(){
       <p>Beste van vandaag: <b>${fmt(S.daily[date])}</b></p>
       ${online()?'<p id="rankLine">🌍 Score versturen…</p>':''}
       <p>🔥 Reeks: <b>${S.streak.count}</b> ${S.streak.count===1?'dag':'dagen'}</p><p><small>Morgen staat er een nieuwe puzzel klaar. Kun jij vandaag nog meer punten halen?</small></p>`,
-      [...(online()?[['🏅 Scorebord','alt',()=>openLB('world')]]:[]),
+      [...(isGuest()?[['💾 Bewaar je voortgang','alt',()=>emailDialog(false)]]:[]),
+       ...(online()?[['🏅 Scorebord',isGuest()?'':'alt',()=>openLB('world')]]:[]),
        ['📤 Delen','',async()=>{
           try{if(navigator.share){await navigator.share({text:txt})}else{await navigator.clipboard.writeText(txt);toast('Gekopieerd! Plak het in je chat.')}}catch(e){}
         }],['↻ Nog een keer','dim',()=>startGame(dailyDef(),'daily')],['Menu','dim',toMenu]]);
@@ -722,13 +729,13 @@ const myId=()=>S.auth&&S.auth.uid||'';
 
 /* --- gastaccount (anoniem inloggen bij Supabase) --- */
 function storeSession(d){
-  S.auth={access:d.access_token,refresh:d.refresh_token,exp:d.expires_at?d.expires_at*1000:Date.now()+(d.expires_in||3600)*1000,uid:d.user&&d.user.id||(S.auth&&S.auth.uid)||''};
+  S.auth={access:d.access_token,refresh:d.refresh_token,exp:d.expires_at?d.expires_at*1000:Date.now()+(d.expires_in||3600)*1000,uid:d.user&&d.user.id||(S.auth&&S.auth.uid)||'',email:(d.user&&d.user.email)||''};
   ensurePlayer();S.player.id=S.auth.uid;save();
 }
-async function authCall(path,body){
-  const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),8000);
+async function authReq(method,path,body,token){
+  const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),10000);
   try{
-    const res=await fetch(SB_URL+path,{method:'POST',signal:ctl.signal,headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{})});
+    const res=await fetch(SB_URL+path,{method,signal:ctl.signal,headers:{apikey:SB_KEY,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body||{})});
     const d=await res.json().catch(()=>null);
     if(!res.ok)throw new Error(String((d&&(d.error_code||d.msg||d.message))||'auth_failed'));
     return d;
@@ -737,6 +744,7 @@ async function authCall(path,body){
     throw e;
   }finally{clearTimeout(t)}
 }
+const authCall=(path,body)=>authReq('POST',path,body);
 let authP=null;
 async function refreshOrSignup(){
   if(S.auth&&S.auth.refresh){
@@ -751,8 +759,8 @@ function getToken(){
   if(!authP)authP=refreshOrSignup().finally(()=>{authP=null});
   return authP;
 }
-async function rpc(fn,args){
-  const token=await getToken();
+async function rpc(fn,args,tokenOverride){
+  const token=tokenOverride||await getToken();
   const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),8000);
   try{
     const res=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:'POST',signal:ctl.signal,
@@ -766,7 +774,7 @@ async function rpc(fn,args){
   }finally{clearTimeout(t)}
 }
 const ERR={offline:'Geen verbinding. Probeer het later opnieuw.',league_not_found:'Die code bestaat niet.',league_full:'Deze league zit vol (max. 50 spelers).',
-  too_many:'Je zit al in 10 leagues.',bad_name:'Vul een geldige naam in.',bad_day:'Deze score is te oud om te versturen.',bad_score:'Deze score kan niet worden verstuurd.',anonymous_provider_disabled:'Gastaccounts staan nog uit in Supabase.',not_signed_in:'Inloggen als gast is niet gelukt. Probeer het later opnieuw.',bad_data:'Opslaan is niet gelukt.'};
+  too_many:'Je zit al in 10 leagues.',bad_name:'Vul een geldige naam in.',bad_day:'Deze score is te oud om te versturen.',bad_score:'Deze score kan niet worden verstuurd.',anonymous_provider_disabled:'Gastaccounts staan nog uit in Supabase.',not_signed_in:'Inloggen als gast is niet gelukt. Probeer het later opnieuw.',bad_data:'Opslaan is niet gelukt.',otp_expired:'Die code klopt niet of is verlopen. Vraag een nieuwe code aan.',validation_failed:'Dit e-mailadres lijkt niet te kloppen.',over_email_send_rate_limit:'Even geduld: je kunt over een minuutje een nieuwe code aanvragen.',over_request_rate_limit:'Even geduld: je kunt over een minuutje een nieuwe code aanvragen.',email_address_invalid:'Dit e-mailadres lijkt niet te kloppen.',otp_disabled:'Geen account gevonden met dit e-mailadres.',signup_disabled:'Geen account gevonden met dit e-mailadres.',user_not_found:'Geen account gevonden met dit e-mailadres.'};
 const errText=e=>ERR[e.message]||'Er ging iets mis. Probeer het later opnieuw.';
 
 async function submitPending(){
@@ -937,13 +945,118 @@ async function bootOnline(){
   }catch(e){/* offline of gastaccounts staan uit: het spel werkt gewoon lokaal door */}
 }
 
-/* ============ account ============ */
+/* ============ account: e-mail koppelen / inloggen ============ */
+const isGuest=()=>online()&&!(S.auth&&S.auth.email);
+function modalRaw(html){$('#card').innerHTML=html;$('#modal').classList.add('on')}
+const validEmail=e=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+let codeTimer=null;
+
+function emailDialog(login){
+  clearInterval(codeTimer);ensurePlayer();
+  modalRaw(`<h2>${login?'🔑 Inloggen':'💾 Bewaar je voortgang'}</h2>
+    <p>${login?'Vul het e-mailadres van je account in. Je krijgt een code van 6 cijfers.':'Vul je e-mailadres in en je levels, scores en leagues blijven bewaard, ook op een nieuwe telefoon. Geen wachtwoord nodig!'}</p>
+    <input id="emIn" class="inp" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="jij@voorbeeld.nl" value="${esc(S.lastEmail||'')}">
+    <p class="msg" id="emMsg"></p>
+    <div class="row"><button class="btn" id="emGo">Stuur me een code</button><button class="btn dim" id="emNo">Later</button></div>`);
+  const go=async()=>{
+    const email=($('#emIn').value||'').trim().toLowerCase(),msg=$('#emMsg'),btn=$('#emGo');
+    if(!validEmail(email)){msg.textContent='Dit e-mailadres lijkt niet te kloppen.';return}
+    btn.disabled=true;btn.textContent='Versturen…';msg.textContent='';
+    try{const kind=await sendCode(email,login);S.lastEmail=email;save();codeDialog(email,kind)}
+    catch(e){msg.textContent=errText(e);btn.disabled=false;btn.textContent='Stuur me een code'}
+  };
+  $('#emGo').onclick=go;
+  $('#emIn').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
+  $('#emNo').onclick=closeModal;
+  setTimeout(()=>{const i=$('#emIn');i&&i.focus()},80);
+}
+// Geeft 'link' (gastaccount wordt aan e-mail gekoppeld) of 'login' (er bestaat al een account met dit adres).
+async function sendCode(email,login){
+  if(!login){
+    const tok=await getToken();
+    try{await authReq('PUT','/auth/v1/user',{email},tok);return 'link'}
+    catch(e){if(e.message!=='email_exists'&&e.message!=='email_conflict_identity_not_deletable')throw e}
+  }
+  await authReq('POST','/auth/v1/otp',{email,create_user:false});
+  return 'login';
+}
+function codeDialog(email,kind){
+  clearInterval(codeTimer);
+  modalRaw(`<h2>📬 Check je mail</h2>
+    <p>We hebben een code van 6 cijfers gestuurd naar<br><b>${esc(email)}</b></p>
+    <input id="cdIn" class="inp code" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="······">
+    <p class="msg" id="cdMsg"></p>
+    <p><small>Niets ontvangen? Kijk ook in je spam.${kind==='login'?' Staat dit adres niet bij een account, dan komt er geen mail.':''}</small></p>
+    <div class="row"><button class="btn dim" id="cdResend" disabled>Opnieuw sturen (30)</button><button class="btn dim" id="cdBack">Ander e-mailadres</button></div>`);
+  let busy=false,left=30;
+  const verify=async()=>{
+    const code=($('#cdIn').value||'').replace(/\D/g,'');
+    if(code.length!==6||busy)return;
+    busy=true;const msg=$('#cdMsg');msg.textContent='Controleren…';
+    try{await verifyCode(email,code,kind)}
+    catch(e){busy=false;msg.textContent=errText(e);const i=$('#cdIn');if(i){i.value='';i.focus()}}
+  };
+  $('#cdIn').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,6);if(e.target.value.length===6)verify()});
+  $('#cdBack').onclick=()=>emailDialog(kind==='login');
+  const rs=$('#cdResend');
+  codeTimer=setInterval(()=>{
+    const b=$('#cdResend');if(!b){clearInterval(codeTimer);return}
+    left--;if(left>0){b.textContent=`Opnieuw sturen (${left})`}else{b.textContent='Opnieuw sturen';b.disabled=false;clearInterval(codeTimer)}
+  },1000);
+  rs.onclick=async()=>{
+    rs.disabled=true;rs.textContent='Versturen…';
+    try{await sendCode(email,kind==='login');codeDialog(email,kind);toast('Nieuwe code onderweg 📬')}
+    catch(e){$('#cdMsg').textContent=errText(e);rs.disabled=false;rs.textContent='Opnieuw sturen'}
+  };
+  setTimeout(()=>{const i=$('#cdIn');i&&i.focus()},80);
+}
+async function verifyCode(email,code,kind){
+  const guestTok=kind==='login'?await getToken().catch(()=>null):null;
+  const d=await authReq('POST','/auth/v1/verify',{type:kind==='link'?'email_change':'email',email,token:code});
+  const oldUid=myId();
+  if(d&&d.access_token)storeSession(d);
+  else if(kind==='link'&&S.auth&&S.auth.refresh){S.auth.exp=0;await getToken()}   // sessie opnieuw ophalen met het bevestigde e-mailadres
+  else throw new Error('otp_expired');
+  if(kind==='login'&&oldUid&&oldUid!==S.auth.uid)await switchAccount(guestTok);
+  else {booted=true;syncUp()}
+  clearInterval(codeTimer);
+  modal(`<h2>✅ Gelukt!</h2><p>Je voortgang is nu veilig bewaard${kind==='login'?' en teruggehaald':''}.</p><p><small>Op een nieuwe telefoon log je in met ${esc(email)}.</small></p>`,[['Verder spelen','',()=>toMenu()]]);
+}
+// Bestaand account op dit apparaat: voortgang samenvoegen, leagues opnieuw joinen, score van vandaag opnieuw insturen, tijdelijk gastaccount opruimen.
+async function switchAccount(guestTok){
+  try{
+    const cloud=await rpc('yippo_load_progress');
+    mergeProgress(cloud);
+    if(cloud&&typeof cloud.name==='string'&&cloud.name)S.player.name=cloud.name.slice(0,20);   // de naam van het account wint
+    const nm=(S.player&&S.player.name)||'';
+    if(nm){
+      for(const l of S.leagues.slice()){
+        try{await rpc('yippo_join_league',{p_code:l.code,p_player_name:nm})}
+        catch(e){if(e.message==='league_not_found')S.leagues=S.leagues.filter(x=>x.code!==l.code)}
+      }
+      const d=today();if(S.daily[d]!==undefined)S.pending={day:d,score:S.daily[d]};
+    }
+    save();booted=true;
+    await submitPending();syncUp();
+  }catch(e){}
+  if(guestTok){try{await rpc('yippo_delete_account',{},guestTok)}catch(e){}}
+}
+async function logout(){
+  try{await syncUp()}catch(e){}
+  try{localStorage.removeItem('dm_save')}catch(e){}
+  location.href=location.pathname;
+}
+
 function accountDialog(){
   ensurePlayer();
+  const email=S.auth&&S.auth.email;
   modal(`<h2>👤 Account</h2>
     <p>Naam: <b>${esc(S.player.name||'(nog geen)')}</b></p>
-    <p>Je speelt als <b>gast</b>. Je voortgang wordt in de cloud bewaard, maar bij een nieuwe telefoon of gewiste browsergegevens ben je je gastaccount kwijt. Inloggen met e-mail komt later.</p>`,
-    [['✏️ Naam wijzigen','',()=>askName(()=>{})],
+    ${email?`<p>Ingelogd als<br><b>${esc(email)}</b></p><p><small>Je voortgang wordt bewaard. Op een nieuwe telefoon log je in met dit e-mailadres.</small></p>`
+           :`<p>Je speelt als <b>gast</b>. Bewaar je voortgang met je e-mailadres, dan raak je niets kwijt als je van telefoon wisselt.</p>`}`,
+    [...(email?[]:[['💾 Bewaar mijn voortgang','',()=>emailDialog(false)],['🔑 Ik heb al een account','dim',()=>emailDialog(true)]]),
+     ['✏️ Naam wijzigen','dim',()=>askName(()=>{})],
+     ...(email?[['Uitloggen','dim',()=>modal('<h2>Uitloggen?</h2><p>Je voortgang blijft bewaard in je account.</p>',[['Ja, uitloggen','',logout],['Annuleren','dim',()=>{}]])]]:[]),
      ['🗑 Account verwijderen','dim',()=>modal(`<h2>Account verwijderen?</h2><p>Je naam, scores, leagues en voortgang worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.</p>`,
         [['Ja, alles verwijderen','',async()=>{
           try{await rpc('yippo_delete_account');try{localStorage.removeItem('dm_save')}catch(e){}location.href=location.pathname}
@@ -972,6 +1085,7 @@ function toMenu(){
   $('#mSound').textContent=S.sound?'🔊 Geluid aan':'🔇 Geluid uit';
   $('#mBoard').style.display=online()?'':'none';
   $('#mAccount').style.display=online()?'':'none';
+  $('#mLogin').style.display=isGuest()?'':'none';
   submitPending();
 }
 function toLevels(){
@@ -991,6 +1105,7 @@ $('#mDaily').onclick=()=>{sfx.ui();startGame(dailyDef(),'daily')};
 $('#mLevels').onclick=()=>{sfx.ui();toLevels()};
 $('#mBoard').onclick=()=>{sfx.ui();openLB('world')};
 $('#mAccount').onclick=()=>{sfx.ui();accountDialog()};
+$('#mLogin').onclick=()=>{sfx.ui();emailDialog(true)};
 $('#tabWorld').onclick=()=>{sfx.ui();lbTab='world';renderLB()};
 $('#tabLeagues').onclick=()=>{sfx.ui();lbTab='leagues';renderLB()};
 $('#lbBack').onclick=toMenu;

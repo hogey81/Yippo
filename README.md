@@ -26,3 +26,8 @@ De online functies staan uit zolang `SB_URL` en `SB_KEY` in `index.html` leeg zi
 De tabellen zijn niet rechtstreeks te lezen of te schrijven (Row Level Security). Alles loopt via de `yippo_*`-functies,
 die controleren wie je bent (`auth.uid()`), en namen, scores (0 tot 50.000) en datums valideren.
 Spelers kunnen hun account en alle gegevens verwijderen via **Account** in het menu.
+
+## Inloggen met e-mail (zonder wachtwoord)
+Spelers beginnen als gast. Ze kunnen hun voortgang bewaren met een e-mailadres en een code van 6 cijfers
+(`💾 Bewaar je voortgang`), en op een nieuw apparaat inloggen met `🔑 Inloggen`. Zie `supabase/email-templates.md`
+voor de mailteksten die je in Supabase moet instellen.
