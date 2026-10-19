@@ -1,7 +1,7 @@
 {
   "name": "Yippo",
   "short_name": "Yippo",
-  "description": "Match-3 met dieren, speciale combo's en een dagelijkse puzzel.",
+  "description": "Wissel, plof en brul! Maak wilde combo's, bouw een leeuw en versla je vrienden in de dagelijkse puzzel. 🦁",
   "start_url": "./",
   "display": "standalone",
   "orientation": "portrait",
