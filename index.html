@@ -950,6 +950,7 @@ const isGuest=()=>online()&&!(S.auth&&S.auth.email);
 function modalRaw(html){$('#card').innerHTML=html;$('#modal').classList.add('on')}
 const validEmail=e=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
 let codeTimer=null;
+const OTP_LEN=6;   // moet gelijk zijn aan 'Email OTP Length' in Supabase (Authentication, Sign In / Providers, Email)
 
 function emailDialog(login){
   clearInterval(codeTimer);ensurePlayer();
@@ -984,19 +985,21 @@ function codeDialog(email,kind){
   clearInterval(codeTimer);
   modalRaw(`<h2>📬 Check je mail</h2>
     <p>We hebben een code van 6 cijfers gestuurd naar<br><b>${esc(email)}</b></p>
-    <input id="cdIn" class="inp code" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="6" placeholder="······">
+    <input id="cdIn" class="inp code" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="10" placeholder="······">
     <p class="msg" id="cdMsg"></p>
+    <div class="row" style="margin-top:6px"><button class="btn" id="cdGo">Controleer code</button></div>
     <p><small>Niets ontvangen? Kijk ook in je spam.${kind==='login'?' Staat dit adres niet bij een account, dan komt er geen mail.':''}</small></p>
     <div class="row"><button class="btn dim" id="cdResend" disabled>Opnieuw sturen (30)</button><button class="btn dim" id="cdBack">Ander e-mailadres</button></div>`);
   let busy=false,left=30;
   const verify=async()=>{
     const code=($('#cdIn').value||'').replace(/\D/g,'');
-    if(code.length!==6||busy)return;
+    if(code.length<6||busy)return;
     busy=true;const msg=$('#cdMsg');msg.textContent='Controleren…';
     try{await verifyCode(email,code,kind)}
     catch(e){busy=false;msg.textContent=errText(e);const i=$('#cdIn');if(i){i.value='';i.focus()}}
   };
-  $('#cdIn').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,6);if(e.target.value.length===6)verify()});
+  $('#cdIn').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,10);if(e.target.value.length===OTP_LEN)verify()});
+  $('#cdGo').onclick=verify;
   $('#cdBack').onclick=()=>emailDialog(kind==='login');
   const rs=$('#cdResend');
   codeTimer=setInterval(()=>{
