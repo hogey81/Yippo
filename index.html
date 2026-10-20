@@ -288,6 +288,7 @@ let S={unlocked:1,stars:{},best:{},daily:{},streak:{count:0,last:''},sound:true,
 try{Object.assign(S,JSON.parse(localStorage.getItem('dm_save')||'{}'))}catch(e){}
 function save(){try{localStorage.setItem('dm_save',JSON.stringify(S))}catch(e){}if(window.scheduleSync)scheduleSync()}
 // Testmodus voor nieuwe functies: open de site met ?beta=1 (aan) of ?beta=0 (uit)
+const KIDSAFE=true;   // kinderveilige namen en leeftijdsvraag: aan voor iedereen
 const BETA=(()=>{try{const q=new URLSearchParams(location.search).get('beta');if(q==='1'){S.beta=true;save()}else if(q==='0'){S.beta=false;save()}}catch(e){}return !!S.beta})();
 
 /* ============ audio ============ */
@@ -871,7 +872,7 @@ async function submitPending(){
 }
 function askName(cb){
   ensurePlayer();
-  if(BETA){if(!S.player.name)setName(autoName());cb&&cb();return}
+  if(KIDSAFE){if(!S.player.name)setName(autoName());cb&&cb();return}
   modal(`<h2>Jouw naam</h2><p>Zo zien anderen je op het scorebord.</p>
     <input id="nameIn" class="inp" maxlength="20" placeholder="bijv. Sander" value="${esc(S.player.name||'')}" autocomplete="nickname">`,
     [['Opslaan','',()=>{
@@ -949,7 +950,7 @@ async function renderLeague(body,code,tok){
 }
 function newLeague(){
   ensurePlayer();
-  if(BETA&&S.age!=='adult'){ageGate(a=>{if(a==='adult')newLeague();else kidModal('Een league maken mag alleen een ouder doen. Jij kunt wel meedoen met een code!')});return}
+  if(KIDSAFE&&S.age!=='adult'){ageGate(a=>{if(a==='adult')newLeague();else kidModal('Een league maken mag alleen een ouder doen. Jij kunt wel meedoen met een code!')});return}
   const go=()=>modal(`<h2>Nieuwe league</h2><p>Geef je league een naam, bijvoorbeeld je familie.</p>
     <input id="lgIn" class="inp" maxlength="24" placeholder="Familie Jansen">`,
     [['Maak league','',async()=>{
@@ -1108,7 +1109,7 @@ function nameDialog(){
 }
 const kidModal=txt=>modal(`<h2>👨‍👩‍👧 Vraag een ouder</h2><p>${txt}</p><p><small>Jij kunt gewoon blijven spelen!</small></p>`,[['Oké','',()=>{}]]);
 function emailEntry(login){
-  if(!BETA){emailDialog(login);return}
+  if(!KIDSAFE){emailDialog(login);return}
   ageGate(a=>{if(a==='adult')emailDialog(login);else kidModal('Een e-mailadres koppelen mag alleen een ouder doen.')});
 }
 
@@ -1227,13 +1228,13 @@ async function logout(){
 function accountDialog(){
   ensurePlayer();
   const email=S.auth&&S.auth.email;
-  if(BETA&&!S.player.name)setName(autoName());
+  if(KIDSAFE&&!S.player.name)setName(autoName());
   const nameBtn=S.age==='adult'?'✏️ Naam wijzigen':S.age==='child'?'🐾 Andere dierennaam':'✏️ Eigen naam kiezen';
   modal(`<h2>👤 Account</h2>
     <p>Jouw naam</p><div class="nickchip">${esc(prettyName(S.player.name||'(nog geen)'))}</div>
     ${email?`<p>Ingelogd als<br><b>${esc(email)}</b></p><p><small>Je voortgang wordt bewaard. Op een nieuwe telefoon log je in met dit e-mailadres.</small></p>`
            :`<p>Je speelt als <b>gast</b></p>`}`,
-    [[BETA?nameBtn:'✏️ Naam wijzigen',BETA?'':'dim',()=>BETA?nameDialog():askName(()=>{})],
+    [[KIDSAFE?nameBtn:'✏️ Naam wijzigen',KIDSAFE?'':'dim',()=>KIDSAFE?nameDialog():askName(()=>{})],
      ...(email?[]:[['💾 Bewaar mijn voortgang','alt',()=>emailEntry(false)],['🔑 Ik heb al een account','dim',()=>emailEntry(true)]]),
      ...(email?[['Uitloggen','dim',()=>modal('<h2>Uitloggen?</h2><p>Je voortgang blijft bewaard in je account.</p>',[['Ja, uitloggen','',logout],['Annuleren','dim',()=>{}]])]]:[]),
      ['🗑 Account verwijderen','dim',()=>modal(`<h2>Account verwijderen?</h2><p>Je naam, scores, leagues en voortgang worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.</p>`,
@@ -1430,8 +1431,8 @@ function showHelp(){
 }
 function toMenu(){
   closeModal();
+  if(KIDSAFE&&!S.nameFixed){S.nameFixed=true;ensurePlayer();if(S.player.name&&!isAutoName(S.player.name)&&S.age!=='adult')S.player.name=autoName();save()}
   if(BETA){
-    if(!S.nameFixed){S.nameFixed=true;ensurePlayer();if(S.player.name&&!isAutoName(S.player.name)&&S.age!=='adult')S.player.name=autoName();save()}
     syncZooFromProgress();show('menu2');renderMenu2();submitPending();return}
   show('menu');
   $('#streakTxt').textContent=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count?`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'} op rij`:'';
@@ -1465,7 +1466,7 @@ $('#mLogin').onclick=()=>{sfx.ui();emailEntry(true)};
 $('#tabWorld').onclick=()=>{sfx.ui();lbTab='world';renderLB()};
 $('#tabLeagues').onclick=()=>{sfx.ui();lbTab='leagues';renderLB()};
 $('#lbBack').onclick=toMenu;
-$('#lbName').onclick=()=>{sfx.ui();ensurePlayer();BETA?nameDialog():askName(()=>{})};
+$('#lbName').onclick=()=>{sfx.ui();ensurePlayer();KIDSAFE?nameDialog():askName(()=>{})};
 $('#mHelp').onclick=()=>{sfx.ui();showHelp()};
 $('#mSound').onclick=()=>{S.sound=!S.sound;save();toMenu();sfx.ui()};
 $('#lvBack').onclick=toMenu;
