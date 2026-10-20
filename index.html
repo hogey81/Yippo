@@ -1061,6 +1061,7 @@ function setName(n){
 }
 // Leeftijd: we bewaren alleen "kind" of "volwassen", nooit het geboortejaar. 16-jarigen geboren in 'jaar-16' tellen voor de zekerheid als kind.
 function ageGate(next){
+  if(!S.age&&S.auth&&S.auth.email){S.age='adult';save()}
   if(S.age)return next(S.age);
   const y=new Date().getFullYear();let opts='';
   for(let i=y;i>=y-100;i--)opts+=`<option value="${i}">${i}</option>`;
@@ -1228,6 +1229,7 @@ async function logout(){
 function accountDialog(){
   ensurePlayer();
   const email=S.auth&&S.auth.email;
+  if(S.auth&&S.auth.email&&!S.age){S.age='adult';save()}
   if(KIDSAFE&&!S.player.name)setName(autoName());
   const nameBtn=S.age==='adult'?'✏️ Naam wijzigen':S.age==='child'?'🐾 Andere dierennaam':'✏️ Eigen naam kiezen';
   modal(`<h2>👤 Account</h2>
@@ -1431,7 +1433,8 @@ function showHelp(){
 }
 function toMenu(){
   closeModal();
-  if(KIDSAFE&&!S.nameFixed){S.nameFixed=true;ensurePlayer();if(S.player.name&&!isAutoName(S.player.name)&&S.age!=='adult')S.player.name=autoName();save()}
+  if(S.auth&&S.auth.email&&!S.age){S.age='adult';save()}
+  if(KIDSAFE&&!S.nameFixed){S.nameFixed=true;ensurePlayer();if(S.player.name&&!isAutoName(S.player.name)&&S.age!=='adult'&&!(S.auth&&S.auth.email))S.player.name=autoName();save()}
   if(BETA){
     syncZooFromProgress();show('menu2');renderMenu2();submitPending();return}
   show('menu');
