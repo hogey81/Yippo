@@ -985,7 +985,7 @@ function codeDialog(email,kind){
   clearInterval(codeTimer);
   modalRaw(`<h2>📬 Check je mail</h2>
     <p>We hebben een code van 6 cijfers gestuurd naar<br><b>${esc(email)}</b></p>
-    <input id="cdIn" class="inp code" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="10" placeholder="······">
+    <div style="display:flex;gap:8px;align-items:center;margin-top:8px"><input id="cdIn" class="inp code" style="margin-top:0" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="10" placeholder="······"><button class="btn alt" id="cdPaste" style="padding:12px 14px;font-size:15px;white-space:nowrap">📋 Plak</button></div>
     <p class="msg" id="cdMsg"></p>
     <div class="row" style="margin-top:6px"><button class="btn" id="cdGo">Controleer code</button></div>
     <p><small>Niets ontvangen? Kijk ook in je spam.${kind==='login'?' Staat dit adres niet bij een account, dan komt er geen mail.':''}</small></p>
@@ -1000,6 +1000,13 @@ function codeDialog(email,kind){
   };
   $('#cdIn').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,10);if(e.target.value.length===OTP_LEN)verify()});
   $('#cdGo').onclick=verify;
+  $('#cdPaste').onclick=async()=>{
+    try{
+      const t=await navigator.clipboard.readText(),m=String(t||'').match(/\d(?:[\s-]?\d){5,9}/),digits=(m?m[0]:'').replace(/\D/g,'');
+      if(digits.length>=6){$('#cdIn').value=digits.slice(0,10);verify()}
+      else toast('Kopieer eerst de code uit je mail 📋');
+    }catch(e){toast('Houd het vakje ingedrukt en kies Plakken');const i=$('#cdIn');i&&i.focus()}
+  };
   $('#cdBack').onclick=()=>emailDialog(kind==='login');
   const rs=$('#cdResend');
   codeTimer=setInterval(()=>{

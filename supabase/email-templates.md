@@ -20,9 +20,11 @@ De code staat in het onderwerp, zodat je hem al in de melding op je telefoon zie
 ```html
 <div style="font-family:Arial,Helvetica,sans-serif;max-width:420px;margin:0 auto;padding:24px;text-align:center;color:#2b0057">
   <h2 style="margin:0 0 8px">🐮 Jouw Yippo-code</h2>
-  <p style="margin:0 0 16px">Vul deze code in het spel in:</p>
-  <p style="font-size:38px;font-weight:bold;letter-spacing:10px;background:#f1e6ff;border-radius:14px;padding:16px;margin:0 0 16px">{{ .Token }}</p>
-  <p style="color:#666;font-size:13px;margin:0">De code is een uur geldig. Heb je dit niet aangevraagd? Dan kun je deze mail gewoon negeren.</p>
+  <p style="margin:0 0 12px">Vul deze verificatiecode in het spel in:</p>
+  <p style="font-size:38px;font-weight:bold;letter-spacing:10px;background:#f1e6ff;border-radius:14px;padding:16px;margin:0 0 12px;-webkit-user-select:all;user-select:all">{{ .Token }}</p>
+  <p style="margin:0 0 16px;font-size:14px">Kopieer de code en tik in het spel op <b>📋 Plak</b>.</p>
+  <p style="color:#666;font-size:13px;margin:0 0 6px">De code is een uur geldig. Heb je dit niet aangevraagd? Dan kun je deze mail gewoon negeren.</p>
+  <p style="color:#999;font-size:12px;margin:0">Your Yippo verification code is {{ .Token }}</p>
 </div>
 ```
 
