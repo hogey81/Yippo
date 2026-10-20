@@ -31,3 +31,7 @@ Spelers kunnen hun account en alle gegevens verwijderen via **Account** in het m
 Spelers beginnen als gast. Ze kunnen hun voortgang bewaren met een e-mailadres en een code van 6 cijfers
 (`💾 Bewaar je voortgang`), en op een nieuw apparaat inloggen met `🔑 Inloggen`. Zie `supabase/email-templates.md`
 voor de mailteksten die je in Supabase moet instellen.
+
+## Testmodus (?beta=1)
+Nieuwe functies kunnen eerst achter een testschakelaar staan. Open de site met `?beta=1` om ze te zien (`?beta=0` zet het weer uit).
+Op dit moment: wereld 1 (De Zebra's) met slingerroute, dierenvrienden en dierentuin, en een nieuw beginscherm.
