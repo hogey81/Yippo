@@ -1256,7 +1256,7 @@ function renderMap(){
   const wrap=$('#mapScroll');
   $('#mapPill').textContent=`${WORLD1.emoji} Wereld ${WORLD1.id} · ${WORLD1.name} · ${Math.min(S.unlocked,MAX_LEVEL)}/${MAX_LEVEL}`;
   const na=nextAnimal();
-  $('#mapHint').textContent=na?`Volgend dier bij level ${na.lvl}: ${na.e}`:'Alle dieren van deze wereld gered! 🎉';
+  $('#mapHint').textContent=na?`Volgend dier bij level ${na.lvl}: ${na.e}`:'Alle dieren van deze wereld verzameld! 🎉';
   $('#mapPlay').textContent=`▶ Speel level ${cur}`;
   const scale=wrap.clientWidth/MAP_W;
   wrap.scrollTop=Math.max(0,cy*scale-wrap.clientHeight*.55);
@@ -1289,8 +1289,8 @@ function openZoo(){
     `<div class="pen" style="background:#ffffff1a;border-color:#ffffff55;color:#fff;text-align:center;font-weight:800;padding:18px 10px 14px"><div style="margin:0">🦙 De Lama-bergen<br><small>🔒 opent vrijdag 18:00 · ${countdown(nextFriday())}</small></div></div>`;
   $('#zooPens').querySelectorAll('.an').forEach(b=>b.onclick=()=>{
     const a=ALL_ANIMALS.find(x=>x.id===b.dataset.a);sfx.ui();
-    if(hasAnimal(a.id))modal(`<div class="rew"><div class="big">${a.e}</div><b>${esc(a.n)}</b><br><small>${esc(a.fact)}</small><br><small>${a.lvl?'Gered bij level '+a.lvl:'Fantasiedier ✨'}</small></div>`,[['Mooi!','',()=>{}]]);
-    else modal(`<div class="rew"><div class="big sil">${a.e}</div><b>Nog niet gered</b><br><small>${a.lvl?`Speel level ${a.lvl} om de ${esc(a.n.toLowerCase())} te redden.`:`Speel de dagelijkse puzzel ${a.how} om de ${esc(a.n.toLowerCase())} te krijgen.`}</small></div>`,[['Oké','',()=>{}]]);
+    if(hasAnimal(a.id))modal(`<div class="rew"><div class="big">${a.e}</div><b>${esc(a.n)}</b><br><small>${esc(a.fact)}</small><br><small>${a.lvl?'Verzameld bij level '+a.lvl:'Fantasiedier ✨'}</small></div>`,[['Mooi!','',()=>{}]]);
+    else modal(`<div class="rew"><div class="big sil">${a.e}</div><b>Nog niet verzameld</b><br><small>${a.lvl?`Speel level ${a.lvl} om de ${esc(a.n.toLowerCase())} te verzamelen.`:`Speel de dagelijkse puzzel ${a.how} om de ${esc(a.n.toLowerCase())} te krijgen.`}</small></div>`,[['Oké','',()=>{}]]);
   });
   if(newIds.length){S.zooSeen=S.zoo.slice();save()}
 }
@@ -1304,7 +1304,7 @@ function renderMenu2(){
   const best=S.daily[today()];
   $('#m2DailySub').textContent=(best!==undefined?`Beste: ${fmt(best)}`:'Nieuwe puzzel vandaag')+((S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count?` · 🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}`:'');
   const earned=ZOO.filter(a=>hasAnimal(a.id)),next=nextAnimal();
-  $('#m2Scene').innerHTML=earned.slice(-5).map(a=>`<span>${a.e}</span>`).join('')+(next?`<span class="sil">${next.e}</span>`:'')+(earned.length?'':'<span style="font-size:15px;font-weight:800;color:#fff">Red je eerste dier bij level 5!</span>');
+  $('#m2Scene').innerHTML=earned.slice(-5).map(a=>`<span>${a.e}</span>`).join('')+(next?`<span class="sil">${next.e}</span>`:'')+(earned.length?'':'<span style="font-size:15px;font-weight:800;color:#fff">Verzamel je eerste dier bij level 5!</span>');
   const tot=ALL_ANIMALS.length;
   $('#m2ZooBar').style.width=Math.round(S.zoo.length/tot*100)+'%';$('#m2ZooTxt').textContent=`${S.zoo.length} / ${tot}`;
   const old=$('#m2Zoo .nb');if(old)old.remove();
