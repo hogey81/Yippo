@@ -1494,6 +1494,36 @@ $('#gMenu').onclick=()=>{
     ['Naar menu','dim',toMenu]]);
 };
 
+/* ============ terugknop van de telefoon ============ */
+// De browser kent maar één pagina, dus we houden zelf bij waar "terug" naartoe gaat.
+let exitArmed=false,exitT=null;
+const pushNav=()=>{try{history.pushState({yippo:1},'')}catch(e){}};
+function currentScreen(){const e=document.querySelector('.screen.on');return e?e.id:''}
+function onBack(){
+  if($('#modal').classList.contains('on')){
+    const over=G&&G.over&&currentScreen()==='game';
+    closeModal();
+    if(over){if(G.mode==='daily')toMenu();else toLevels()}   // terug na het eindscherm
+    return true;
+  }
+  switch(currentScreen()){
+    case 'game':
+      if(G&&!G.busy&&!G.over)$('#gMenu').click();               // pauzemenu
+      else if(G&&G.over){if(G.mode==='daily')toMenu();else toLevels()}
+      return true;
+    case 'levels': case 'map': case 'zooScreen': case 'lb':
+      toMenu();return true;
+    default: return false;   // beginscherm
+  }
+}
+try{history.replaceState({yippo:0},'');pushNav()}catch(e){}
+addEventListener('popstate',()=>{
+  if(onBack()){pushNav();return}
+  if(exitArmed){exitArmed=false;clearTimeout(exitT);history.back();return}   // tweede keer: echt afsluiten
+  exitArmed=true;toast('Druk nogmaals op terug om af te sluiten');pushNav();
+  exitT=setTimeout(()=>{exitArmed=false},2500);
+});
+
 toMenu();
 bootOnline().then(handleInvite);
 </script>
