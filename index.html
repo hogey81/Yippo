@@ -167,6 +167,11 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 .an.locked .e{filter:grayscale(1) brightness(0) opacity(.3)}
 .rew{background:#ffffff1f;border-radius:16px;padding:10px;margin:10px 0}
 .rew .big{font-size:64px;line-height:1.1}
+/* namen en leeftijd */
+.nickchip{background:#ffffff26;border-radius:16px;padding:12px;font-size:21px;font-weight:900;margin:8px 0}
+.chip2{display:inline-block;background:#ffffff2e;border-radius:12px;padding:7px 11px;margin:3px;font-weight:800;font-size:15px;color:#fff}
+.chip2.on{background:#ffd23f;color:#5b3a00}
+select.inp{appearance:auto}
 /* e-mail dialog */
 .msg{min-height:20px;margin:8px 0 0;font-weight:700;color:#ffe066}
 .code{font-size:30px!important;letter-spacing:10px;font-variant-numeric:tabular-nums}
@@ -279,7 +284,7 @@ const yesterday=()=>dateStr(new Date(Date.now()-864e5));
 const fmt=n=>n.toLocaleString('nl-NL');
 
 /* ============ save ============ */
-let S={unlocked:1,stars:{},best:{},daily:{},streak:{count:0,last:''},sound:true,seenHelp:false,player:null,leagues:[],pending:null,auth:null,zoo:[],zooSeen:[],beta:false};
+let S={unlocked:1,stars:{},best:{},daily:{},streak:{count:0,last:''},sound:true,seenHelp:false,player:null,leagues:[],pending:null,auth:null,zoo:[],zooSeen:[],beta:false,age:null,nameFixed:false};
 try{Object.assign(S,JSON.parse(localStorage.getItem('dm_save')||'{}'))}catch(e){}
 function save(){try{localStorage.setItem('dm_save',JSON.stringify(S))}catch(e){}if(window.scheduleSync)scheduleSync()}
 // Testmodus voor nieuwe functies: open de site met ?beta=1 (aan) of ?beta=0 (uit)
@@ -743,7 +748,7 @@ function win(){
     <p>Score: <b>${fmt(G.score)}</b>${bonus?`<br><small>(inclusief ${fmt(bonus)} bonus voor overgebleven zetten)</small>`:''}</p>${newA?animalBlock(newA):''}${BETA&&last?`<p><b>🎉 Wereld 1 gehaald!</b><br><small>De Lama's komen vrijdag om 18:00.</small></p>`:''}`,
     [...(newA?[['🏡 Naar de dierentuin','alt',()=>openZoo()]]:[]),
      last?['🏆 Naar de kaart','',toLevels]:['Volgend level ▶','',()=>startLevel(L+1)],
-     ...(isGuest()&&(L===5||L%10===0)?[['💾 Bewaar je voortgang','alt',()=>emailDialog(false)]]:[]),
+     ...(isGuest()&&(L===5||L%10===0)?[['💾 Bewaar je voortgang','alt',()=>emailEntry(false)]]:[]),
      ['↻ Opnieuw','dim',()=>startLevel(L)],['Levels','dim',toLevels]]),500);
 }
 function lose(){
@@ -770,7 +775,7 @@ function finishDaily(){
       <p>Beste van vandaag: <b>${fmt(S.daily[date])}</b></p>
       ${online()?'<p id="rankLine">🌍 Score versturen…</p>':''}
       <p>🔥 Reeks: <b>${S.streak.count}</b> ${S.streak.count===1?'dag':'dagen'}</p>${fa.map(animalBlock).join('')}<p><small>Morgen staat er een nieuwe puzzel klaar. Kun jij vandaag nog meer punten halen?</small></p>`,
-      [...(isGuest()?[['💾 Bewaar je voortgang','alt',()=>emailDialog(false)]]:[]),
+      [...(isGuest()?[['💾 Bewaar je voortgang','alt',()=>emailEntry(false)]]:[]),
        ...(online()?[['🏅 Scorebord',isGuest()?'':'alt',()=>openLB('world')]]:[]),
        ['📤 Delen','',async()=>{
           try{if(navigator.share){await navigator.share({text:txt})}else{await navigator.clipboard.writeText(txt);toast('Gekopieerd! Plak het in je chat.')}}catch(e){}
@@ -866,6 +871,7 @@ async function submitPending(){
 }
 function askName(cb){
   ensurePlayer();
+  if(BETA){if(!S.player.name)setName(autoName());cb&&cb();return}
   modal(`<h2>Jouw naam</h2><p>Zo zien anderen je op het scorebord.</p>
     <input id="nameIn" class="inp" maxlength="20" placeholder="bijv. Sander" value="${esc(S.player.name||'')}" autocomplete="nickname">`,
     [['Opslaan','',()=>{
@@ -909,7 +915,7 @@ async function renderWorld(body,tok){
   const total=rows.length?+rows[0].total:0,me=myId();
   let h=`<div class="lbhead"><span>📅 Vandaag</span><small>${fmt(total)} ${total===1?'speler':'spelers'}</small></div>`;
   if(!rows.length)h+='<p class="muted">Nog niemand vandaag. Wees de eerste!</p>';
-  rows.forEach(r=>{h+=`<div class="lbrow${r.player_id===me?' me':''}"><span class="rk">${medal(+r.rank)}</span><span class="nm">${esc(r.name)}</span><span class="sc">${fmt(+r.score)}</span></div>`});
+  rows.forEach(r=>{h+=`<div class="lbrow${r.player_id===me?' me':''}"><span class="rk">${medal(+r.rank)}</span><span class="nm">${esc(prettyName(r.name))}</span><span class="sc">${fmt(+r.score)}</span></div>`});
   if(S.daily[day]===undefined)h+='<div class="lbact"><button class="btn" id="lbPlay">▶ Speel de dagelijkse puzzel</button></div>';
   body.innerHTML=h;
   const b=$('#lbPlay');if(b)b.onclick=()=>{sfx.ui();startGame(dailyDef(),'daily')};
@@ -932,7 +938,7 @@ async function renderLeague(body,code,tok){
   addLeague(code,name);
   let h=`<div class="lbhead"><span>🏠 ${esc(name)}</span><span class="chip">${esc(code)}</span></div>
     <div class="lbrow" style="background:none;padding:0 12px;font-size:12px;opacity:.8"><span class="rk"></span><span class="nm">Speler</span><span class="sc2">Vandaag</span><span class="sc2">7 dagen</span></div>`;
-  rows.forEach((r,i)=>{h+=`<div class="lbrow${r.player_id===me?' me':''}"><span class="rk">${medal(i+1)}</span><span class="nm">${esc(r.name)}</span><span class="sc2">${r.today===null?'–':fmt(+r.today)}</span><span class="sc">${fmt(+r.week)}</span></div>`});
+  rows.forEach((r,i)=>{h+=`<div class="lbrow${r.player_id===me?' me':''}"><span class="rk">${medal(i+1)}</span><span class="nm">${esc(prettyName(r.name))}</span><span class="sc2">${r.today===null?'–':fmt(+r.today)}</span><span class="sc">${fmt(+r.week)}</span></div>`});
   h+='<div class="lbact"><button class="btn" id="lgInvite">📤 Uitnodigen</button><button class="btn dim" id="lgLeave">Verlaat league</button></div>';
   if(S.daily[today()]===undefined)h+='<div class="lbact"><button class="btn alt" id="lbPlay">▶ Speel de dagelijkse puzzel</button></div>';
   body.innerHTML=h;
@@ -943,10 +949,12 @@ async function renderLeague(body,code,tok){
 }
 function newLeague(){
   ensurePlayer();
+  if(BETA&&S.age!=='adult'){ageGate(a=>{if(a==='adult')newLeague();else kidModal('Een league maken mag alleen een ouder doen. Jij kunt wel meedoen met een code!')});return}
   const go=()=>modal(`<h2>Nieuwe league</h2><p>Geef je league een naam, bijvoorbeeld je familie.</p>
     <input id="lgIn" class="inp" maxlength="24" placeholder="Familie Jansen">`,
     [['Maak league','',async()=>{
       const n=($('#lgIn').value||'').trim();if(!n){go();return}
+      if(badName(n)){toast('Die naam kan niet.');go();return}
       try{
         const code=await rpc('yippo_create_league',{p_name:n,p_player_name:S.player.name});
         addLeague(code,n);openLB('league:'+code);
@@ -984,7 +992,7 @@ function handleInvite(){
 
 /* ============ voortgang in de cloud ============ */
 function progressData(){
-  return {unlocked:S.unlocked,stars:S.stars,best:S.best,daily:S.daily,streak:S.streak,leagues:S.leagues,zoo:S.zoo,name:(S.player&&S.player.name)||''};
+  return {unlocked:S.unlocked,stars:S.stars,best:S.best,daily:S.daily,streak:S.streak,leagues:S.leagues,zoo:S.zoo,age:S.age,name:(S.player&&S.player.name)||''};
 }
 function mergeProgress(c){
   if(!c||typeof c!=='object')return;
@@ -999,6 +1007,7 @@ function mergeProgress(c){
     if(l&&/^[A-Z0-9]{5}$/.test(l.code)&&typeof l.name==='string'&&!S.leagues.some(x=>x.code===l.code)&&S.leagues.length<10)S.leagues.push({code:l.code,name:l.name.slice(0,24)});
   });
   (Array.isArray(c.zoo)?c.zoo:[]).forEach(id=>{if(typeof id==='string'&&/^[a-z0-9-]{2,20}$/.test(id)&&ALL_ANIMALS.some(a=>a.id===id)&&!S.zoo.includes(id))S.zoo.push(id)});
+  if(c.age==='child')S.age='child';else if(!S.age&&c.age==='adult')S.age='adult';
   ensurePlayer();
   if(!S.player.name&&typeof c.name==='string')S.player.name=c.name.slice(0,20);
 }
@@ -1021,6 +1030,86 @@ async function bootOnline(){
     booted=true;save();syncUp();
     if($('#menu').classList.contains('on'))toMenu();
   }catch(e){/* offline of gastaccounts staan uit: het spel werkt gewoon lokaal door */}
+}
+
+/* ============ namen en leeftijd (kinderveilig, testmodus) ============ */
+// Namen mogen max. 20 tekens zijn (database). Bijvoeglijk naamwoord <= 8, dier <= 8, plus " 12".
+const NAME_ADJ=['Vrolijke','Slimme','Snelle','Stoere','Lieve','Dappere','Gekke','Vlugge','Sterke','Blije'];
+const NAME_ANIMALS=[['Zebra','🦓'],['Giraf','🦒'],['Olifant','🐘'],['Leeuw','🦁'],['Pinguïn','🐧'],['Lama','🦙'],['Panda','🐼'],['Flamingo','🦩'],['Kameel','🐪'],['Uil','🦉'],['Dolfijn','🐬'],['Koala','🐨'],['Vos','🦊'],['Egel','🦔']];
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const autoName=(adj,animal)=>`${adj||pick(NAME_ADJ)} ${animal||pick(NAME_ANIMALS)[0]} ${10+Math.floor(Math.random()*90)}`;
+function autoParts(n){
+  const m=/^(\S+) (\S+) \d{2}$/.exec(n||'');
+  if(!m||!NAME_ADJ.includes(m[1]))return null;
+  const a=NAME_ANIMALS.find(x=>x[0]===m[2]);return a?{adj:m[1],animal:a[0],emoji:a[1]}:null;
+}
+const isAutoName=n=>!!autoParts(n);
+const prettyName=n=>{const p=autoParts(n);return p?p.emoji+' '+n:n};
+const BAD_WORDS=['kut','fuck','shit','hoer','kanker','tering','tyfus','lul','neger','nazi','hitler','slet','mongool','flikker','porno','kkr'];
+function badName(n){
+  const t=String(n).toLowerCase().replace(/[0@]/g,'o').replace(/1/g,'i').replace(/3/g,'e').replace(/4/g,'a').replace(/5/g,'s').replace(/[^a-z]/g,'');
+  return BAD_WORDS.some(w=>t.includes(w));
+}
+function setName(n){
+  ensurePlayer();
+  const changed=S.player.name!==n;S.player.name=n;save();
+  if(changed&&online()&&S.auth){
+    if(S.daily[today()]!==undefined){S.pending={day:today(),score:S.daily[today()]};save();submitPending()}
+    S.leagues.forEach(l=>rpc('yippo_join_league',{p_code:l.code,p_player_name:n}).catch(()=>{}));
+  }
+}
+// Leeftijd: we bewaren alleen "kind" of "volwassen", nooit het geboortejaar. 16-jarigen geboren in 'jaar-16' tellen voor de zekerheid als kind.
+function ageGate(next){
+  if(S.age)return next(S.age);
+  const y=new Date().getFullYear();let opts='';
+  for(let i=y;i>=y-100;i--)opts+=`<option value="${i}">${i}</option>`;
+  modalRaw(`<h2>🎂 Even een vraag</h2><p>Voor je naam en e-mail moeten we weten hoe oud je bent.</p><p><small>We bewaren je geboortejaar niet.</small></p>
+    <select id="ageSel" class="inp"><option value="">Kies je geboortejaar</option>${opts}</select>
+    <div class="row"><button class="btn" id="ageGo" disabled>Doorgaan</button><button class="btn dim" id="ageNo">Annuleren</button></div><p><small>Niemand ziet je antwoord.</small></p>`);
+  $('#ageSel').onchange=()=>{$('#ageGo').disabled=!$('#ageSel').value};
+  $('#ageGo').onclick=()=>{const v=+$('#ageSel').value;if(!v)return;S.age=(y-v)>=17?'adult':'child';save();closeModal();next(S.age)};
+  $('#ageNo').onclick=closeModal;
+}
+function animalNameDialog(after){
+  let adj=pick(NAME_ADJ),animal=pick(NAME_ANIMALS)[0],num=10+Math.floor(Math.random()*90);
+  const draw=()=>{
+    const em=NAME_ANIMALS.find(a=>a[0]===animal)[1];
+    modalRaw(`<h2>🐾 Kies je dierennaam</h2><p>Zo blijft je echte naam privé!</p>
+      <div class="nickchip">${em} ${esc(adj)} ${esc(animal)} ${num}</div>
+      <div>${NAME_ADJ.map(a=>`<button class="chip2${a===adj?' on':''}" data-adj="${a}">${a}</button>`).join('')}</div>
+      <div style="margin-top:4px">${NAME_ANIMALS.map(a=>`<button class="chip2${a[0]===animal?' on':''}" data-an="${a[0]}">${a[1]} ${a[0]}</button>`).join('')}</div>
+      <div class="row"><button class="btn" id="anOk">✅ Dit wordt mijn naam</button><button class="btn dim" id="anRand">🎲 Verras me</button></div>
+      ${S.age==='child'?'<p><small>Wil je je voortgang bewaren? Vraag een ouder om hulp.</small></p>':''}`);
+    $('#card').querySelectorAll('[data-adj]').forEach(b=>b.onclick=()=>{adj=b.dataset.adj;draw()});
+    $('#card').querySelectorAll('[data-an]').forEach(b=>b.onclick=()=>{animal=b.dataset.an;draw()});
+    $('#anRand').onclick=()=>{adj=pick(NAME_ADJ);animal=pick(NAME_ANIMALS)[0];num=10+Math.floor(Math.random()*90);draw()};
+    $('#anOk').onclick=()=>{setName(`${adj} ${animal} ${num}`);closeModal();toast('Welkom, '+animal.toLowerCase()+'! 🐾');if(after)after();else accountDialog()};
+  };
+  draw();
+}
+function nameDialog(){
+  ensurePlayer();
+  ageGate(a=>{
+    if(a!=='adult'){animalNameDialog();return}
+    modalRaw(`<h2>✏️ Kies je naam</h2><p>Dit zie je op het scorebord. Gebruik liever niet je volledige naam.</p>
+      <input id="nmIn" class="inp" maxlength="20" placeholder="Jouw naam" value="${esc(isAutoName(S.player.name)?'':S.player.name||'')}" autocomplete="nickname">
+      <p class="msg" id="nmMsg"></p>
+      <div class="row"><button class="btn" id="nmOk">Opslaan</button><button class="btn dim" id="nmAn">🎲 Toch liever een dierennaam</button><button class="btn dim" id="nmNo">Annuleren</button></div>`);
+    const save1=()=>{
+      const v=($('#nmIn').value||'').trim().slice(0,20);
+      if(!v){$('#nmMsg').textContent='Vul een naam in.';return}
+      if(badName(v)){$('#nmMsg').textContent='Die naam kan niet. Kies een andere.';return}
+      setName(v);closeModal();toast('Naam opgeslagen ✅');accountDialog();
+    };
+    $('#nmOk').onclick=save1;$('#nmIn').addEventListener('keydown',e=>{if(e.key==='Enter')save1()});
+    $('#nmAn').onclick=()=>animalNameDialog();$('#nmNo').onclick=closeModal;
+    setTimeout(()=>{const i=$('#nmIn');i&&i.focus()},80);
+  });
+}
+const kidModal=txt=>modal(`<h2>👨‍👩‍👧 Vraag een ouder</h2><p>${txt}</p><p><small>Jij kunt gewoon blijven spelen!</small></p>`,[['Oké','',()=>{}]]);
+function emailEntry(login){
+  if(!BETA){emailDialog(login);return}
+  ageGate(a=>{if(a==='adult')emailDialog(login);else kidModal('Een e-mailadres koppelen mag alleen een ouder doen.')});
 }
 
 /* ============ account: e-mail koppelen / inloggen ============ */
@@ -1138,12 +1227,14 @@ async function logout(){
 function accountDialog(){
   ensurePlayer();
   const email=S.auth&&S.auth.email;
+  if(BETA&&!S.player.name)setName(autoName());
+  const nameBtn=S.age==='adult'?'✏️ Naam wijzigen':S.age==='child'?'🐾 Andere dierennaam':'✏️ Eigen naam kiezen';
   modal(`<h2>👤 Account</h2>
-    <p>Naam: <b>${esc(S.player.name||'(nog geen)')}</b></p>
+    <p>Jouw naam</p><div class="nickchip">${esc(prettyName(S.player.name||'(nog geen)'))}</div>
     ${email?`<p>Ingelogd als<br><b>${esc(email)}</b></p><p><small>Je voortgang wordt bewaard. Op een nieuwe telefoon log je in met dit e-mailadres.</small></p>`
            :`<p>Je speelt als <b>gast</b>. Bewaar je voortgang met je e-mailadres, dan raak je niets kwijt als je van telefoon wisselt.</p>`}`,
-    [...(email?[]:[['💾 Bewaar mijn voortgang','',()=>emailDialog(false)],['🔑 Ik heb al een account','dim',()=>emailDialog(true)]]),
-     ['✏️ Naam wijzigen','dim',()=>askName(()=>{})],
+    [...(email?[]:[['💾 Bewaar mijn voortgang','',()=>emailEntry(false)],['🔑 Ik heb al een account','dim',()=>emailEntry(true)]]),
+     [BETA?nameBtn:'✏️ Naam wijzigen',BETA?'':'dim',()=>BETA?nameDialog():askName(()=>{})],
      ...(email?[['Uitloggen','dim',()=>modal('<h2>Uitloggen?</h2><p>Je voortgang blijft bewaard in je account.</p>',[['Ja, uitloggen','',logout],['Annuleren','dim',()=>{}]])]]:[]),
      ['🗑 Account verwijderen','dim',()=>modal(`<h2>Account verwijderen?</h2><p>Je naam, scores, leagues en voortgang worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.</p>`,
         [['Ja, alles verwijderen','',async()=>{
@@ -1322,7 +1413,7 @@ $('#m2League').onclick=()=>{sfx.ui();openLB('leagues')};
 $('#m2Account').onclick=()=>{sfx.ui();accountDialog()};
 $('#m2Help').onclick=()=>{sfx.ui();showHelp()};
 $('#m2Sound').onclick=()=>{S.sound=!S.sound;save();renderMenu2();sfx.ui()};
-$('#m2Login').onclick=()=>{sfx.ui();emailDialog(true)};
+$('#m2Login').onclick=()=>{sfx.ui();emailEntry(true)};
 
 /* ============ menus ============ */
 function showHelp(){
@@ -1339,7 +1430,9 @@ function showHelp(){
 }
 function toMenu(){
   closeModal();
-  if(BETA){syncZooFromProgress();show('menu2');renderMenu2();submitPending();return}
+  if(BETA){
+    if(!S.nameFixed){S.nameFixed=true;ensurePlayer();if(S.player.name&&!isAutoName(S.player.name)&&S.age!=='adult')S.player.name=autoName();save()}
+    syncZooFromProgress();show('menu2');renderMenu2();submitPending();return}
   show('menu');
   $('#streakTxt').textContent=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count?`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'} op rij`:'';
   $('#mDaily').textContent=S.daily[today()]!==undefined?`📅 Dagelijks (beste: ${fmt(S.daily[today()])})`:'📅 Dagelijkse puzzel';
@@ -1368,11 +1461,11 @@ $('#mDaily').onclick=()=>{sfx.ui();startGame(dailyDef(),'daily')};
 $('#mLevels').onclick=()=>{sfx.ui();toLevels()};
 $('#mBoard').onclick=()=>{sfx.ui();openLB('world')};
 $('#mAccount').onclick=()=>{sfx.ui();accountDialog()};
-$('#mLogin').onclick=()=>{sfx.ui();emailDialog(true)};
+$('#mLogin').onclick=()=>{sfx.ui();emailEntry(true)};
 $('#tabWorld').onclick=()=>{sfx.ui();lbTab='world';renderLB()};
 $('#tabLeagues').onclick=()=>{sfx.ui();lbTab='leagues';renderLB()};
 $('#lbBack').onclick=toMenu;
-$('#lbName').onclick=()=>{sfx.ui();ensurePlayer();askName(()=>{})};
+$('#lbName').onclick=()=>{sfx.ui();ensurePlayer();BETA?nameDialog():askName(()=>{})};
 $('#mHelp').onclick=()=>{sfx.ui();showHelp()};
 $('#mSound').onclick=()=>{S.sound=!S.sound;save();toMenu();sfx.ui()};
 $('#lvBack').onclick=toMenu;
