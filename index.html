@@ -1233,8 +1233,8 @@ function accountDialog(){
     <p>Jouw naam</p><div class="nickchip">${esc(prettyName(S.player.name||'(nog geen)'))}</div>
     ${email?`<p>Ingelogd als<br><b>${esc(email)}</b></p><p><small>Je voortgang wordt bewaard. Op een nieuwe telefoon log je in met dit e-mailadres.</small></p>`
            :`<p>Je speelt als <b>gast</b>. Bewaar je voortgang met je e-mailadres, dan raak je niets kwijt als je van telefoon wisselt.</p>`}`,
-    [...(email?[]:[['💾 Bewaar mijn voortgang','',()=>emailEntry(false)],['🔑 Ik heb al een account','dim',()=>emailEntry(true)]]),
-     [BETA?nameBtn:'✏️ Naam wijzigen',BETA?'':'dim',()=>BETA?nameDialog():askName(()=>{})],
+    [[BETA?nameBtn:'✏️ Naam wijzigen',BETA?'':'dim',()=>BETA?nameDialog():askName(()=>{})],
+     ...(email?[]:[['💾 Bewaar mijn voortgang','alt',()=>emailEntry(false)],['🔑 Ik heb al een account','dim',()=>emailEntry(true)]]),
      ...(email?[['Uitloggen','dim',()=>modal('<h2>Uitloggen?</h2><p>Je voortgang blijft bewaard in je account.</p>',[['Ja, uitloggen','',logout],['Annuleren','dim',()=>{}]])]]:[]),
      ['🗑 Account verwijderen','dim',()=>modal(`<h2>Account verwijderen?</h2><p>Je naam, scores, leagues en voortgang worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.</p>`,
         [['Ja, alles verwijderen','',async()=>{
