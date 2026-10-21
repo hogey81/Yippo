@@ -1274,25 +1274,43 @@ const ZOO=[
   {id:'w1-5',  e:'🦓',n:'Zebra',     lvl:5,  fact:'Elke zebra heeft unieke strepen, net als jouw vingerafdruk.'},
   {id:'w1-10', e:'🦒',n:'Giraf',     lvl:10, fact:'Een giraf heeft net als jij zeven nekwervels, maar de zijne zijn veel langer.'},
   {id:'w1-15', e:'🦛',n:'Nijlpaard', lvl:15, fact:'Een nijlpaard kan zijn bek ongelooflijk wijd opendoen.'},
-  {id:'w1-20', e:'🐘',n:'Olifant',   lvl:20, fact:'Olifanten herkennen zichzelf in de spiegel en nemen hun doden mee in gedachten.'},
+  {id:'w1-20', e:'🐘',n:'Olifant',   lvl:20, fact:'Olifanten leven in familiegroepen onder leiding van de oudste moeder.'},
   {id:'w1-25', e:'🦏',n:'Neushoorn', lvl:25, fact:'De hoorn van een neushoorn is gemaakt van hetzelfde spul als jouw nagels.'},
   {id:'w1-30', e:'🐆',n:'Luipaard',  lvl:30, fact:'Een luipaard sleept zijn eten soms omhoog in een boom.'},
-  {id:'w1-35', e:'🦍',n:'Gorilla',   lvl:35, fact:'Gorilla\'s zijn vredelievend en eten vooral planten.'},
+  {id:'w1-35', e:'🦍',n:'Gorilla',   lvl:35, fact:'Gorilla\'s leven in een groep onder leiding van een zilverrug.'},
   {id:'w1-40', e:'🦁',n:'Leeuw',     lvl:40, fact:'De brul van een leeuw is tot wel 8 kilometer ver te horen.'},
-  {id:'w2-45', e:'🦙',n:'Lama',      lvl:45, fact:'Lama\'s zijn nieuwsgierig en kunnen flink spugen als ze boos zijn.'},
+  {id:'w2-45', e:'🦙',n:'Lama',      lvl:45, fact:'Lama\'s zijn nieuwsgierig, dragen zware pakken in de bergen en kunnen spugen als ze boos zijn.'},
   {id:'w2-50', e:'🐑',n:'Alpaca',    lvl:50, fact:'De wol van een alpaca is zacht en warm. Er worden truien van gemaakt.'},
   {id:'w2-55', e:'🦅',n:'Condor',    lvl:55, fact:'De Andescondor is een van de grootste vliegende vogels ter wereld.'},
-  {id:'w2-60', e:'🐐',n:'Berggeit',  lvl:60, fact:'Een berggeit klimt als een kei op steile rotsen.'},
+  {id:'w2-60', e:'🦩',n:'Andesflamingo', lvl:60, fact:'Een Andesflamingo is roze door de algen die hij eet, en hij woont op zoutmeren hoog in de bergen.'},
   {id:'w2-65', e:'🐻',n:'Brilbeer',  lvl:65, fact:'De brilbeer is de enige beer die in Zuid-Amerika leeft.'},
-  {id:'w2-70', e:'🐇',n:'Viscacha',  lvl:70, fact:'Een viscacha lijkt op een konijn met een lange staart en woont in de bergen.'},
+  {id:'w2-70', e:'🐇',n:'Viscacha',  lvl:70, fact:'Een viscacha is een knaagdier, familie van de chinchilla, en woont tussen de rotsen in de bergen.'},
   {id:'w2-75', e:'🦌',n:'Vicuña',    lvl:75, fact:'De vicuña is de kleinste kameelachtige en heeft heel fijne wol.'},
-  {id:'w2-80', e:'🐈',n:'Poema',     lvl:80, fact:'Een poema kan heel hoog springen en leeft ook in de bergen.'},
+  {id:'w2-80', e:'🐈',n:'Poema',     lvl:80, fact:'Een poema kan heel hoog springen en leeft in bergen, bossen en woestijnen, van Canada tot Zuid-Amerika.'},
 ];
 const wOf=a=>+a.id[1];
 const FANTASY=[
   {id:'f-eenhoorn',e:'🦄',n:'Eenhoorn',days:7, fact:'Eenhoorns bestaan alleen in sprookjes... en in Yippo!',how:'7 dagen op rij'},
   {id:'f-draak',   e:'🐉',n:'Draak',   days:30,fact:'Draken spuwen vuur en zijn dol op een lange reeks.',how:'30 dagen op rij'},
 ];
+const HAB={
+ 'w1-5':{t:["🌿 Planteneter", "🏞️ Savanne"],r:"Oost- en zuidelijk Afrika",n:"",c:["Ethiopia", "Kenya", "Uganda", "Tanzania", "Zambia", "Malawi", "Mozambique", "Zimbabwe", "Botswana", "Namibia", "South Africa", "Angola", "S. Sudan", "Dem. Rep. Congo", "eSwatini", "Somalia"]},
+ 'w1-10':{t:["🌿 Planteneter", "🏞️ Savanne"],r:"Afrika, onder de Sahara",n:"",c:["Kenya", "Tanzania", "Uganda", "Zambia", "Zimbabwe", "Botswana", "Namibia", "South Africa", "Mozambique", "Ethiopia", "Somalia", "S. Sudan", "Chad", "Cameroon", "Niger", "Angola", "Malawi", "Rwanda", "Central African Rep.", "Dem. Rep. Congo"]},
+ 'w1-15':{t:["🌿 Planteneter", "💧 Rivieren en meren"],r:"Afrika, onder de Sahara",n:"",c:["Kenya", "Tanzania", "Uganda", "Zambia", "Zimbabwe", "Botswana", "Namibia", "South Africa", "Mozambique", "Angola", "Malawi", "eSwatini", "Ethiopia", "Somalia", "S. Sudan", "Sudan", "Rwanda", "Burundi", "Dem. Rep. Congo", "Congo", "Gabon", "Cameroon", "Central African Rep.", "Chad", "Nigeria", "Niger", "Benin", "Togo", "Ghana", "Burkina Faso", "Mali", "Senegal", "Guinea", "Guinea-Bissau", "Sierra Leone", "Liberia", "Côte d'Ivoire"]},
+ 'w1-20':{t:["🌿 Planteneter", "🏞️ Savanne en bos"],r:"Afrika en Azië (twee soorten)",n:"",c:["Kenya", "Tanzania", "Uganda", "Zambia", "Zimbabwe", "Botswana", "Namibia", "South Africa", "Mozambique", "Angola", "Malawi", "eSwatini", "Ethiopia", "S. Sudan", "Rwanda", "Burundi", "Dem. Rep. Congo", "Congo", "Gabon", "Cameroon", "Central African Rep.", "Chad", "Nigeria", "Ghana", "Burkina Faso", "Mali", "Guinea", "Côte d'Ivoire", "Liberia", "Eq. Guinea", "India", "Sri Lanka", "Nepal", "Bangladesh", "Bhutan", "Myanmar", "Thailand", "Laos", "Cambodia", "Vietnam", "Malaysia", "Indonesia", "China"]},
+ 'w1-25':{t:["🌿 Planteneter", "🏞️ Savanne"],r:"Zuidelijk Afrika en Zuid-Azië (de soort verschilt)",n:"",c:["South Africa", "Namibia", "Botswana", "Zimbabwe", "Kenya", "Tanzania", "Mozambique", "Zambia", "eSwatini", "Uganda", "Rwanda", "India", "Nepal", "Indonesia", "Malaysia"]},
+ 'w1-30':{t:["🍖 Vleeseter", "🌳 Bos en savanne"],r:"Afrika en grote delen van Azië",n:"",c:["Kenya", "Tanzania", "Uganda", "Zambia", "Zimbabwe", "Botswana", "Namibia", "South Africa", "Mozambique", "Angola", "Malawi", "eSwatini", "Ethiopia", "Somalia", "S. Sudan", "Sudan", "Rwanda", "Burundi", "Dem. Rep. Congo", "Congo", "Gabon", "Cameroon", "Central African Rep.", "Chad", "Nigeria", "Niger", "Benin", "Togo", "Ghana", "Burkina Faso", "Mali", "Senegal", "Guinea", "Côte d'Ivoire", "Eq. Guinea", "India", "Nepal", "Sri Lanka", "Bangladesh", "Pakistan", "Iran", "Myanmar", "Thailand", "Laos", "Cambodia", "Vietnam", "Malaysia", "Indonesia", "China", "Russia"]},
+ 'w1-35':{t:["🌿 Vooral planten", "🌳 Regenwoud"],r:"Midden-Afrika",n:"",c:["Dem. Rep. Congo", "Congo", "Gabon", "Cameroon", "Central African Rep.", "Eq. Guinea", "Rwanda", "Uganda", "Nigeria"]},
+ 'w1-40':{t:["🍖 Vleeseter", "🏞️ Savanne"],r:"Afrika onder de Sahara, plus een klein gebied in India",n:"",c:["Kenya", "Tanzania", "Uganda", "Zambia", "Zimbabwe", "Botswana", "Namibia", "South Africa", "Mozambique", "Angola", "Malawi", "eSwatini", "Ethiopia", "Somalia", "S. Sudan", "Rwanda", "Dem. Rep. Congo", "Central African Rep.", "Cameroon", "Chad", "Nigeria", "Niger", "Benin", "Burkina Faso", "Senegal", "Guinea", "India"]},
+ 'w2-45':{t:["🌿 Planteneter", "⛰️ Hooggebergte"],r:"Andes in Zuid-Amerika",n:"Een gehouden dier: mensen fokken lama's al heel lang.",c:["Peru", "Bolivia", "Chile", "Argentina", "Ecuador"]},
+ 'w2-50':{t:["🌿 Planteneter", "⛰️ Hooggebergte"],r:"Andes in Zuid-Amerika",n:"Een gehouden dier: mensen fokken alpaca's voor hun wol.",c:["Peru", "Bolivia", "Chile"]},
+ 'w2-55':{t:["🍖 Aaseter", "⛰️ Hooggebergte"],r:"Andes en de kust van Zuid-Amerika",n:"",c:["Venezuela", "Colombia", "Ecuador", "Peru", "Bolivia", "Chile", "Argentina"]},
+ 'w2-60':{t:["🦐 Algen en kleine diertjes", "💧 Zoutmeren in de bergen"],r:"Hoge Andes",n:"",c:["Bolivia", "Chile", "Argentina", "Peru"]},
+ 'w2-65':{t:["🌿 Vooral planten", "🌳 Bergbos"],r:"Noordelijke Andes",n:"",c:["Venezuela", "Colombia", "Ecuador", "Peru", "Bolivia", "Argentina"]},
+ 'w2-70':{t:["🌿 Planteneter", "⛰️ Rotsen"],r:"Andes in Zuid-Amerika",n:"",c:["Peru", "Bolivia", "Chile", "Argentina"]},
+ 'w2-75':{t:["🌿 Planteneter", "⛰️ Hooggebergte"],r:"Hoge Andes",n:"",c:["Peru", "Bolivia", "Chile", "Argentina", "Ecuador"]},
+ 'w2-80':{t:["🍖 Vleeseter", "🌎 Bijna overal"],r:"Noord-, Midden- en Zuid-Amerika",n:"",c:["Canada", "United States of America", "Mexico", "Guatemala", "Belize", "Honduras", "Nicaragua", "Costa Rica", "Panama", "Colombia", "Venezuela", "Ecuador", "Peru", "Brazil", "Bolivia", "Paraguay", "Uruguay", "Argentina", "Chile", "Guyana", "Suriname"]},
+};
 const ALL_ANIMALS=ZOO.concat(FANTASY);
 const zooTotal=()=>ZOO.filter(a=>worldOpen(wOf(a))).length+FANTASY.length;
 const hasAnimal=id=>S.zoo.includes(id);
@@ -1448,6 +1466,42 @@ $('#mapZoo').onclick=()=>{sfx.ui();openZoo()};
 $('#mapPrev').onclick=()=>{if(mapWorld>1){sfx.ui();openMap(mapWorld-1)}};
 $('#mapNext').onclick=()=>{if(mapWorld<WORLDS.length&&worldOpen(mapWorld+1)){sfx.ui();openMap(mapWorld+1)}};
 
+/* --- dierkaart met leefgebied (testmodus) --- */
+let WORLD_PATHS=null;
+function loadWorld(){
+  if(WORLD_PATHS)return Promise.resolve(WORLD_PATHS);
+  return fetch('world.json').then(r=>r.json()).then(j=>WORLD_PATHS=j);
+}
+function rangeSvg(paths,green){
+  const set=new Set(green);
+  let s='<svg id="rngSvg" viewBox="0 0 420 200" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;border-radius:14px;background:#2a1458">';
+  Object.keys(paths).forEach(n=>{if(!set.has(n))s+=`<path d="${paths[n]}" fill="#c9cbd8" stroke="#9a9cb0" stroke-width=".4" stroke-linejoin="round"/>`});
+  Object.keys(paths).forEach(n=>{if(set.has(n))s+=`<path class="on" d="${paths[n]}" fill="#4cd37a" stroke="#fff" stroke-width=".7" stroke-linejoin="round"/>`});
+  return s+'</svg>';
+}
+function zoomRange(){
+  const svg=document.getElementById('rngSvg');if(!svg)return;
+  const on=svg.querySelectorAll('path.on');if(!on.length)return;
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  on.forEach(p=>{const b=p.getBBox();x0=Math.min(x0,b.x);y0=Math.min(y0,b.y);x1=Math.max(x1,b.x+b.width);y1=Math.max(y1,b.y+b.height)});
+  let w=(x1-x0)+24,h=(y1-y0)+24;const ar=420/200;
+  if(w/h<ar)w=h*ar;else h=w/ar;
+  w=Math.min(w,420);h=Math.min(h,200);
+  const cx=(x0+x1)/2,cy=(y0+y1)/2;
+  svg.setAttribute('viewBox',`${Math.max(0,Math.min(420-w,cx-w/2))} ${Math.max(0,Math.min(200-h,cy-h/2))} ${w} ${h}`);
+}
+function animalCard(a){
+  const h=HAB[a.id];
+  if(!h){ // fantasiedier
+    modal(`<div class="rew"><div class="big">${a.e}</div><b>${esc(a.n)}</b><br><small>${esc(a.fact)}</small><br><small style="font-weight:800">📖 Leeft alleen in verhalen</small></div>`,[['Mooi!','',()=>{}]]);
+    return;
+  }
+  const head=`<div class="rew"><div class="big">${a.e}</div><b>${esc(a.n)}</b><br><small>${esc(a.fact)}</small><div style="margin:8px 0 2px">${h.t.map(t=>`<span style="display:inline-block;background:#ffffff2e;border-radius:12px;padding:4px 10px;margin:2px;font-weight:800;font-size:12px">${esc(t)}</span>`).join('')}</div>`;
+  const foot=`<div style="font-size:12px;font-weight:800;color:#bff5d0;margin-top:6px">🟩 ${esc(h.r)}</div><small style="opacity:.8">Ongeveer: de kaart kleurt hele landen.${h.n?' '+esc(h.n):''}</small><br><small>Verzameld bij level ${a.lvl}</small></div>`;
+  const buttons=[['Mooi!','',()=>{}],['Bronnen','dim',()=>modal(`<h2>ℹ️ Bronnen</h2><p style="font-size:13px">De dierenfeiten zijn in eigen woorden geschreven op basis van Wikipedia (CC BY-SA) en gegevens van IUCN. De landenkaart komt van Natural Earth (publiek domein). Leefgebieden zijn een grove indicatie.</p>`,[['Sluiten','',()=>{}]])]];
+  modal(head+`<p style="margin:8px 0 4px;font-weight:800">📍 Hier leeft de ${esc(a.n.toLowerCase())}</p><div id="rngBox" style="min-height:90px;font-size:12px">Kaart laden…</div>`+foot,buttons);
+  loadWorld().then(p=>{const b=document.getElementById('rngBox');if(!b)return;b.innerHTML=rangeSvg(p,h.c);zoomRange()}).catch(()=>{const b=document.getElementById('rngBox');if(b)b.textContent=''});
+}
 /* --- dierentuin --- */
 function openZoo(){
   updateMax();show('zooScreen');
@@ -1473,7 +1527,8 @@ function openZoo(){
   $('#zooChips').querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{const e=document.getElementById('pen-'+b.dataset.w);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})});
   $('#zooPens').querySelectorAll('.an').forEach(b=>b.onclick=()=>{
     const a=ALL_ANIMALS.find(x=>x.id===b.dataset.a);sfx.ui();
-    if(hasAnimal(a.id))modal(`<div class="rew"><div class="big">${a.e}</div><b>${esc(a.n)}</b><br><small>${esc(a.fact)}</small><br><small>${a.lvl?'Verzameld bij level '+a.lvl:'Fantasiedier ✨'}</small></div>`,[['Mooi!','',()=>{}]]);
+    if(hasAnimal(a.id)&&BETA)animalCard(a);
+    else if(hasAnimal(a.id))modal(`<div class="rew"><div class="big">${a.e}</div><b>${esc(a.n)}</b><br><small>${esc(a.fact)}</small><br><small>${a.lvl?'Verzameld bij level '+a.lvl:'Fantasiedier ✨'}</small></div>`,[['Mooi!','',()=>{}]]);
     else modal(`<div class="rew"><div class="big sil">${a.e}</div><b>Nog niet verzameld</b><br><small>${a.lvl?`Speel level ${a.lvl} om de ${esc(a.n.toLowerCase())} te verzamelen.`:`Speel de dagelijkse puzzel ${a.how} om de ${esc(a.n.toLowerCase())} te krijgen.`}</small></div>`,[['Oké','',()=>{}]]);
   });
   if(newIds.length){S.zooSeen=S.zoo.slice();save()}
