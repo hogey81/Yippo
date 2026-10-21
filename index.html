@@ -1472,11 +1472,11 @@ function loadWorld(){
   if(WORLD_PATHS)return Promise.resolve(WORLD_PATHS);
   return fetch('world.json').then(r=>r.json()).then(j=>WORLD_PATHS=j);
 }
-function rangeSvg(paths,green){
+function rangeSvg(paths,green,id){
   const set=new Set(green);
-  let s='<svg id="rngSvg" viewBox="0 0 420 200" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;border-radius:14px;background:#2a1458">';
-  Object.keys(paths).forEach(n=>{if(!set.has(n))s+=`<path d="${paths[n]}" fill="#c9cbd8" stroke="#9a9cb0" stroke-width=".4" stroke-linejoin="round"/>`});
-  Object.keys(paths).forEach(n=>{if(set.has(n))s+=`<path class="on" d="${paths[n]}" fill="#4cd37a" stroke="#fff" stroke-width=".7" stroke-linejoin="round"/>`});
+  let s='<svg id="'+(id||'rngSvg')+'" viewBox="0 0 420 200" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;border-radius:14px;background:#2a1458">';
+  Object.keys(paths).forEach(n=>{if(!set.has(n))s+=`<path d="${paths[n].d}" fill="#c9cbd8" stroke="#9a9cb0" stroke-width=".4" stroke-linejoin="round"/>`});
+  Object.keys(paths).forEach(n=>{if(set.has(n))s+=`<path class="on" d="${paths[n].d}" fill="#4cd37a" stroke="#fff" stroke-width=".7" stroke-linejoin="round"/>`});
   return s+'</svg>';
 }
 function zoomRange(){
@@ -1502,6 +1502,24 @@ function animalCard(a){
   modal(head+`<p style="margin:8px 0 4px;font-weight:800">📍 Hier leeft de ${esc(a.n.toLowerCase())}</p><div id="rngBox" style="min-height:90px;font-size:12px">Kaart laden…</div>`+foot,buttons);
   loadWorld().then(p=>{const b=document.getElementById('rngBox');if(!b)return;b.innerHTML=rangeSvg(p,h.c);zoomRange()}).catch(()=>{const b=document.getElementById('rngBox');if(b)b.textContent=''});
 }
+
+const CONT_NL={'Africa':'Afrika','Asia':'Azië','Europe':'Europa','North America':'Noord-Amerika','South America':'Zuid-Amerika','Oceania':'Oceanië'};
+const CONT_E={'Africa':'🌍','Asia':'🌏','Europe':'🌍','North America':'🌎','South America':'🌎','Oceania':'🌏'};
+function zooWorldBox(){
+  return `<div class="pen" id="pen-wereld" style="background:#2a1458;border-color:#7b4fd0;color:#fff"><h3>🌍 Mijn wereldkaart</h3><div id="zooWorldMap" style="min-height:90px;font-size:12px;text-align:center">Kaart laden…</div><div id="zooConts" style="margin-top:6px;text-align:center"></div></div>`;
+}
+function fillZooWorld(){
+  const box=document.getElementById('zooWorldMap');if(!box)return;
+  const have=ZOO.filter(a=>hasAnimal(a.id)&&HAB[a.id]);
+  const green=[...new Set(have.flatMap(a=>HAB[a.id].c))];
+  loadWorld().then(p=>{
+    const b=document.getElementById('zooWorldMap');if(!b)return;
+    b.innerHTML=rangeSvg(p,green,'zooWorldSvg');
+    const found=new Set(green.map(n=>p[n]&&p[n].c).filter(Boolean));
+    const cs=document.getElementById('zooConts');
+    cs.innerHTML=`<div style="font-weight:800;font-size:13px;margin-bottom:4px">Werelddelen ontdekt: ${found.size} / ${Object.keys(CONT_NL).length}</div>`+Object.keys(CONT_NL).map(c=>`<span style="display:inline-block;border-radius:12px;padding:4px 10px;margin:2px;font-weight:800;font-size:12px;background:${found.has(c)?'#4cd37a':'#ffffff26'};color:${found.has(c)?'#073b1c':'#ffffffaa'}">${found.has(c)?CONT_E[c]:'🔒'} ${CONT_NL[c]}</span>`).join('')+(found.size<6?'<div style="font-size:11px;opacity:.8;margin-top:4px">Verzamel meer dieren om nieuwe werelddelen te ontdekken!</div>':'');
+  }).catch(()=>{box.textContent=''});
+}
 /* --- dierentuin --- */
 function openZoo(){
   updateMax();show('zooScreen');
@@ -1512,7 +1530,7 @@ function openZoo(){
     const g=hasAnimal(a.id);
     return `<button class="an${g?'':' locked'}" data-a="${a.id}"><div class="e">${a.e}</div><span class="l">${g?esc(a.n):'🔒 '+extra}</span>${g&&newIds.includes(a.id)?'<span class="nb" style="right:2px;top:0">NIEUW!</span>':''}</button>`;
   };
-  let pens='';
+  let pens=BETA?zooWorldBox():'';
   WORLDS.forEach(W=>{
     if(worldOpen(W.id)){
       const list=ZOO.filter(a=>wOf(a)===W.id),have=list.filter(a=>hasAnimal(a.id)).length;
@@ -1522,7 +1540,7 @@ function openZoo(){
     }
   });
   pens+=`<div class="pen" style="background:#d9b8f2;border-color:#8a5fb8"><h3>✨ Fantasiedieren · ${FANTASY.filter(a=>hasAnimal(a.id)).length}/${FANTASY.length}</h3><div class="grid">${FANTASY.map(a=>cell(a,a.how)).join('')}</div></div>`;
-  $('#zooPens').innerHTML=pens;
+  $('#zooPens').innerHTML=pens;if(BETA)fillZooWorld();
   $('#zooChips').innerHTML=WORLDS.map(W=>`<button class="zchip${worldOpen(W.id)?' on':' lock'}" data-w="${W.id}">${W.emoji}</button>`).join('')+COMING.map(c=>`<span class="zchip lock">${c.emoji}</span>`).join('');
   $('#zooChips').querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{const e=document.getElementById('pen-'+b.dataset.w);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})});
   $('#zooPens').querySelectorAll('.an').forEach(b=>b.onclick=()=>{
