@@ -121,7 +121,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 /* wereldkaart, dierentuin, nieuw beginscherm (voorheen testmodus) */
 #map{padding:0}
 #mapScroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
-#mapSvg{display:block;width:100%;height:auto}
+#mapSvg{display:block;width:100%;max-width:480px;margin:0 auto;height:auto}
 .mapTop{position:absolute;left:0;right:0;top:0;padding:max(10px,env(safe-area-inset-top)) 12px 0;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
 .mapTop .pill{background:#000a}
 .mapnav{display:flex;gap:6px;align-items:center;pointer-events:none}
@@ -1469,7 +1469,7 @@ function renderMap(){
   const na=nextAnimal();
   $('#mapHint').textContent=na?`Volgend dier bij level ${na.lvl}: ${na.e}`:'Alle dieren verzameld! 🎉';
   $('#mapPlay').textContent=`▶ Speel level ${cur}`;
-  const scale=wrap.clientWidth/MAP_W;
+  const scale=svg.clientWidth/MAP_W;
   const focusY=here?pts[ci-1][1]:(cur>base+WORLD_SIZE?pts[WORLD_SIZE-1][1]:pts[0][1]);
   wrap.scrollTop=Math.max(0,focusY*scale-wrap.clientHeight*.55);
 }
