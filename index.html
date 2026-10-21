@@ -118,7 +118,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 .lbact{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0}
 .lbact .btn{padding:9px 14px;font-size:15px}
 .inp{width:100%;padding:12px 14px;border-radius:12px;border:0;font-size:18px;font-weight:700;text-align:center;margin-top:8px;color:#2b0057;-webkit-user-select:text;user-select:text}
-/* wereldkaart, dierentuin, nieuw beginscherm (testmodus ?beta=1) */
+/* wereldkaart, dierentuin, nieuw beginscherm (voorheen testmodus) */
 #map{padding:0}
 #mapScroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 #mapSvg{display:block;width:100%;height:auto}
@@ -299,9 +299,11 @@ try{const raw=localStorage.getItem('dm_save');HAD_SAVE=!!raw;Object.assign(S,JSO
 LANG=S.lang||(HAD_SAVE?'nl':(window.I18N?I18N.detect():'nl'));
 if(window.I18N)I18N.setLang(LANG);else LANG='nl';
 function save(){try{localStorage.setItem('dm_save',JSON.stringify(S))}catch(e){}if(window.scheduleSync)scheduleSync()}
-// Testmodus voor nieuwe functies: open de site met ?beta=1 (aan) of ?beta=0 (uit)
+// Nieuwe functies (kaart, dierentuin, wereldkaart, werelden) staan voor iedereen aan.
+// ?beta=1 is nu alleen nog een voorproefje: werelden die nog niet open zijn alvast spelen (?beta=0 zet het uit).
 const KIDSAFE=true;   // kinderveilige namen en leeftijdsvraag: aan voor iedereen
-const BETA=(()=>{try{const q=new URLSearchParams(location.search).get('beta');if(q==='1'){S.beta=true;save()}else if(q==='0'){S.beta=false;save()}}catch(e){}return !!S.beta})();
+const BETA=true;
+const PREVIEW=(()=>{try{const q=new URLSearchParams(location.search).get('beta');if(q==='1'){S.beta=true;save()}else if(q==='0'){S.beta=false;save()}}catch(e){}return !!S.beta})();
 
 /* ============ audio ============ */
 let ac=null;
@@ -1284,7 +1286,7 @@ const WORLDS=[
 const COMING=[{name:'De Pinguïns',emoji:'🐧'},{name:"De Panda's",emoji:'🐼'},{name:"De Flamingo's",emoji:'🦩'}];   // teasers voor wereld 3 en verder
 const WORLD1=WORLDS[0];
 const worldOf=L=>Math.min(WORLDS.length,Math.max(1,Math.ceil(L/WORLD_SIZE)));
-const worldOpen=w=>{const W=WORLDS[w-1];return !!W&&(BETA||!W.release||new Date()>=new Date(W.release))};
+const worldOpen=w=>{const W=WORLDS[w-1];return !!W&&(PREVIEW||!W.release||new Date()>=new Date(W.release))};
 function updateMax(){
   const open=BETA?WORLDS.filter((_,i)=>worldOpen(i+1)).length:1;
   MAX_LEVEL=Math.max(1,open)*WORLD_SIZE;

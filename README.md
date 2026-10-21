@@ -32,9 +32,8 @@ Spelers beginnen als gast. Ze kunnen hun voortgang bewaren met een e-mailadres e
 (`💾 Bewaar je voortgang`), en op een nieuw apparaat inloggen met `🔑 Inloggen`. Zie `supabase/email-templates.md`
 voor de mailteksten die je in Supabase moet instellen.
 
-## Testmodus (?beta=1)
-Nieuwe functies kunnen eerst achter een testschakelaar staan. Open de site met `?beta=1` om ze te zien (`?beta=0` zet het weer uit).
-Op dit moment: wereld 1 (De Zebra's) en wereld 2 (De Lama's) met eigen routes, dierenvrienden en dierentuin, en een nieuw beginscherm. Wereld 2 opent voor iedereen op vrijdag 23 oktober 2026 om 18:00, zodra de testmodus voor iedereen aan staat.
+## Voorproefje (?beta=1)
+Alle functies (kaart, dierentuin, wereldkaart, nieuwe menu) staan voor iedereen aan. Werelden gaan open op hun `release`-moment (vrijdag 18:00). Met `?beta=1` kun je een wereld die nog dicht is alvast spelen om te testen (`?beta=0` zet het weer uit).
 
 ## Talen (Nederlands, Engels, Spaans)
 
