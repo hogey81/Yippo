@@ -287,6 +287,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
+const APP_VERSION='2026-10-21 b';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
@@ -1650,6 +1651,7 @@ function setLanguage(l){
 }
 function langDialog(){
   modalRaw(`<h2>🌐 Kies je taal</h2><div class="row" style="flex-direction:column">${Object.keys(I18N.LANGS).map(k=>`<button class="btn${k===LANG?'':' dim'}" data-lang="${k}">${I18N.LANGS[k]}</button>`).join('')}</div>`);
+  $('#card').insertAdjacentHTML('beforeend','<p style="opacity:.5;font-size:11px;margin:8px 0 0">'+APP_VERSION+'</p>');
   $('#card').querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{sfx.ui();closeModal();setLanguage(b.dataset.lang)});
 }
 $('#m2Lang').onclick=langDialog;$('#mLang').onclick=langDialog;
