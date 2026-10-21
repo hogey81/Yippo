@@ -207,6 +207,7 @@ table.help td:first-child{white-space:nowrap}
   <button class="btn dim" id="mHelp">❓ Hoe werkt het?</button>
   <button class="linkbtn" id="mLogin" style="display:none">🔑 Heb je al een account? Inloggen</button>
   <button class="btn dim" id="mSound">🔊 Geluid aan</button>
+  <button class="btn dim" id="mLang"></button>
 </div>
 
 <div id="menu2" class="screen">
@@ -215,7 +216,7 @@ table.help td:first-child{white-space:nowrap}
   <button class="m2btn m2daily" id="m2Daily"><span class="t">📅 Dagelijkse puzzel</span><span class="s" id="m2DailySub"></span></button>
   <button class="m2zoo" id="m2Zoo"><div class="scene" id="m2Scene"></div><div class="foot"><b>🏡 Bekijk je dierentuin</b><div class="bar2"><div><i id="m2ZooBar"></i></div><span id="m2ZooTxt"></span></div></div></button>
   <div class="m2row"><button class="m2btn" id="m2Board"><span class="t">🏅 Scorebord</span><span class="s" id="m2BoardSub">Wereldwijd</span></button><button class="m2btn" id="m2League"><span class="t">👨‍👩‍👧 Leagues</span><span class="s" id="m2LeagueSub">Met vrienden</span></button></div>
-  <div class="m2links"><button class="linkbtn" id="m2Account">👤 Account</button><button class="linkbtn" id="m2Help">❓ Hoe werkt het?</button><button class="linkbtn" id="m2Sound">🔊 Geluid</button></div>
+  <div class="m2links"><button class="linkbtn" id="m2Account">👤 Account</button><button class="linkbtn" id="m2Help">❓ Hoe werkt het?</button><button class="linkbtn" id="m2Sound">🔊 Geluid</button><button class="linkbtn" id="m2Lang"></button></div>
   <button class="linkbtn" id="m2Login" style="display:none">🔑 Heb je al een account? Inloggen</button>
 </div>
 
@@ -265,6 +266,7 @@ table.help td:first-child{white-space:nowrap}
 <div id="modal"><div class="card" id="card"></div></div>
 <div id="toast"></div>
 
+<script src="i18n.js"></script>
 <script>
 'use strict';
 /* ============ constants ============ */
@@ -285,11 +287,17 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const fmt=n=>n.toLocaleString('nl-NL');
+let LANG='nl';
+const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
+const fmt=n=>n.toLocaleString(LOCALES[LANG]);
 
 /* ============ save ============ */
 let S={unlocked:1,stars:{},best:{},daily:{},streak:{count:0,last:''},sound:true,seenHelp:false,player:null,leagues:[],pending:null,auth:null,zoo:[],zooSeen:[],beta:false,age:null,nameFixed:false};
-try{Object.assign(S,JSON.parse(localStorage.getItem('dm_save')||'{}'))}catch(e){}
+let HAD_SAVE=false;
+try{const raw=localStorage.getItem('dm_save');HAD_SAVE=!!raw;Object.assign(S,JSON.parse(raw||'{}'))}catch(e){}
+// taal: bewuste keuze, anders de taal van de telefoon; bestaande spelers zonder keuze blijven Nederlands
+LANG=S.lang||(HAD_SAVE?'nl':(window.I18N?I18N.detect():'nl'));
+if(window.I18N)I18N.setLang(LANG);else LANG='nl';
 function save(){try{localStorage.setItem('dm_save',JSON.stringify(S))}catch(e){}if(window.scheduleSync)scheduleSync()}
 // Testmodus voor nieuwe functies: open de site met ?beta=1 (aan) of ?beta=0 (uit)
 const KIDSAFE=true;   // kinderveilige namen en leeftijdsvraag: aan voor iedereen
@@ -784,7 +792,7 @@ function finishDaily(){
       [...(isGuest()?[['💾 Bewaar je voortgang','alt',()=>emailEntry(false)]]:[]),
        ...(online()?[['🏅 Scorebord',isGuest()?'':'alt',()=>openLB('world')]]:[]),
        ['📤 Delen','',async()=>{
-          try{if(navigator.share){await navigator.share({text:txt})}else{await navigator.clipboard.writeText(txt);toast('Gekopieerd! Plak het in je chat.')}}catch(e){}
+          try{if(navigator.share){await navigator.share({text:I18N.trLines(txt)})}else{await navigator.clipboard.writeText(I18N.trLines(txt));toast('Gekopieerd! Plak het in je chat.')}}catch(e){}
         }],['↻ Nog een keer','dim',()=>startGame(dailyDef(),'daily')],['Menu','dim',toMenu]]);
     if(online())submitPending().then(r=>{
       const el=$('#rankLine');if(!el)return;
@@ -891,6 +899,7 @@ function askName(cb){
 }
 const inviteUrl=code=>location.origin+location.pathname+'?league='+code;
 async function shareText(text){
+  text=I18N.trLines(text);
   try{if(navigator.share){await navigator.share({text})}else{await navigator.clipboard.writeText(text);toast('Gekopieerd! Plak het in je chat.')}}catch(e){}
 }
 function inviteLeague(code,name){
@@ -1040,18 +1049,31 @@ async function bootOnline(){
 
 /* ============ namen en leeftijd (kinderveilig, testmodus) ============ */
 // Namen mogen max. 20 tekens zijn (database). Bijvoeglijk naamwoord <= 8, dier <= 8, plus " 12".
-const NAME_ADJ=['Vrolijke','Slimme','Snelle','Stoere','Lieve','Dappere','Gekke','Vlugge','Sterke','Blije'];
-const NAME_ANIMALS=[['Zebra','🦓'],['Giraf','🦒'],['Olifant','🐘'],['Leeuw','🦁'],['Pinguïn','🐧'],['Lama','🦙'],['Panda','🐼'],['Flamingo','🦩'],['Kameel','🐪'],['Uil','🦉'],['Dolfijn','🐬'],['Koala','🐨'],['Vos','🦊'],['Egel','🦔']];
+const NAME_SETS={
+  nl:{adj:['Vrolijke','Slimme','Snelle','Stoere','Lieve','Dappere','Gekke','Vlugge','Sterke','Blije'],an:['Zebra','Giraf','Olifant','Leeuw','Pinguïn','Lama','Panda','Flamingo','Kameel','Uil','Dolfijn','Koala','Vos','Egel']},
+  en:{adj:['Happy','Clever','Swift','Brave','Kind','Silly','Speedy','Mighty','Jolly','Lucky'],an:['Zebra','Giraffe','Elephant','Lion','Penguin','Llama','Panda','Flamingo','Camel','Owl','Dolphin','Koala','Fox','Hedgehog']},
+  es:{adj:['Feliz','Veloz','Fuerte','Valiente','Genial','Alegre','Amable','Dulce','Audaz','Leal'],an:['Cebra','Jirafa','Elefante','León','Pingüino','Llama','Panda','Flamenco','Camello','Búho','Delfín','Koala','Zorro','Erizo']},
+};
+const NAME_EMOJI=['🦓','🦒','🐘','🦁','🐧','🦙','🐼','🦩','🐪','🦉','🐬','🐨','🦊','🦔'];
+let NAME_ADJ,NAME_ANIMALS;
+const setNameLang=l=>{const n=NAME_SETS[l]||NAME_SETS.nl;NAME_ADJ=n.adj;NAME_ANIMALS=n.an.map((a,i)=>[a,NAME_EMOJI[i]])};
+setNameLang(LANG);
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 const autoName=(adj,animal)=>`${adj||pick(NAME_ADJ)} ${animal||pick(NAME_ANIMALS)[0]} ${10+Math.floor(Math.random()*90)}`;
-function autoParts(n){
+function autoParts(n){   // herkent automatische namen in elke taal
   const m=/^(\S+) (\S+) \d{2}$/.exec(n||'');
-  if(!m||!NAME_ADJ.includes(m[1]))return null;
-  const a=NAME_ANIMALS.find(x=>x[0]===m[2]);return a?{adj:m[1],animal:a[0],emoji:a[1]}:null;
+  if(!m)return null;
+  for(const k in NAME_SETS){
+    const set=NAME_SETS[k],i=set.an.indexOf(m[2]);
+    if(i>=0&&set.adj.includes(m[1]))return{adj:m[1],animal:m[2],emoji:NAME_EMOJI[i]};
+  }
+  return null;
 }
 const isAutoName=n=>!!autoParts(n);
 const prettyName=n=>{const p=autoParts(n);return p?p.emoji+' '+n:n};
-const BAD_WORDS=['kut','fuck','shit','hoer','kanker','tering','tyfus','lul','neger','nazi','hitler','slet','mongool','flikker','porno','kkr'];
+const BAD_WORDS=['kut','fuck','shit','hoer','kanker','tering','tyfus','lul','neger','nazi','hitler','slet','mongool','flikker','porno','kkr',
+  'bitch','cunt','dick','cock','pussy','whore','slut','nigg','fag','rape','porn','penis','vagina','asshole','bastard',
+  'puta','puto','mierda','polla','verga','joder','cabron','pendejo','marica','maricon','follar','culo','negrata','coño'];
 function badName(n){
   const t=String(n).toLowerCase().replace(/[0@]/g,'o').replace(/1/g,'i').replace(/3/g,'e').replace(/4/g,'a').replace(/5/g,'s').replace(/[^a-z]/g,'');
   return BAD_WORDS.some(w=>t.includes(w));
@@ -1595,7 +1617,21 @@ function showHelp(){
   <p><small>Wissel een speciaal dier met een buur, of tik hem twee keer, om hem te activeren. Twee speciale dieren naast elkaar wisselen geeft een mega-effect!<br>🔨 haalt één dier weg, 🔀 schudt het bord. 🧊 ijs verdwijnt als je er een setje op maakt.</small></p>`,
   [['Begrepen!','',()=>{}]]);
 }
+
+/* --- taalkeuze --- */
+function langLabel(){const t='🌐 '+I18N.LANGS[LANG];$('#m2Lang').textContent=t;$('#mLang').textContent=t}
+function setLanguage(l){
+  LANG=l;S.lang=l;save();I18N.setLang(l);setNameLang(l);
+  if(!S.player||!S.player.name||isAutoName(S.player.name)){/* automatische naam blijft zoals hij is */}
+  toMenu();
+}
+function langDialog(){
+  modalRaw(`<h2>🌐 Kies je taal</h2><div class="row" style="flex-direction:column">${Object.keys(I18N.LANGS).map(k=>`<button class="btn${k===LANG?'':' dim'}" data-lang="${k}">${I18N.LANGS[k]}</button>`).join('')}</div>`);
+  $('#card').querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{sfx.ui();closeModal();setLanguage(b.dataset.lang)});
+}
+$('#m2Lang').onclick=langDialog;$('#mLang').onclick=langDialog;
 function toMenu(){
+  langLabel();
   closeModal();updateMax();
   if(S.auth&&S.auth.email&&!S.age){S.age='adult';save()}
   if(KIDSAFE&&!S.nameFixed){S.nameFixed=true;ensurePlayer();if(S.player.name&&!isAutoName(S.player.name)&&S.age!=='adult'&&!(S.auth&&S.auth.email))S.player.name=autoName();save()}
