@@ -21,7 +21,7 @@
 <style>
 :root{--cell:44px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-html,body{margin:0;height:100%;overflow:hidden;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:#fff;
+html,body{margin:0;height:100%;overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:#fff;
   background:linear-gradient(#7b2cbf,#5a189a 55%,#240046);overscroll-behavior:none}
 button{font:inherit;color:inherit;border:0;cursor:pointer}
 .screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom))}
@@ -54,8 +54,9 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 
 /* game */
 #game{gap:8px}
-.top{display:flex;justify-content:space-between;align-items:center;width:calc(var(--cell)*7);gap:6px}
-.goals{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;min-height:34px}
+.top{display:flex;justify-content:space-between;align-items:center;width:calc(var(--cell)*7);gap:6px;flex-wrap:nowrap}
+.top .pill,.goal{white-space:nowrap}
+.goals{display:flex;gap:8px;justify-content:center;flex-wrap:nowrap;width:calc(var(--cell)*7);min-height:34px}
 .goal{background:#0000004d;border-radius:14px;padding:5px 11px;font-weight:800;font-size:15px}
 .goal.done{background:#2d9b4acc}
 .bar{width:calc(var(--cell)*7);height:14px;border-radius:9px;background:#0005;overflow:hidden}
@@ -288,7 +289,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-21 c';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-23 a';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
@@ -412,7 +413,7 @@ function sizeBoard(){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c];if(t&&t.el)place(t,r,c)}
   drawBgs();
 }
-addEventListener('resize',sizeBoard);
+addEventListener('resize',()=>{sizeBoard();if(G)hud()});
 
 function drawBgs(){
   board.querySelectorAll('.cellbg,.iceov').forEach(e=>e.remove());
@@ -638,7 +639,18 @@ function goalHave(g){
   switch(g.kind){case'collect':return G.collected[g.type]||0;case'ice':return G.iceStart-G.iceNow;case'special':return G.specialsMade;case'score':return G.score}
 }
 const goalsMet=()=>G.def.goals.every(g=>goalHave(g)>=g.n);
+// Past een rij pillen op een smalle telefoon of bij een groot lettertype: lettertype kleiner tot alles op één regel past
+function fitRow(row,sel){
+  const els=[...row.querySelectorAll(sel)];if(!els.length)return;
+  els.forEach(e=>{e.style.fontSize='';e.style.padding=''});
+  let fs=parseFloat(getComputedStyle(els[0]).fontSize)||15;
+  while(row.scrollWidth>row.clientWidth+1&&fs>9){fs-=.5;els.forEach(e=>{e.style.fontSize=fs+'px';e.style.padding='5px '+Math.max(5,Math.round(fs*.6))+'px'})}
+}
 function hud(){
+  hud0();
+  fitRow($('#game .top'),'.pill');fitRow($('#goals'),'.goal');
+}
+function hud0(){
   $('#gLevel').textContent=G.mode==='daily'?'📅 Dagelijks':'Level '+G.def.L;
   $('#gMoves').textContent='Zetten '+G.moves;
   $('#gScore').textContent='⭐ '+fmt(G.score);
