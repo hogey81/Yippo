@@ -289,7 +289,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-23 a';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-23 b';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
@@ -360,6 +360,7 @@ function modal(html,buttons){
 function closeModal(){$('#modal').classList.remove('on')}
 
 /* ============ level definitions ============ */
+const SPECIAL_GOALS=['lion','elephant'],SPECIAL_EMOJI={lion:'🦁',elephant:'🐘'};   // welk speciaal dier je moet maken wisselt per level
 function levelDef(L){
   const r=mulberry32(L*7919+13);
   const hard=Math.max(0,L-2);                 // level 1-2 zijn de uitleg-levels, daarna wordt het steeds pittiger
@@ -379,7 +380,7 @@ function levelDef(L){
     if(L>=12){const c=pickT([a,b]);goals.push({kind:'collect',type:c,n:base-2})}
   }
   else if(k===3){ice=Math.min(13+Math.floor(2*wf),5+Math.floor(hard*.45));goals.push({kind:'ice',n:ice},{kind:'collect',type:pickT(),n:base-2});moves+=2}
-  else if(k===4){goals.push({kind:'special',n:Math.min(6,3+Math.floor(hard/6))},{kind:'collect',type:pickT(),n:base-2})}
+  else if(k===4){const sk=SPECIAL_GOALS[Math.floor((L-4)/5)%SPECIAL_GOALS.length],sn=Math.min(6,3+Math.floor(hard/6));goals.push({kind:'special',s:sk,n:sk==='elephant'?Math.min(3,Math.max(2,sn-3)):Math.min(4,Math.max(2,sn-2))},{kind:'collect',type:pickT(),n:base-2});moves+=sk==='elephant'?3:2}
   else{ice=Math.min(12+Math.floor(2*wf),4+Math.floor(hard*.4));goals.push({kind:'score',n:Math.min(2800+Math.floor(300*wf),1500+L*50)},{kind:'ice',n:ice});moves+=3}
   return {L,types,moves,goals,ice,seed:L*104729+1};
 }
@@ -636,7 +637,7 @@ const startLevel=L=>startGame(levelDef(L),'level');
 
 /* ============ HUD ============ */
 function goalHave(g){
-  switch(g.kind){case'collect':return G.collected[g.type]||0;case'ice':return G.iceStart-G.iceNow;case'special':return G.specialsMade;case'score':return G.score}
+  switch(g.kind){case'collect':return G.collected[g.type]||0;case'ice':return G.iceStart-G.iceNow;case'special':return g.s?G.made[g.s]:G.specialsMade;case'score':return G.score}
 }
 const goalsMet=()=>G.def.goals.every(g=>goalHave(g)>=g.n);
 // Past een rij pillen op een smalle telefoon of bij een groot lettertype: lettertype kleiner tot alles op één regel past
@@ -664,7 +665,7 @@ function hud0(){
   }
   $('#goals').innerHTML=G.def.goals.map(g=>{
     const h=Math.min(goalHave(g),g.n),done=h>=g.n;
-    const ic=g.kind==='collect'?ANIMALS[g.type].e:g.kind==='ice'?'🧊':g.kind==='special'?'🦁':'🎯';
+    const ic=g.kind==='collect'?ANIMALS[g.type].e:g.kind==='ice'?'🧊':g.kind==='special'?SPECIAL_EMOJI[g.s]||'🦁':'🎯';
     return `<span class="goal${done?' done':''}">${done?'✅':ic} ${fmt(h)}/${fmt(g.n)}</span>`;
   }).join('');
   const p=G.def.goals.reduce((a,g)=>a+Math.min(1,goalHave(g)/g.n),0)/G.def.goals.length;
@@ -785,7 +786,7 @@ function lose(){
   G.over=true;sfx.lose();
   const L=G.def.L;
   setTimeout(()=>modal(`<h2>😿 Net niet…</h2><p>Je hebt geen zetten meer.</p>
-    <p>${G.def.goals.map(g=>{const ic=g.kind==='collect'?ANIMALS[g.type].e:g.kind==='ice'?'🧊':g.kind==='special'?'🦁':'🎯';return `${ic} ${fmt(Math.min(goalHave(g),g.n))}/${fmt(g.n)}`}).join(' &nbsp; ')}</p>`,
+    <p>${G.def.goals.map(g=>{const ic=g.kind==='collect'?ANIMALS[g.type].e:g.kind==='ice'?'🧊':g.kind==='special'?SPECIAL_EMOJI[g.s]||'🦁':'🎯';return `${ic} ${fmt(Math.min(goalHave(g),g.n))}/${fmt(g.n)}`}).join(' &nbsp; ')}</p>`,
     [['↻ Opnieuw proberen','',()=>startLevel(L)],['Levels','dim',toLevels]]),500);
 }
 function finishDaily(){
