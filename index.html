@@ -218,7 +218,7 @@ table.help td:first-child{white-space:nowrap}
   <button class="m2btn m2daily" id="m2Daily"><span class="t">📅 Dagelijkse puzzel</span><span class="s" id="m2DailySub"></span></button>
   <button class="m2zoo" id="m2Zoo"><div class="scene" id="m2Scene"></div><div class="foot"><b>🏡 Bekijk je dierentuin</b><div class="bar2"><div><i id="m2ZooBar"></i></div><span id="m2ZooTxt"></span></div></div></button>
   <div class="m2row"><button class="m2btn" id="m2Board"><span class="t">🏅 Scorebord</span><span class="s" id="m2BoardSub">Wereldwijd</span></button><button class="m2btn" id="m2League"><span class="t">👨‍👩‍👧 Leagues</span><span class="s" id="m2LeagueSub">Met vrienden</span></button></div>
-  <div class="m2links"><button class="linkbtn" id="m2Account">👤 Account</button><button class="linkbtn" id="m2Help">❓ Hoe werkt het?</button><button class="linkbtn" id="m2Sound">🔊 Geluid</button><button class="linkbtn" id="m2Lang"></button></div>
+  <div class="m2links"><button class="linkbtn" id="m2Account">👤 Account</button><button class="linkbtn" id="m2Help">❓ Hoe werkt het?</button><button class="linkbtn" id="m2Sound">🔊 Geluid</button><button class="linkbtn" id="m2Lang"></button><button class="linkbtn" id="m2Privacy">🔒 Privacy</button></div>
   <button class="linkbtn" id="m2Login" style="display:none">🔑 Heb je al een account? Inloggen</button>
 </div>
 
@@ -289,7 +289,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-23 b';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-24 a';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
@@ -1668,6 +1668,7 @@ function langDialog(){
   $('#card').insertAdjacentHTML('beforeend','<p style="opacity:.5;font-size:11px;margin:8px 0 0">'+APP_VERSION+'</p>');
   $('#card').querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{sfx.ui();closeModal();setLanguage(b.dataset.lang)});
 }
+$('#m2Privacy').onclick=()=>window.open('privacy.html?lang='+LANG,'_blank');
 $('#m2Lang').onclick=langDialog;$('#mLang').onclick=langDialog;
 function toMenu(){
   langLabel();

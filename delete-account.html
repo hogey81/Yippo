@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><link rel="icon" href="favicon.svg" type="image/svg+xml"><style>
+:root{--bg:#240046;--card:#ffffff14;--fg:#fff;--mut:#d9c7f5;--acc:#ffd23f}
+@media (prefers-color-scheme:light){:root{--bg:#f6f0ff;--card:#fff;--fg:#2b0057;--mut:#5b3a8a;--acc:#7b2cbf}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+header img{width:48px;height:48px;border-radius:12px}
+header a.back{margin-left:auto;color:var(--acc);font-weight:700;text-decoration:none}
+h1{font-size:28px;margin:12px 0 4px}h2{font-size:20px;margin:28px 0 6px}
+p,li{color:var(--fg)}.mut{color:var(--mut);font-size:14px}
+ul{padding-left:22px}li{margin:4px 0}
+.box{background:var(--card);border-radius:16px;padding:14px 18px;margin:14px 0}
+.lang{display:flex;gap:8px;margin:10px 0 0}
+.lang button{font:inherit;font-weight:700;border:2px solid var(--acc);background:transparent;color:var(--fg);border-radius:12px;padding:5px 14px;cursor:pointer}
+.lang button.on{background:var(--acc);color:#2b0057}
+a{color:var(--acc)}
+[hidden]{display:none!important}
+</style><title>Yippo</title></head><body><main><header><img src="icons/icon-192.png" alt="Yippo"><b>Yippo</b><a class="back" href="./" data-l="nl">← Terug naar het spel</a><a class="back" href="./" data-l="en">← Back to the game</a><a class="back" href="./" data-l="es">← Volver al juego</a></header><div class="lang"><button data-b="nl">Nederlands</button><button data-b="en">English</button><button data-b="es">Español</button></div><section data-l="nl" hidden><h1 data-l="nl">Account verwijderen</h1><p>Je kunt je Yippo-account op twee manieren laten verwijderen.</p>
+<h2>1. In de app (snelste)</h2><ol><li>Open Yippo en tik in het menu op <b>👤 Account</b>.</li><li>Tik op <b>🗑 Account verwijderen</b>.</li><li>Bevestig met <b>Ja, alles verwijderen</b>.</li></ol>
+<p>Daarmee worden je naam, scores, leagues, voortgang en (als je die had gekoppeld) je e-mailadres <b>definitief</b> verwijderd. Dit kan niet ongedaan worden gemaakt. De voortgang die op je eigen apparaat staat, verdwijnt als je de app verwijdert of de gegevens van je browser wist.</p>
+<h2>2. Via e-mail</h2><p>Lukt het niet in de app, of vraag je het als ouder voor je kind? Mail naar <a href="mailto:privacy@hunting4cards.com">privacy@hunting4cards.com</a> met het e-mailadres van het account of, bij een gastaccount, de spelersnaam (bijvoorbeeld "Vrolijke Zebra 42") en eventueel de league-code. Wij verwijderen de gegevens dan zo snel mogelijk, meestal binnen enkele dagen. Een gastaccount zonder e-mail kunnen we niet altijd herkennen: in dat geval kan het verwijderen alleen in de app.</p>
+<p><a href="privacy.html">Lees onze privacyverklaring</a></p></section><section data-l="en" hidden><h1 data-l="en">Delete your account</h1><p>You can have your Yippo account deleted in two ways.</p>
+<h2>1. In the app (fastest)</h2><ol><li>Open Yippo and tap <b>👤 Account</b> in the menu.</li><li>Tap <b>🗑 Delete account</b>.</li><li>Confirm with <b>Yes, delete everything</b>.</li></ol>
+<p>This <b>permanently</b> deletes your name, scores, leagues, progress and (if you linked one) your email address. This cannot be undone. Progress stored on your own device disappears when you uninstall the app or clear your browser data.</p>
+<h2>2. By email</h2><p>Can't do it in the app, or asking as a parent for your child? Email <a href="mailto:privacy@hunting4cards.com">privacy@hunting4cards.com</a> with the email address of the account or, for a guest account, the player name (for example "Happy Zebra 42") and, if possible, the league code. We will delete the data as soon as we can, usually within a few days. We cannot always identify a guest account without an email: in that case deleting can only be done in the app.</p>
+<p><a href="privacy.html">Read our privacy policy</a></p></section><section data-l="es" hidden><h1 data-l="es">Eliminar tu cuenta</h1><p>Puedes eliminar tu cuenta de Yippo de dos maneras.</p>
+<h2>1. En la app (lo más rápido)</h2><ol><li>Abre Yippo y toca <b>👤 Cuenta</b> en el menú.</li><li>Toca <b>🗑 Eliminar cuenta</b>.</li><li>Confirma con <b>Sí, borrar todo</b>.</li></ol>
+<p>Esto elimina <b>para siempre</b> tu nombre, puntuaciones, ligas, progreso y (si lo vinculaste) tu correo. No se puede deshacer. El progreso guardado en tu propio dispositivo desaparece al desinstalar la app o borrar los datos del navegador.</p>
+<h2>2. Por correo electrónico</h2><p>¿No puedes hacerlo en la app, o lo pides como padre o madre por tu hijo? Escribe a <a href="mailto:privacy@hunting4cards.com">privacy@hunting4cards.com</a> con el correo de la cuenta o, en una cuenta de invitado, el nombre de jugador (por ejemplo "Feliz Cebra 42") y, si puedes, el código de la liga. Eliminaremos los datos lo antes posible, normalmente en unos días. No siempre podemos identificar una cuenta de invitado sin correo: en ese caso solo se puede eliminar desde la app.</p>
+<p><a href="privacy.html">Lee nuestra política de privacidad</a></p></section><script>
+(function(){
+  var L=['nl','en','es'],q=(location.search.match(/[?&]lang=(nl|en|es)/)||[])[1],s='';
+  try{s=(JSON.parse(localStorage.getItem('dm_save')||'{}').lang)||''}catch(e){}
+  var n=(navigator.language||'nl').slice(0,2),l=q||(L.indexOf(s)>=0?s:(L.indexOf(n)>=0?n:'en'));
+  function set(x){document.documentElement.lang=x;[].forEach.call(document.querySelectorAll('[data-l]'),function(e){e.hidden=e.getAttribute('data-l')!==x});[].forEach.call(document.querySelectorAll('.lang button'),function(b){b.className=b.getAttribute('data-b')===x?'on':''});document.title=document.querySelector('h1[data-l="'+x+'"]').textContent+' · Yippo'}
+  [].forEach.call(document.querySelectorAll('.lang button'),function(b){b.onclick=function(){set(b.getAttribute('data-b'))}});
+  set(l);
+})();
+</script></main></body></html>

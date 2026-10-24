@@ -2,6 +2,7 @@
    Rijen: [nederlands, engels, spaans]. "{}" is een invulplek (getal, naam, ...). */
 (function(){
 const ROWS=[
+["Privacy","Privacy","Privacidad"],
 ["jij@voorbeeld.nl","you@example.com","tu@ejemplo.com"],
 ["Familie Jansen","The Smiths","Familia García"],
 ["level {}","level {}","nivel {}"],
