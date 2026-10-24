@@ -1,7 +1,9 @@
 # Pushmeldingen (dagrecord verbeterd): opzet en checklist
 
+Melding: wie in een league zit krijgt een bericht als een ander lid van die league het dagrecord van de league verbetert ("🏆 Nieuw dagrecord in <leaguenaam>"). Wie in geen league zit, krijgt niets.
+
 Wat al klaar staat in de code:
-- `push.sql`: tabellen voor telefoons en wachtrij, aan- en afmelden (alleen volwassen accounts), en een trigger die een record opmerkt.
+- `push.sql`: tabellen voor telefoons en wachtrij, aan- en afmelden (alleen volwassen accounts), en een trigger die een record in een league opmerkt.
 - `functions/push-record/index.ts`: de serverfunctie die de melding via Firebase (FCM) verstuurt. Maximaal één melding per telefoon per dag, niet tussen 22:00 en 08:00, in nl/en/es.
 
 Wat er nog moet gebeuren (pas na de testperiode, samen met de Android-app):

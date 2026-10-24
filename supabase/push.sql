@@ -1,4 +1,4 @@
--- Yippo: pushmeldingen "iemand heeft het dagrecord verbeterd" (voorbereiding voor de Android-app)
+-- Yippo: pushmeldingen "iemand in je league heeft het dagrecord verbeterd" (voorbereiding voor de Android-app)
 -- Plak dit bestand in Supabase: SQL Editor -> New query -> Run. Veilig om opnieuw te draaien.
 -- Pas draaien als yippo.sql al is gedraaid. Er wordt nog niets verstuurd zolang de serverfunctie
 -- (supabase/functions/push-record) niet is uitgerold: zie supabase/push.md.
@@ -14,13 +14,15 @@ create table if not exists yippo_devices (
 );
 create index if not exists yippo_devices_player on yippo_devices (player_id);
 
--- Wachtrij: elke keer dat iemand het wereldrecord van de dag verbetert komt hier een regel in.
+-- Wachtrij: elke keer dat iemand het dagrecord van een league verbetert komt hier een regel in.
 create table if not exists yippo_push_queue (
   id         bigserial primary key,
   day        date not null,
   player_id  uuid not null,
   name       text not null,
   score      int  not null,
+  league_code text not null,
+  league_name text not null,
   created_at timestamptz not null default now(),
   sent_at    timestamptz
 );
@@ -60,17 +62,28 @@ end $$;
 grant execute on function yippo_register_device(text, text), yippo_unregister_device(text) to authenticated;
 
 -- ========== Record opmerken ==========
--- Zodra een score hoger is dan alle andere scores van die dag komt er een regel in de wachtrij.
--- De eerste score van een dag telt niet: er is dan nog niets verbeterd.
+-- Zodra een score hoger is dan alle andere scores van die dag in een league waar de speler in zit,
+-- komt er een regel in de wachtrij. De eerste score van een dag in een league telt niet: er is dan nog niets verbeterd.
 create or replace function yippo_scores_record_trg()
 returns trigger
 language plpgsql security definer set search_path = public as $$
-declare v_prev int;
+declare
+  l record;
+  v_prev int;
 begin
-  select max(score) into v_prev from yippo_scores where day = new.day and player_id <> new.player_id;
-  if v_prev is not null and new.score > v_prev and (tg_op = 'INSERT' or new.score > old.score) then
-    insert into yippo_push_queue (day, player_id, name, score) values (new.day, new.player_id, new.name, new.score);
-  end if;
+  if tg_op = 'UPDATE' and new.score <= old.score then return new; end if;
+  for l in
+    select m.code, g.name from yippo_members m join yippo_leagues g on g.code = m.code where m.player_id = new.player_id
+  loop
+    select max(s.score) into v_prev
+      from yippo_scores s
+      join yippo_members m2 on m2.player_id = s.player_id and m2.code = l.code
+      where s.day = new.day and s.player_id <> new.player_id;
+    if v_prev is not null and new.score > v_prev then
+      insert into yippo_push_queue (day, player_id, name, score, league_code, league_name)
+      values (new.day, new.player_id, new.name, new.score, l.code, l.name);
+    end if;
+  end loop;
   return new;
 end $$;
 

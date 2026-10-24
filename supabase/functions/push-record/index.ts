@@ -1,4 +1,4 @@
-// Supabase Edge Function: verstuurt de pushmelding "iemand heeft het dagrecord verbeterd" via Firebase Cloud Messaging.
+// Supabase Edge Function: verstuurt de pushmelding "iemand in je league heeft het dagrecord verbeterd" via Firebase Cloud Messaging.
 // Leest de wachtrij yippo_push_queue (zie push.sql). Wordt elke paar minuten aangeroepen (zie push.md).
 // Geheimen (Supabase -> Edge Functions -> Secrets): FCM_SERVICE_ACCOUNT = de hele JSON van het Firebase-servicesleutelbestand.
 // SUPABASE_URL en SUPABASE_SERVICE_ROLE_KEY zijn er al automatisch.
@@ -7,10 +7,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 const sa = JSON.parse(Deno.env.get("FCM_SERVICE_ACCOUNT") || "{}");
 
-const TEXT: Record<string, (n: string, s: string) => { title: string; body: string }> = {
-  nl: (n, s) => ({ title: "🏆 Nieuw dagrecord!", body: `${n} heeft het dagrecord verbeterd: ${s} punten. Kun jij hem verslaan?` }),
-  en: (n, s) => ({ title: "🏆 New daily record!", body: `${n} beat the daily record: ${s} points. Can you beat them?` }),
-  es: (n, s) => ({ title: "🏆 ¡Nuevo récord del día!", body: `${n} ha mejorado el récord del día: ${s} puntos. ¿Puedes superarlo?` }),
+const TEXT: Record<string, (n: string, s: string, l: string) => { title: string; body: string }> = {
+  nl: (n, s, l) => ({ title: `🏆 Nieuw dagrecord in ${l}`, body: `${n} heeft het dagrecord verbeterd: ${s} punten. Kun jij hem verslaan?` }),
+  en: (n, s, l) => ({ title: `🏆 New daily record in ${l}`, body: `${n} beat the daily record: ${s} points. Can you beat them?` }),
+  es: (n, s, l) => ({ title: `🏆 Nuevo récord del día en ${l}`, body: `${n} ha mejorado el récord del día: ${s} puntos. ¿Puedes superarlo?` }),
 };
 
 const b64url = (b: ArrayBuffer | string) =>
@@ -50,15 +50,19 @@ Deno.serve(async () => {
   for (const q of queue) {
     const age = Date.now() - new Date(q.created_at).getTime();
     // oude of tussentijds ingehaalde records niet meer melden; 's nachts wachten we (max 6 uur)
-    const { data: top } = await sb.from("yippo_scores").select("score").eq("day", q.day).order("score", { ascending: false }).limit(1);
-    const outdated = age > 6 * 3600e3 || (top && top[0] && top[0].score > q.score);
+    const { data: members } = await sb.from("yippo_members").select("player_id").eq("code", q.league_code);
+    const ids = (members || []).map((m: { player_id: string }) => m.player_id);
+    const { data: top } = ids.length
+      ? await sb.from("yippo_scores").select("score").eq("day", q.day).in("player_id", ids).order("score", { ascending: false }).limit(1)
+      : { data: [] };
+    const outdated = !ids.length || age > 6 * 3600e3 || (top && top[0] && top[0].score > q.score);
     if (quiet && !outdated) continue;
     if (!outdated) {
-      const { data: devices } = await sb.from("yippo_devices").select("*").neq("player_id", q.player_id)
-        .or(`last_push_day.is.null,last_push_day.neq.${q.day}`).limit(500);   // maximaal één melding per telefoon per dag
+      const { data: devices } = await sb.from("yippo_devices").select("*").in("player_id", ids).neq("player_id", q.player_id)
+        .or(`last_push_day.is.null,last_push_day.neq.${q.day}`).limit(500);   // alleen leden van de league, maximaal één melding per telefoon per dag
       for (const d of devices || []) {
         token = token || await accessToken();
-        const m = (TEXT[d.lang] || TEXT.nl)(q.name, String(q.score).replace(/\B(?=(\d{3})+(?!\d))/g, d.lang === "en" ? "," : "."));
+        const m = (TEXT[d.lang] || TEXT.nl)(q.name, String(q.score).replace(/\B(?=(\d{3})+(?!\d))/g, d.lang === "en" ? "," : "."), q.league_name);
         const r = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
           method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
           body: JSON.stringify({ message: { token: d.token, notification: m, android: { priority: "normal", notification: { channel_id: "daily-record" } }, data: { type: "daily-record" } } }),
