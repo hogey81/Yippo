@@ -40,3 +40,6 @@ Alle functies (kaart, dierentuin, wereldkaart, nieuwe menu) staan voor iedereen 
 De code schrijft Nederlandse teksten. `i18n.js` vertaalt wat er op het scherm komt naar Engels of Spaans (rijen `[nl, en, es]`, `{}` is een invulplek). De taal komt uit de keuze van de speler (🌐-knop in het menu), anders uit de taal van de telefoon; bestaande spelers blijven Nederlands tot ze zelf kiezen.
 
 Nieuwe tekst toevoegen: voeg een rij toe aan `ROWS` in `i18n.js`. Voor een nieuwe taal komt er een kolom bij, plus `LANGS`/`IDX` in `i18n.js` en `NAME_SETS`/`LOCALES` in `index.html`. Teksten die nog niet vertaald zijn staan in `I18N.miss()` in de browserconsole.
+
+## Adres
+Het spel staat op https://www.yippogame.com (yippogame.com stuurt door). Het oude adres https://yippo-game.vercel.app blijft werken. De DNS staat bij Vercel (nameservers van Vercel ingesteld bij Hostinger).
