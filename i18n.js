@@ -2,6 +2,14 @@
    Rijen: [nederlands, engels, spaans]. "{}" is een invulplek (getal, naam, ...). */
 (function(){
 const ROWS=[
+["Download de app","Download the app","Descarga la app"],
+["Binnenkort in Google Play","Coming soon on Google Play","Próximamente en Google Play"],
+["Binnenkort in de App Store","Coming soon on the App Store","Próximamente en la App Store"],
+["Meer info","More info","Más info"],
+["SPONSOR GEZOCHT","SPONSOR WANTED","SE BUSCA PATROCINADOR"],
+["Jouw bedrijf hier?","Your company here?","¿Tu empresa aquí?"],
+["Laat je gezinsvriendelijke product of merk hier zien aan spelers. Mail ons voor de mogelijkheden.","Show your family-friendly product or brand to players here. Email us for the options.","Muestra aquí tu producto o marca familiar a los jugadores. Escríbenos para conocer las opciones."],
+["Word sponsor","Become a sponsor","Hazte patrocinador"],
 ["Privacy","Privacy","Privacidad"],
 ["jij@voorbeeld.nl","you@example.com","tu@ejemplo.com"],
 ["Familie Jansen","The Smiths","Familia García"],

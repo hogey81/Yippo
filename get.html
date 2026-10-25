@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><link rel="icon" href="favicon.svg" type="image/svg+xml"><style>
+:root{--bg:#240046;--card:#ffffff14;--fg:#fff;--mut:#d9c7f5;--acc:#ffd23f}
+@media (prefers-color-scheme:light){:root{--bg:#f6f0ff;--card:#fff;--fg:#2b0057;--mut:#5b3a8a;--acc:#7b2cbf}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+header img{width:48px;height:48px;border-radius:12px}
+header a.back{margin-left:auto;color:var(--acc);font-weight:700;text-decoration:none}
+h1{font-size:28px;margin:12px 0 4px}h2{font-size:20px;margin:28px 0 6px}
+p,li{color:var(--fg)}.mut{color:var(--mut);font-size:14px}
+ul{padding-left:22px}li{margin:4px 0}
+.box{background:var(--card);border-radius:16px;padding:14px 18px;margin:14px 0}
+.lang{display:flex;gap:8px;margin:10px 0 0}
+.lang button{font:inherit;font-weight:700;border:2px solid var(--acc);background:transparent;color:var(--fg);border-radius:12px;padding:5px 14px;cursor:pointer}
+.lang button.on{background:var(--acc);color:#2b0057}
+a{color:var(--acc)}
+[hidden]{display:none!important}
+.card{background:var(--card);border-radius:20px;padding:26px 22px;margin:22px 0;text-align:center}.big{font-size:56px;line-height:1.1}.btn{display:inline-block;margin:6px;background:var(--acc);color:#2b0057;font-weight:800;border-radius:14px;padding:11px 20px;text-decoration:none}.btn.alt{background:transparent;border:2px solid var(--acc);color:var(--acc)}</style><title>Yippo</title></head><body><main>
+<header><img src="icons/icon-192.png" alt="Yippo"><b>Yippo</b></header>
+<div class="lang"><button data-b="nl">Nederlands</button><button data-b="en">English</button><button data-b="es">Español</button></div>
+<section data-l="nl" hidden><h1 data-l="nl">Yippo komt eraan</h1><div class="card"><div class="big">📱</div><h2 class="sub" data-t="Binnenkort in {store}"></h2><p class="txt" data-t="Bijna zover! Deze QR-code werkt zodra Yippo in {store} staat. Speel intussen gewoon in je browser."></p><a class="btn" href="./">Speel nu in je browser</a></div></section><section data-l="en" hidden><h1 data-l="en">Yippo is coming</h1><div class="card"><div class="big">📱</div><h2 class="sub" data-t="Coming soon on {store}"></h2><p class="txt" data-t="Almost there! This QR code will work as soon as Yippo is in {store}. In the meantime, just play in your browser."></p><a class="btn" href="./">Play now in your browser</a></div></section><section data-l="es" hidden><h1 data-l="es">Yippo ya viene</h1><div class="card"><div class="big">📱</div><h2 class="sub" data-t="Próximamente en {store}"></h2><p class="txt" data-t="¡Ya casi! Este código QR funcionará en cuanto Yippo esté en {store}. Mientras tanto, juega en tu navegador."></p><a class="btn" href="./">Juega ahora en tu navegador</a></div></section>
+<script>
+// Zodra Yippo in de winkel staat: vul hier de links in, dan stuurt de QR-code mensen meteen door.
+var STORE={android:'',ios:''};
+(function(){
+  var p=(location.search.match(/[?&]p=(android|ios)/)||[])[1]||'android';
+  if(STORE[p]){location.replace(STORE[p]);return}
+  var name=p==='ios'?'App Store':'Google Play';
+  [].forEach.call(document.querySelectorAll('[data-t]'),function(e){e.textContent=e.getAttribute('data-t').replace('{store}',name)});
+})();
+</script>
+<script>
+(function(){
+  var L=['nl','en','es'],q=(location.search.match(/[?&]lang=(nl|en|es)/)||[])[1],s='';
+  try{s=(JSON.parse(localStorage.getItem('dm_save')||'{}').lang)||''}catch(e){}
+  var n=(navigator.language||'nl').slice(0,2),l=q||(L.indexOf(s)>=0?s:(L.indexOf(n)>=0?n:'en'));
+  function set(x){document.documentElement.lang=x;[].forEach.call(document.querySelectorAll('[data-l]'),function(e){e.hidden=e.getAttribute('data-l')!==x});[].forEach.call(document.querySelectorAll('.lang button'),function(b){b.className=b.getAttribute('data-b')===x?'on':''});document.title=document.querySelector('h1[data-l="'+x+'"]').textContent+' · Yippo'}
+  [].forEach.call(document.querySelectorAll('.lang button'),function(b){b.onclick=function(){set(b.getAttribute('data-b'))}});
+  set(l);
+})();
+</script>
+</main></body></html>
