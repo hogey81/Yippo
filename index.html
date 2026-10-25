@@ -314,7 +314,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-26 b';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-26 c';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
@@ -658,6 +658,7 @@ function startGame(def,mode){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)attach(grid[r][c],r,c,true);
   drawBgs();
   hud();G.busy=false;scheduleHint();
+  if(mode==='daily'&&online()){const g=G;rpc('yippo_global',{p_day:def.date,p_limit:1}).then(r=>{if(G===g&&Array.isArray(r)&&r[0]&&typeof r[0].score==='number'){g.worldBest=r[0].score;hud()}}).catch(()=>{})}
   if(!S.seenHelp&&mode==='level'&&def.L===1){S.seenHelp=true;save();showHelp()}
 }
 const startLevel=L=>startGame(levelDef(L),'level');
@@ -683,7 +684,7 @@ function hud0(){
   $('#gMoves').textContent='Zetten '+G.moves;
   $('#gScore').textContent='⭐ '+fmt(G.score);
   if(G.mode==='daily'){
-    const best=S.daily[G.def.date]||0;
+    const best=Math.max(G.worldBest||0,S.daily[G.def.date]||0);   // beste score van vandaag van iedereen (zonder verbinding: je eigen beste)
     $('#goals').innerHTML=`<span class="goal">🏆 Beste vandaag: ${fmt(Math.max(best,G.score))}</span>`;
     $('#barfill').style.width=Math.round((G.def.moves-G.moves)/G.def.moves*100)+'%';
     $('#tHammer span').textContent=G.hammers;$('#tShuffle span').textContent=G.shuffles;
