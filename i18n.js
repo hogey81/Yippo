@@ -3,7 +3,7 @@
 (function(){
 const ROWS=[
 ["Ik daag je uit!","I challenge you!","¡Te desafío!"],
-["Verbreek mijn dagrecord als je durft:","Beat my daily record if you dare:","Supera mi récord del día si te atreves:"],
+["Verbreek mijn dagrecord!","Beat my daily record!","¡Supera mi récord del día!"],
 ["Kun jij mij verslaan?","Can you beat me?","¿Puedes ganarme?"],
 ["Download de app","Download the app","Descarga la app"],
 ["Binnenkort in Google Play","Coming soon on Google Play","Próximamente en Google Play"],

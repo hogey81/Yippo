@@ -314,7 +314,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-27 a';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-27 b';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
@@ -827,7 +827,7 @@ function finishDaily(){
   save();
   sfx.win();
   const m=G.made,score=G.score;
-  const txt=`🔥 Ik daag je uit!\nVerbreek mijn dagrecord als je durft:\n⭐ ${fmt(S.daily[date])} punten in ${G.def.moves} zetten\n🏆 Kun jij mij verslaan? 👇\nhttps://www.yippogame.com/`;
+  const txt=`🔥 Ik daag je uit!\nVerbreek mijn dagrecord!\n⭐ ${fmt(S.daily[date])} punten in ${G.def.moves} zetten\n🏆 Kun jij mij verslaan? 👇\nhttps://www.yippogame.com/`;
   const showResult=()=>{
     modal(`<h2>${record&&prev?'🏆 Nieuw record!':'📅 Klaar!'}</h2>
       <div class="stars">⭐ ${fmt(score)}</div><p>punten in ${G.def.moves} zetten</p>
