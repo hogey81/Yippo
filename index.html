@@ -314,7 +314,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-26 a';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-26 b';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
@@ -326,7 +326,9 @@ try{const raw=localStorage.getItem('dm_save');HAD_SAVE=!!raw;Object.assign(S,JSO
 // taal: bewuste keuze, anders de taal van de telefoon; bestaande spelers zonder keuze blijven Nederlands
 LANG=S.lang||(HAD_SAVE?'nl':(window.I18N?I18N.detect():'nl'));
 if(window.I18N)I18N.setLang(LANG);else LANG='nl';
-function save(){try{localStorage.setItem('dm_save',JSON.stringify(S))}catch(e){}if(window.scheduleSync)scheduleSync()}
+// Reservekopie van de beste voortgang op dit apparaat: komt de voortgang ooit lager uit (inloggen, wisselen van account), dan herstelt het spel hem vanzelf
+function backupProgress(){try{const b=JSON.parse(localStorage.getItem('dm_best')||'null');if(!b||S.unlocked>=b.unlocked)localStorage.setItem('dm_best',JSON.stringify({unlocked:S.unlocked,stars:S.stars,best:S.best,daily:S.daily,streak:S.streak,zoo:S.zoo,leagues:S.leagues}))}catch(e){}}
+function save(){try{localStorage.setItem('dm_save',JSON.stringify(S));backupProgress()}catch(e){}if(window.scheduleSync)scheduleSync()}
 // Nieuwe functies (kaart, dierentuin, wereldkaart, werelden) staan voor iedereen aan.
 // ?beta=1 is nu alleen nog een voorproefje: werelden die nog niet open zijn alvast spelen (?beta=0 zet het uit).
 const KIDSAFE=true;   // kinderveilige namen en leeftijdsvraag: aan voor iedereen
@@ -1291,7 +1293,7 @@ async function switchAccount(guestTok){
 }
 async function logout(){
   try{await syncUp()}catch(e){}
-  try{localStorage.removeItem('dm_save')}catch(e){}
+  try{localStorage.removeItem('dm_save');localStorage.removeItem('dm_best')}catch(e){}
   location.href=location.pathname;
 }
 
@@ -1310,7 +1312,7 @@ function accountDialog(){
      ...(email?[['Uitloggen','dim',()=>modal('<h2>Uitloggen?</h2><p>Je voortgang blijft bewaard in je account.</p>',[['Ja, uitloggen','',logout],['Annuleren','dim',()=>{}]])]]:[]),
      ['🗑 Account verwijderen','dim',()=>modal(`<h2>Account verwijderen?</h2><p>Je naam, scores, leagues en voortgang worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.</p>`,
         [['Ja, alles verwijderen','',async()=>{
-          try{await rpc('yippo_delete_account');try{localStorage.removeItem('dm_save')}catch(e){}location.href=location.pathname}
+          try{await rpc('yippo_delete_account');try{localStorage.removeItem('dm_save');localStorage.removeItem('dm_best')}catch(e){}location.href=location.pathname}
           catch(e){toast(errText(e))}
         }],['Annuleren','dim',()=>{}]])],
      ['Sluiten','dim',()=>{}]]);
@@ -1792,6 +1794,8 @@ addEventListener('popstate',()=>{
   exitT=setTimeout(()=>{exitArmed=false},2500);
 });
 
+function restoreBackup(){try{const b=JSON.parse(localStorage.getItem('dm_best')||'null');if(b&&b.unlocked>S.unlocked){mergeProgress(b);save()}}catch(e){}}
+updateMax();restoreBackup();backupProgress();
 toMenu();
 bootOnline().then(handleInvite);
 </script>
