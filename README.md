@@ -43,3 +43,6 @@ Nieuwe tekst toevoegen: voeg een rij toe aan `ROWS` in `i18n.js`. Voor een nieuw
 
 ## Adres
 Het spel staat op https://www.yippogame.com (yippogame.com stuurt door). Het oude adres https://yippo-game.vercel.app blijft werken. De DNS staat bij Vercel (nameservers van Vercel ingesteld bij Hostinger).
+
+## Beheerpagina (/beheer)
+`beheer.html` (op https://www.yippogame.com/beheer) toont statistieken: actieve en nieuwe accounts, spelers per dag, voortgang per wereld, leagues. Inloggen met een code per e-mail; alleen adressen in de tabel `yippo_admins` krijgen cijfers terug (zie `supabase/admin.sql`, functie `yippo_admin_stats`). Het geeft alleen totalen terug, geen persoonsgegevens. Een beheeraccount maak je in Supabase onder Authentication, Users, Add user (met "Auto confirm user").

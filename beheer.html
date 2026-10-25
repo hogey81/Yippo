@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><link rel="icon" href="favicon.svg" type="image/svg+xml"><title>Beheer · Yippo</title>
+<style>
+:root{--bg:#1a0033;--card:#ffffff14;--fg:#fff;--mut:#cdb8ee;--acc:#ffd23f;--bar:#7b2cbf;--bar2:#4cd37a}
+@media (prefers-color-scheme:light){:root{--bg:#f6f0ff;--card:#fff;--fg:#2b0057;--mut:#6a4a98;--acc:#7b2cbf;--bar:#7b2cbf;--bar2:#1f9d55}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:980px;margin:0 auto;padding:18px 16px 60px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header img{width:44px;height:44px;border-radius:11px}
+header h1{font-size:22px;margin:0}header .sp{flex:1}
+button{font:inherit;font-weight:700;border:0;border-radius:12px;padding:9px 16px;background:var(--acc);color:#2b0057;cursor:pointer}
+button.ghost{background:transparent;border:2px solid var(--acc);color:var(--fg)}
+input{font:inherit;padding:10px 12px;border-radius:12px;border:2px solid var(--mut);background:var(--card);color:var(--fg);width:100%;max-width:340px}
+.login{max-width:420px;margin:60px auto;text-align:center}.login p{color:var(--mut)}
+.msg{min-height:22px;color:#ff7a90;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin:18px 0}
+.card{background:var(--card);border-radius:16px;padding:14px 16px}
+.card .n{font-size:32px;font-weight:800;line-height:1.1}.card .l{color:var(--mut);font-size:14px}
+h2{font-size:18px;margin:26px 0 8px}
+.note{color:var(--mut);font-size:13px}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:5px 8px;text-align:right;border-bottom:1px solid #ffffff1f}th:first-child,td:first-child{text-align:left}
+.chart{background:var(--card);border-radius:16px;padding:12px}
+svg text{fill:var(--mut);font-size:11px}
+[hidden]{display:none!important}
+</style></head><body><main>
+<header><img src="icons/icon-192.png" alt=""><h1>Yippo · Beheer</h1><span class="sp"></span><button class="ghost" id="refresh" hidden>↻ Vernieuwen</button><button class="ghost" id="logout" hidden>Uitloggen</button></header>
+
+<section class="login" id="login">
+  <h2>Inloggen</h2>
+  <p id="loginHelp">Vul het e-mailadres in van het beheeraccount. Je krijgt een code van 6 cijfers.</p>
+  <input id="em" type="email" inputmode="email" autocomplete="email" placeholder="e-mailadres">
+  <input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="code uit je mail" hidden style="margin-top:8px">
+  <p class="msg" id="msg"></p>
+  <button id="go">Stuur me een code</button>
+</section>
+
+<section id="dash" hidden>
+  <p class="note" id="stamp"></p>
+  <div class="grid" id="cards"></div>
+  <h2>Spelers per dag (laatste 30 dagen)</h2>
+  <div class="chart" id="chartPlayers"></div>
+  <h2>Nieuwe accounts per dag</h2>
+  <div class="chart" id="chartNew"></div>
+  <h2>Hoe ver zijn spelers? (per wereld)</h2>
+  <div class="chart" id="chartWorlds"></div>
+  <h2>Per dag</h2>
+  <div class="chart"><table id="tbl"></table></div>
+  <p class="note">Let op: het spel telt accounts, geen personen. Wie op twee apparaten of browsers speelt, telt twee keer mee, en een wissen van de browser maakt een nieuw gastaccount. "Actief" = accounts waarvan de voortgang recent is opgeslagen. "Spelers met een score" = accounts die minstens één dagelijkse puzzel hebben gespeeld.</p>
+</section>
+
+<script>
+var SB_URL="https://ovymejnayklmcrdncpjj.supabase.co",SB_KEY="sb_publishable_m6bghNYvHTTst6N9iyVBsg_SiE6zlnk";
+var $=function(id){return document.getElementById(id)};
+var token=null;
+try{token=sessionStorage.getItem('yb_tok')}catch(e){}
+function api(path,body,tok){
+  return fetch(SB_URL+path,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json',Authorization:'Bearer '+(tok||SB_KEY)},body:JSON.stringify(body||{})})
+    .then(function(r){return r.json().catch(function(){return null}).then(function(d){if(!r.ok)throw new Error((d&&(d.error_code||d.message||d.msg))||('http_'+r.status));return d})});
+}
+function fmt(n){return Number(n||0).toLocaleString('nl-NL')}
+function setMsg(t){$('msg').textContent=t||''}
+function showLogin(){token=null;try{sessionStorage.removeItem('yb_tok')}catch(e){}$('login').hidden=false;$('dash').hidden=true;$('logout').hidden=true;$('refresh').hidden=true;$('code').hidden=true;$('go').textContent='Stuur me een code'}
+var step=0;
+$('go').onclick=function(){
+  var em=($('em').value||'').trim().toLowerCase();setMsg('');
+  if(step===0){
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){setMsg('Vul een geldig e-mailadres in.');return}
+    $('go').disabled=true;
+    api('/auth/v1/otp',{email:em,create_user:false}).then(function(){step=1;$('code').hidden=false;$('em').readOnly=true;$('go').textContent='Inloggen';$('loginHelp').textContent='Code verstuurd naar '+em+'. Kijk ook in je spam.';$('code').focus()})
+      .catch(function(){setMsg('Dat is niet gelukt. Controleer het adres en probeer het later opnieuw.')}).then(function(){$('go').disabled=false});
+  }else{
+    var c=($('code').value||'').replace(/\D/g,'');
+    if(c.length<6){setMsg('Vul de code uit je mail in.');return}
+    $('go').disabled=true;
+    api('/auth/v1/verify',{type:'email',email:em,token:c}).then(function(d){token=d.access_token;try{sessionStorage.setItem('yb_tok',token)}catch(e){}load()})
+      .catch(function(){setMsg('Die code klopt niet of is verlopen.')}).then(function(){$('go').disabled=false});
+  }
+};
+$('code').addEventListener('keydown',function(e){if(e.key==='Enter')$('go').click()});
+$('em').addEventListener('keydown',function(e){if(e.key==='Enter')$('go').click()});
+$('logout').onclick=function(){step=0;$('em').readOnly=false;showLogin()};
+$('refresh').onclick=function(){load()};
+
+function card(n,l){return '<div class="card"><div class="n">'+fmt(n)+'</div><div class="l">'+l+'</div></div>'}
+function bars(el,vals,labels,color,fmtv){
+  var W=920,H=190,pl=34,pb=26,n=vals.length,max=Math.max.apply(null,vals.concat([1])),bw=Math.min((W-pl)/n,70);
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img">';
+  [0,.5,1].forEach(function(f){var y=H-pb-(H-pb-14)*f;s+='<line x1="'+pl+'" x2="'+W+'" y1="'+y+'" y2="'+y+'" stroke="#ffffff22"/><text x="0" y="'+(y+4)+'">'+fmt(Math.round(max*f))+'</text>'});
+  vals.forEach(function(v,i){var h=(H-pb-14)*v/max,x=pl+i*bw+2;s+='<rect x="'+x+'" y="'+(H-pb-h)+'" width="'+Math.max(2,bw-4)+'" height="'+h+'" rx="3" fill="'+color+'"><title>'+labels[i]+': '+(fmtv?fmtv(v):fmt(v))+'</title></rect>'});
+  labels.forEach(function(l,i){if(n<=12||i%5===0||i===n-1)s+='<text x="'+(pl+i*bw+bw/2)+'" y="'+(H-8)+'" text-anchor="middle">'+l+'</text>'});
+  el.innerHTML=s+'</svg>';
+}
+function render(d){
+  $('stamp').textContent='Bijgewerkt: '+new Date(d.generated).toLocaleString('nl-NL');
+  $('cards').innerHTML=
+    card(d.active_1d,'actief laatste 24 uur')+card(d.active_7d,'actief laatste 7 dagen')+card(d.active_30d,'actief laatste 30 dagen')+
+    card(d.new_1d,'nieuwe accounts 24 uur')+card(d.new_7d,'nieuwe accounts 7 dagen')+card(d.new_30d,'nieuwe accounts 30 dagen')+
+    card(d.profiles,'accounts met voortgang')+card(d.players_with_score,'spelers met een dagelijkse score')+card(d.accounts_total,'accounts in totaal')+
+    card(d.accounts_guest,'gastaccounts')+card(d.accounts_email,'accounts met e-mail')+card(d.adults,'volwassenen')+card(d.children,'kinderen')+
+    card(d.leagues,'leagues')+card(d.league_members,'league-leden')+card(d.scores_total,'dagscores in totaal');
+  var days=d.daily||[],lab=days.map(function(x){return x.day.slice(8,10)+'/'+x.day.slice(5,7)});
+  bars($('chartPlayers'),days.map(function(x){return x.players}),lab,'var(--bar)');
+  bars($('chartNew'),days.map(function(x){return x.new_accounts}),lab,'var(--bar2)');
+  var w=d.worlds||[];bars($('chartWorlds'),w.map(function(x){return x.n}),w.map(function(x){return 'wereld '+x.world}),'var(--bar)');
+  var t='<tr><th>Dag</th><th>Spelers</th><th>Nieuwe accounts</th><th>Hoogste score</th></tr>';
+  days.slice().reverse().forEach(function(x){t+='<tr><td>'+x.day+'</td><td>'+fmt(x.players)+'</td><td>'+fmt(x.new_accounts)+'</td><td>'+(x.best==null?'–':fmt(x.best))+'</td></tr>'});
+  $('tbl').innerHTML=t;
+}
+function load(){
+  api('/rest/v1/rpc/yippo_admin_stats',{},token).then(function(d){$('login').hidden=true;$('dash').hidden=false;$('logout').hidden=false;$('refresh').hidden=false;render(d)})
+   .catch(function(e){
+     showLogin();
+     setMsg(/not_admin/.test(e.message)?'Geen toegang met dit account.':'Je sessie is verlopen. Log opnieuw in.');
+     step=0;$('em').readOnly=false;
+   });
+}
+if(token)load();
+</script>
+</main></body></html>
