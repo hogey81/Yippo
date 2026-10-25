@@ -137,10 +137,10 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 /* download-QR's (links, vast in beeld) en sponsorruimte (onderaan): alleen op desktop, niet op telefoons */
 .m2side,.m2desk{display:none}
 @media (hover:hover) and (pointer:fine) and (min-width:1000px){
-  .m2side{display:flex;position:fixed;left:28px;top:50%;transform:translateY(-50%);width:210px;flex-direction:column;gap:14px;text-align:center;z-index:3}
+  .m2side{display:flex;position:absolute;left:28px;top:150px;width:210px;flex-direction:column;gap:14px;text-align:center;z-index:3}   /* top wordt in alignSide() gelijk gezet aan de bovenkant van Spelen */
   .m2desk{display:block;width:min(760px,100%);margin:34px 0 24px;text-align:left}
 }
-.m2side h2{font-size:17px;margin:0}
+.m2side h2{font-size:17px;margin:0;line-height:1}
 @media (max-height:720px){.m2side{gap:8px}.m2side .dlc{padding:9px}.m2side .dlc img{width:104px;height:104px}.m2side small{margin-bottom:5px}}
 .m2side .dlc{background:#1a003388;border:1px solid #ffffff22;border-radius:18px;padding:14px 12px}
 .m2side .dlc img{display:block;width:150px;height:150px;margin:0 auto 8px;background:#fff;border-radius:12px;padding:8px}
@@ -313,7 +313,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-25 b';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-25 c';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
@@ -1639,6 +1639,8 @@ $('#zooBack').onclick=toMenu;
 $('#zooMap').onclick=()=>{sfx.ui();openMap()};
 
 /* --- nieuw beginscherm --- */
+function alignSide(){const p=$('#m2Play'),d=document.querySelector('.m2side');if(p&&d&&p.offsetTop)d.style.top=p.offsetTop+'px'}
+addEventListener('resize',alignSide);
 function renderMenu2(){
   updateMax();
   const cur=Math.min(S.unlocked,MAX_LEVEL),CW=WORLDS[worldOf(cur)-1];
@@ -1655,6 +1657,7 @@ function renderMenu2(){
   const on=online();
   $('#m2Board').style.display=on?'':'none';$('#m2League').style.display=on?'':'none';$('#m2Account').style.display=on?'':'none';
   $('#m2Login').style.display=isGuest()?'':'none';
+  alignSide();setTimeout(alignSide,150);
 }
 $('#m2Play').onclick=e=>{sfx.ui();if(e.target.id==='m2Map')openMap();else startLevel(Math.min(S.unlocked,MAX_LEVEL))};
 $('#m2Daily').onclick=()=>{sfx.ui();startGame(dailyDef(),'daily')};
