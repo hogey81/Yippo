@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#5a189a">
-<meta name="description" content="Yippo: Wissel, plof en brul! Maak wilde combo's, bouw een leeuw en versla je vrienden in de dagelijkse puzzel. 🦁">
+<meta name="description" content="Yippo: Schuif, maak vette combo's en versla je vrienden! 🦁">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Yippo">
 <meta property="og:title" content="Yippo">
-<meta property="og:description" content="Wissel, plof en brul! Maak wilde combo's, bouw een leeuw en versla je vrienden in de dagelijkse puzzel. 🦁">
+<meta property="og:description" content="Schuif, maak vette combo's en versla je vrienden! 🦁">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.yippogame.com/">
 <meta property="og:image" content="https://www.yippogame.com/icons/share.png">
@@ -314,7 +314,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-27 b';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-27 c';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);

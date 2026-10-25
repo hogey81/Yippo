@@ -1,7 +1,7 @@
 {
   "name": "Yippo",
   "short_name": "Yippo",
-  "description": "Wissel, plof en brul! Maak wilde combo's, bouw een leeuw en versla je vrienden in de dagelijkse puzzel. 🦁",
+  "description": "Schuif, maak vette combo's en versla je vrienden! 🦁",
   "start_url": "./",
   "display": "standalone",
   "orientation": "portrait",
