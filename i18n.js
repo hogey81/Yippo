@@ -2,6 +2,7 @@
    Rijen: [nederlands, engels, spaans]. "{}" is een invulplek (getal, naam, ...). */
 (function(){
 const ROWS=[
+["Contact","Contact","Contacto"],
 ["Ik daag je uit!","I challenge you!","¡Te desafío!"],
 ["Verbreek mijn dagrecord!","Beat my daily record!","¡Supera mi récord del día!"],
 ["Kun jij mij verslaan?","Can you beat me?","¿Puedes ganarme?"],
