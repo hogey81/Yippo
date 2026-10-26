@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="color-scheme" content="only light">
+<meta name="supported-color-schemes" content="light">
+<meta name="darkreader-lock">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#5a189a">
 <meta name="description" content="Yippo: Schuif, maak vette combo's en versla je vrienden! 🦁">
@@ -24,6 +26,7 @@ if(!window.Capacitor){window.va=window.va||function(){(window.vaq=window.vaq||[]
 <title>Yippo</title>
 <style>
 :root{--cell:44px;color-scheme:only light}
+html,body,*{color-scheme:only light;forced-color-adjust:none}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{margin:0;height:100%;overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:#fff;
   background:linear-gradient(#7b2cbf,#5a189a 55%,#240046);overscroll-behavior:none}
@@ -317,7 +320,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-27 h';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-27 i';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
