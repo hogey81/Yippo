@@ -314,7 +314,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-27 d';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-27 e';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
@@ -661,6 +661,7 @@ function startGame(def,mode){
   if(mode==='daily'&&online()){   // beste score van vandaag van iedereen: bij de start en daarna elke 20 seconden opnieuw ophalen
     const g=G,poll=()=>{
       if(G!==g||g.over)return;
+      if(document.hidden||!$('#game').classList.contains('on')){setTimeout(poll,20000);return}   // niet zichtbaar: niets ophalen
       rpc('yippo_global',{p_day:def.date,p_limit:1}).then(r=>{if(G===g&&Array.isArray(r)&&r[0]&&typeof r[0].score==='number'&&r[0].score!==g.worldBest){g.worldBest=r[0].score;hud()}}).catch(()=>{}).then(()=>{if(G===g&&!g.over)setTimeout(poll,20000)});
     };
     poll();
