@@ -18,6 +18,8 @@
 <meta property="og:url" content="https://www.yippogame.com/">
 <meta property="og:image" content="https://www.yippogame.com/icons/share.png">
 <meta name="twitter:card" content="summary_large_image">
+<script>/* anonieme bezoekerstelling (Vercel Web Analytics): zonder cookies, niet in de app */
+if(!window.Capacitor){window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};var vs=document.createElement('script');vs.defer=true;vs.src='/_vercel/insights/script.js';document.head.appendChild(vs)}</script>
 <title>Yippo</title>
 <style>
 :root{--cell:44px}
@@ -314,7 +316,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-27 e';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-27 f';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
