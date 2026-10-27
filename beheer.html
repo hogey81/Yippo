@@ -94,6 +94,7 @@ function bars(el,vals,labels,color,fmtv){
 function render(d){
   $('stamp').textContent='Bijgewerkt: '+new Date(d.generated).toLocaleString('nl-NL');
   $('cards').innerHTML=
+    card(d.real_total,'echte spelers (voorbij level 5, dagscore, league of e-mail)')+card(d.real_7d,'echte spelers actief 7 dagen')+card(d.real_1d,'echte spelers actief 24 uur')+
     card(d.active_1d,'actief laatste 24 uur')+card(d.active_7d,'actief laatste 7 dagen')+card(d.active_30d,'actief laatste 30 dagen')+
     card(d.new_1d,'nieuwe accounts 24 uur')+card(d.new_7d,'nieuwe accounts 7 dagen')+card(d.new_30d,'nieuwe accounts 30 dagen')+
     card(d.profiles,'accounts met voortgang')+card(d.players_with_score,'spelers met een dagelijkse score')+card(d.accounts_total,'accounts in totaal')+

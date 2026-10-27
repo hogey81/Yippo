@@ -34,6 +34,22 @@ begin
     'scores_total',       (select count(*) from yippo_scores),
     'leagues',            (select count(*) from yippo_leagues),
     'league_members',     (select count(*) from yippo_members),
+    -- echte spelers: voorbij de uitleg (level 6+), of een dagscore, of in een league, of een e-mailadres
+    'real_total',         (select count(*) from yippo_profiles p where (
+      case when (p.data ->> 'unlocked') ~ '^[0-9]+$' then (p.data ->> 'unlocked')::int else 1 end >= 6
+      or exists (select 1 from yippo_scores s where s.player_id = p.user_id)
+      or exists (select 1 from yippo_members m where m.player_id = p.user_id)
+      or exists (select 1 from auth.users u where u.id = p.user_id and coalesce(u.email, '') <> ''))),
+    'real_7d',            (select count(*) from yippo_profiles p where p.updated_at > now() - interval '7 days' and (
+      case when (p.data ->> 'unlocked') ~ '^[0-9]+$' then (p.data ->> 'unlocked')::int else 1 end >= 6
+      or exists (select 1 from yippo_scores s where s.player_id = p.user_id)
+      or exists (select 1 from yippo_members m where m.player_id = p.user_id)
+      or exists (select 1 from auth.users u where u.id = p.user_id and coalesce(u.email, '') <> ''))),
+    'real_1d',            (select count(*) from yippo_profiles p where p.updated_at > now() - interval '1 day' and (
+      case when (p.data ->> 'unlocked') ~ '^[0-9]+$' then (p.data ->> 'unlocked')::int else 1 end >= 6
+      or exists (select 1 from yippo_scores s where s.player_id = p.user_id)
+      or exists (select 1 from yippo_members m where m.player_id = p.user_id)
+      or exists (select 1 from auth.users u where u.id = p.user_id and coalesce(u.email, '') <> ''))),
     'active_1d',          (select count(*) from yippo_profiles where updated_at > now() - interval '1 day'),
     'active_7d',          (select count(*) from yippo_profiles where updated_at > now() - interval '7 days'),
     'active_30d',         (select count(*) from yippo_profiles where updated_at > now() - interval '30 days'),
