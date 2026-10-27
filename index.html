@@ -320,7 +320,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-27 j';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-28 b';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
@@ -697,8 +697,8 @@ function hud0(){
   $('#gMoves').textContent='Zetten '+G.moves;
   $('#gScore').textContent='⭐ '+fmt(G.score);
   if(G.mode==='daily'){
-    const best=Math.max(G.worldBest||0,S.daily[G.def.date]||0);   // beste score van vandaag van iedereen (zonder verbinding: je eigen beste)
-    $('#goals').innerHTML=`<span class="goal">🏆 Beste vandaag: ${fmt(Math.max(best,G.score))}</span>`;
+    const mine=Math.max(S.daily[G.def.date]||0,G.score),best=Math.max(G.worldBest||0,mine);   // wereldrecord van vandaag (zonder verbinding: je eigen beste) en daarachter jouw eigen beste
+    $('#goals').innerHTML=`<span class="goal">🏆 Beste vandaag: ${fmt(best)} · 👤 Jij: ${fmt(mine)}</span>`;
     $('#barfill').style.width=Math.round((G.def.moves-G.moves)/G.def.moves*100)+'%';
     $('#tHammer span').textContent=G.hammers;$('#tShuffle span').textContent=G.shuffles;
     $('#tHammer').classList.toggle('on',G.hammerOn);
@@ -1338,8 +1338,9 @@ function accountDialog(){
 const WORLDS=[
   {id:1,name:"De Zebra's",emoji:'🦓',pen:'De Zebra-weide',color:'#a8d86b',release:null},
   {id:2,name:"De Lama's", emoji:'🦙',pen:'De Lama-bergen',color:'#d9b8f2',release:'2026-10-23T18:00:00'},
+  {id:3,name:'De Pinguïns',emoji:'🐧',pen:'De Pinguïn-ijsvlakte',color:'#bfe6ff',release:'2026-10-30T18:00:00'},
 ];
-const COMING=[{name:'De Pinguïns',emoji:'🐧'},{name:"De Panda's",emoji:'🐼'},{name:"De Flamingo's",emoji:'🦩'}];   // teasers voor wereld 3 en verder
+const COMING=[{name:"De Panda's",emoji:'🐼'},{name:"De Flamingo's",emoji:'🦩'},{name:"De Koala's",emoji:'🐨'}];   // teasers voor wereld 3 en verder
 const WORLD1=WORLDS[0];
 const worldOf=L=>Math.min(WORLDS.length,Math.max(1,Math.ceil(L/WORLD_SIZE)));
 const worldOpen=w=>{const W=WORLDS[w-1];return !!W&&(PREVIEW||!W.release||new Date()>=new Date(W.release))};
@@ -1367,6 +1368,14 @@ const ZOO=[
   {id:'w2-70', e:'🐇',n:'Viscacha',  lvl:70, fact:'Een viscacha is een knaagdier, familie van de chinchilla, en woont tussen de rotsen in de bergen.'},
   {id:'w2-75', e:'🦌',n:'Vicuña',    lvl:75, fact:'De vicuña is de kleinste kameelachtige en heeft heel fijne wol.'},
   {id:'w2-80', e:'🐈',n:'Poema',     lvl:80, fact:'Een poema kan heel hoog springen en leeft in bergen, bossen en woestijnen, van Canada tot Zuid-Amerika.'},
+  {id:'w3-85', e:'🐧',n:'Keizerpinguïn', lvl:85, fact:'Bij de keizerpinguïn houdt de vader het ei op zijn voeten warm, wel twee maanden lang.'},
+  {id:'w3-90', e:'🦭',n:'Zeeluipaard', lvl:90, fact:'De zeeluipaard leeft op het zee-ijs rond Antarctica en eet onder meer krill, vis en pinguïns.'},
+  {id:'w3-95', e:'🐳',n:'Orka', lvl:95, fact:'Een orka blijft zijn hele leven bij zijn familiegroep.'},
+  {id:'w3-100', e:'🐋',n:'Bultrug', lvl:100, fact:'In de zomer eet de bultrug veel krill bij Antarctica, in de winter zwemt hij naar warmer water.'},
+  {id:'w3-105', e:'🦐',n:'Krill', lvl:105, fact:'Krill zijn kleine garnaaltjes, maar er zijn er zo veel dat ze het belangrijkste eten zijn voor veel dieren bij Antarctica.'},
+  {id:'w3-110', e:'🦑',n:'Reuzeninktvis', lvl:110, fact:'De reuzeninktvis heeft de grootste ogen van alle dieren: groter dan een voetbal.'},
+  {id:'w3-115', e:'🐟',n:'IJsvis', lvl:115, fact:'Het bloed van de ijsvis is niet rood, maar doorzichtig.'},
+  {id:'w3-120', e:'🐬',n:'Zandloperdolfijn', lvl:120, fact:'De zandloperdolfijn zwemt als enige kleine dolfijn in het ijskoude water ver in het zuiden.'},
 ];
 const wOf=a=>+a.id[1];
 const FANTASY=[
@@ -1390,6 +1399,14 @@ const HAB={
  'w2-70':{t:["🌿 Planteneter", "⛰️ Rotsen"],r:"Andes in Zuid-Amerika",n:"",c:["Peru", "Bolivia", "Chile", "Argentina"],k:{"Argentina": [-72, -40, -62, -22], "Chile": [-72, -40, -67, -17]}},
  'w2-75':{t:["🌿 Planteneter", "⛰️ Hooggebergte"],r:"Hoge Andes",n:"",c:["Peru", "Bolivia", "Chile", "Argentina", "Ecuador"],k:{"Argentina": [-69, -30, -65, -22], "Chile": [-70, -30, -67, -17], "Ecuador": [-80, -3, -77, 0]}},
  'w2-80':{t:["🍖 Vleeseter", "🌎 Bijna overal"],r:"Noord-, Midden- en Zuid-Amerika",n:"",c:["Canada", "United States of America", "Mexico", "Guatemala", "Belize", "Honduras", "Nicaragua", "Costa Rica", "Panama", "Colombia", "Venezuela", "Ecuador", "Peru", "Brazil", "Bolivia", "Paraguay", "Uruguay", "Argentina", "Chile", "Guyana", "Suriname"],k:{"Canada": [-140, 48, -100, 62], "United States of America": [-125, 25, -100, 49]}},
+ 'w3-85':{t:["🐟 Eet vis en krill", "🧊 Zee-ijs"],r:"Antarctica",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],ant:true},
+ 'w3-90':{t:["🍖 Vleeseter", "🧊 Zee-ijs"],r:"Zee-ijs rond Antarctica",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],ant:true},
+ 'w3-95':{t:["🍖 Vleeseter", "🌊 Alle oceanen"],r:"Alle oceanen, ook rond Antarctica",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],nomap:true},
+ 'w3-100':{t:["🦐 Eet krill", "🌊 Alle oceanen"],r:"Alle oceanen, in de zomer bij Antarctica",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],nomap:true},
+ 'w3-105':{t:["🌿 Eet algen", "🌊 Zuidelijke Oceaan"],r:"Zuidelijke Oceaan rond Antarctica",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],ant:true},
+ 'w3-110':{t:["🍖 Vleeseter", "🌑 Diepzee"],r:"Diep in de Zuidelijke Oceaan",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],nomap:true},
+ 'w3-115':{t:["🍖 Vleeseter", "🧊 IJskoud water"],r:"Zuidelijke Oceaan rond Antarctica",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],ant:true},
+ 'w3-120':{t:["🍖 Vleeseter", "🌊 Zuidelijke Oceaan"],r:"Zuidelijke Oceaan",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],nomap:true},
 };
 const ALL_ANIMALS=ZOO.concat(FANTASY);
 const zooTotal=()=>ZOO.filter(a=>worldOpen(wOf(a))).length+FANTASY.length;
@@ -1432,6 +1449,7 @@ const MAP_W=420,MAP_STEP=84,MAP_TOP=190,MAP_BOT=150;
 const mapH=()=>MAP_TOP+(WORLD_SIZE-1)*MAP_STEP+MAP_BOT;
 const THEMES={
   1:{amp:100,phase:.25,decor:['🌳','🦒','🌾','🐘','🌳','🦁','🌿','🦓','🌳','🦛','🪨','🐆','🌴','🦏','🌾','🦍']},
+  3:{amp:104,phase:2.1,decor:['🐧','🧊','❄️','🏔️','🐧','⛄','🧊','🐋','❄️','🐧','🌨️','🦭']},
   2:{amp:108,phase:1.3,decor:['🦙','🌼','🌷','🏔️','🦙','🌸','🪨','🦙','🌼','🌷','☁️','🦙'],bridges:[14,28]},
 };
 const mapX=(i,w)=>{const t=THEMES[w]||THEMES[1];return 210+t.amp*Math.sin((i-1)*.9+t.phase)};
@@ -1446,6 +1464,14 @@ function smoothPath(pts){
   return d;
 }
 function mapBackground(w,H){
+  if(w===3){
+    let h=`<defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eaf8ff"/><stop offset=".2" stop-color="#cfeaff"/><stop offset=".6" stop-color="#a3d2f2"/><stop offset="1" stop-color="#63aade"/></linearGradient>
+      <pattern id="cow" patternUnits="objectBoundingBox" width="1" height="1"><image href="icons/icon-192.png" width="58" height="58" preserveAspectRatio="xMidYMid slice"/></pattern></defs><rect width="${MAP_W}" height="${H}" fill="url(#mg)"/>`;
+    for(let y=320;y<H-100;y+=430)h+=`<polygon points="0,${y+160} 80,${y+10} 150,${y+110} 240,${y-40} 330,${y+120} 420,${y+20} 420,${y+400} 0,${y+400}" fill="#ffffff" opacity=".55"/><polygon points="0,${y+240} 120,${y+130} 220,${y+230} 320,${y+120} 420,${y+240} 420,${y+400} 0,${y+400}" fill="#e3f4ff" opacity=".6"/>`;
+    for(let y=360;y<H-100;y+=360)h+=`<ellipse cx="${(y*11)%280+70}" cy="${y}" rx="52" ry="14" fill="#fff" opacity=".85"/>`;
+    h+=`<path d="M0,${H-110} C100,${H-160} 200,${H-120} 300,${H-145} C360,${H-158} 400,${H-150} 420,${H-155} L420,${H} L0,${H} Z" fill="#f4fbff"/>`;
+    return h;
+  }
   if(w===2){
     let h=`<defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc4e1"/><stop offset=".12" stop-color="#bde7f2"/><stop offset=".55" stop-color="#cdb7f2"/><stop offset="1" stop-color="#8fd6b0"/></linearGradient>
       <pattern id="cow" patternUnits="objectBoundingBox" width="1" height="1"><image href="icons/icon-192.png" width="58" height="58" preserveAspectRatio="xMidYMid slice"/></pattern></defs><rect width="${MAP_W}" height="${H}" fill="url(#mg)"/>`;
@@ -1460,6 +1486,7 @@ function mapBackground(w,H){
 }
 function mapRoad(w,pts){
   const road=smoothPath(pts);
+  if(w===3)return `<path d="${road}" fill="none" stroke="#2b5d8a" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#e8f6ff" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#9fd0f0" stroke-width="30" stroke-dasharray="4 12" stroke-linecap="round" stroke-linejoin="round"/>`;
   if(w===2){
     let h=`<path d="${road}" fill="none" stroke="#8c5a2b" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#e3b27a" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="3" stroke-dasharray="2 12" stroke-linecap="round"/>`;
     ((THEMES[2]||{}).bridges||[]).forEach(i=>{   // hangbrug tussen level i en i+1
@@ -1561,7 +1588,8 @@ function rangeSvg(paths,habs,id){
     if(!k)full.add(n);else(part[n]=part[n]||[]).push(k);
   }));
   full.forEach(n=>delete part[n]);
-  let s='<svg id="'+(id||'rngSvg')+'" viewBox="0 0 420 200" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;border-radius:14px;background:#2a1458"><defs>',cp=0,over='';
+  const world=id==='zooWorldSvg',ant=habs.some(h=>h.ant);
+  let s='<svg id="'+(id||'rngSvg')+'" viewBox="0 0 420 '+(world?214:200)+'" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;border-radius:14px;background:#2a1458"><defs>',cp=0,over='';
   Object.keys(paths).forEach(n=>{
     (part[n]||[]).forEach(k=>{
       const x=geoX(k[0]),y=geoY(k[3]),w=geoX(k[2])-x,h=geoY(k[1])-y,i=cp++;
@@ -1572,6 +1600,7 @@ function rangeSvg(paths,habs,id){
   s+='</defs>';
   Object.keys(paths).forEach(n=>{if(!full.has(n))s+=`<path d="${paths[n].d}" fill="#c9cbd8" stroke="#9a9cb0" stroke-width=".4" stroke-linejoin="round"/>`});
   Object.keys(paths).forEach(n=>{if(full.has(n))s+=`<path class="on" d="${paths[n].d}" fill="#4cd37a" stroke="#fff" stroke-width=".7" stroke-linejoin="round"/>`});
+  if(world)s+=`<rect x="30" y="203" width="360" height="8" rx="4" fill="${ant?'#4cd37a':'#c9cbd8'}" stroke="${ant?'#fff':'#9a9cb0'}" stroke-width=".5"/><text x="210" y="210" font-size="5" text-anchor="middle" fill="${ant?'#073b1c':'#5a5a70'}">Antarctica</text>`;
   return s+over+'</svg>';
 }
 function zoomRange(){
@@ -1600,12 +1629,16 @@ function animalCard(a){
   const head=`<div class="rew"><div class="big">${a.e}</div><b>${esc(a.n)}</b><br><small>${esc(a.fact)}</small><div style="margin:8px 0 2px">${h.t.map(t=>`<span style="display:inline-block;background:#ffffff2e;border-radius:12px;padding:4px 10px;margin:2px;font-weight:800;font-size:12px">${esc(t)}</span>`).join('')}</div>`;
   const foot=`${h.n?`<small style="opacity:.8">${esc(h.n)}</small><br>`:''}<small>Verzameld bij level ${a.lvl}</small></div>`;
   const buttons=[['Mooi!','',()=>{}],['Bronnen','dim',()=>modal(`<h2>ℹ️ Bronnen</h2><p style="font-size:13px">De dierenfeiten zijn in eigen woorden geschreven op basis van Wikipedia (CC BY-SA) en gegevens van IUCN. De landenkaart komt van Natural Earth (publiek domein). Leefgebieden zijn een grove indicatie.</p>`,[['Sluiten','',()=>{}]])]];
+  if(h.ant||h.nomap){   // dieren van de zee: geen landenkaart, wel waar ze leven
+    modal(head+`<div style="margin-top:6px;border-radius:14px;padding:18px 10px;background:linear-gradient(#9fd8ff,#2a7fc4);text-align:center"><div style="font-size:42px">${h.ant?'🧊':'🌊'}</div><div style="font-weight:800;font-size:15px;margin-top:2px">${esc(h.r)}</div></div>`+foot,buttons);
+    return;
+  }
   modal(head+`<div id="rngBox" style="margin-top:6px;min-height:90px;font-size:12px">Kaart laden…</div>`+foot,buttons);
   loadWorld().then(p=>{const b=document.getElementById('rngBox');if(!b)return;b.innerHTML=rangeSvg(p,[h]);zoomRange()}).catch(()=>{const b=document.getElementById('rngBox');if(b)b.textContent=''});
 }
 
-const CONT_NL={'Africa':'Afrika','Asia':'Azië','Europe':'Europa','North America':'Noord-Amerika','South America':'Zuid-Amerika','Oceania':'Oceanië'};
-const CONT_E={'Africa':'🌍','Asia':'🌏','Europe':'🌍','North America':'🌎','South America':'🌎','Oceania':'🌏'};
+const CONT_NL={'Africa':'Afrika','Asia':'Azië','Europe':'Europa','North America':'Noord-Amerika','South America':'Zuid-Amerika','Oceania':'Oceanië','Antarctica':'Antarctica'};
+const CONT_E={'Africa':'🌍','Asia':'🌏','Europe':'🌍','North America':'🌎','South America':'🌎','Oceania':'🌏','Antarctica':'🧊'};
 function zooWorldBox(){
   return `<div class="pen" id="pen-wereld" style="background:#2a1458;border-color:#7b4fd0;color:#fff"><h3>🌍 Mijn wereldkaart</h3><div id="zooWorldMap" style="min-height:90px;font-size:12px;text-align:center">Kaart laden…</div><div id="zooConts" style="margin-top:6px;text-align:center"></div></div>`;
 }
@@ -1617,8 +1650,9 @@ function fillZooWorld(){
     const b=document.getElementById('zooWorldMap');if(!b)return;
     b.innerHTML=rangeSvg(p,have.map(a=>HAB[a.id]),'zooWorldSvg');
     const found=new Set(green.map(n=>p[n]&&p[n].c).filter(Boolean));
+    if(have.some(a=>HAB[a.id].ant))found.add('Antarctica');
     const cs=document.getElementById('zooConts');
-    cs.innerHTML=`<div style="font-weight:800;font-size:13px;margin-bottom:4px">Werelddelen ontdekt: ${found.size} / ${Object.keys(CONT_NL).length}</div>`+Object.keys(CONT_NL).map(c=>`<span style="display:inline-block;border-radius:12px;padding:4px 10px;margin:2px;font-weight:800;font-size:12px;background:${found.has(c)?'#4cd37a':'#ffffff26'};color:${found.has(c)?'#073b1c':'#ffffffaa'}">${found.has(c)?CONT_E[c]:'🔒'} ${CONT_NL[c]}</span>`).join('')+(found.size<6?'<div style="font-size:11px;opacity:.8;margin-top:4px">Verzamel meer dieren om nieuwe werelddelen te ontdekken!</div>':'');
+    cs.innerHTML=`<div style="font-weight:800;font-size:13px;margin-bottom:4px">Werelddelen ontdekt: ${found.size} / ${Object.keys(CONT_NL).length}</div>`+Object.keys(CONT_NL).map(c=>`<span style="display:inline-block;border-radius:12px;padding:4px 10px;margin:2px;font-weight:800;font-size:12px;background:${found.has(c)?'#4cd37a':'#ffffff26'};color:${found.has(c)?'#073b1c':'#ffffffaa'}">${found.has(c)?CONT_E[c]:'🔒'} ${CONT_NL[c]}</span>`).join('')+(found.size<Object.keys(CONT_NL).length?'<div style="font-size:11px;opacity:.8;margin-top:4px">Verzamel meer dieren om nieuwe werelddelen te ontdekken!</div>':'');
   }).catch(()=>{box.textContent=''});
 }
 /* --- dierentuin --- */
