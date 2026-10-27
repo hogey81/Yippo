@@ -901,7 +901,7 @@ async function authReq(method,path,body,token){
     throw e;
   }finally{clearTimeout(t)}
 }
-const authCall=(path,body)=>authReq('POST',path,body);
+const authCall=(path,body)=>LOCAL_TEST?Promise.reject(new Error('offline')):authReq('POST',path,body);
 let authP=null;
 async function refreshOrSignup(){
   if(S.auth&&S.auth.refresh){
@@ -916,7 +916,9 @@ function getToken(){
   if(!authP)authP=refreshOrSignup().finally(()=>{authP=null});
   return authP;
 }
+const LOCAL_TEST=/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);   // lokale tests praten niet met de echte database
 async function rpc(fn,args,tokenOverride){
+  if(LOCAL_TEST)throw new Error('offline');
   const token=tokenOverride||await getToken();
   const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),8000);
   try{
