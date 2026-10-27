@@ -820,7 +820,7 @@ function win(){
   const last=L>=MAX_LEVEL;
   const az=BETA?ZOO.find(a=>a.lvl===L):null,newA=az?awardAnimal(az.id):null;
   setTimeout(()=>modal(`<h2>🎉 Level gehaald!</h2><div class="stars">${'⭐'.repeat(st)}${'☆'.repeat(3-st)}</div>
-    <p>Score: <b>${fmt(G.score)}</b>${bonus?`<br><small>(inclusief ${fmt(bonus)} bonus voor overgebleven zetten)</small>`:''}</p>${newA?animalBlock(newA):''}${BETA&&L%WORLD_SIZE===0?worldDoneBlock(L/WORLD_SIZE):''}`,
+    <p>Score: <b>${fmt(G.score)}</b>${bonus?`<br><small>(inclusief ${fmt(bonus)} bonus voor overgebleven zetten)</small>`:''}</p>${newA?animalBlock(newA):''}${BETA&&L%WORLD_SIZE===0?worldDoneBlock(L/WORLD_SIZE):''}${isGuest()&&(L===10||L%20===0)?'<p style="background:#ffffff1f;border-radius:12px;padding:8px 10px;font-size:14px">💾 Je voortgang staat nu alleen op dit toestel. Bewaar hem met je e-mailadres, dan raak je hem nooit meer kwijt.</p>':''}`,
     [...(newA?[['🏡 Naar de dierentuin','alt',()=>openZoo()]]:[]),
      last?['🏆 Naar de kaart','',toLevels]:['Volgend level ▶','',()=>startLevel(L+1)],
      ...(isGuest()&&(L===5||L%10===0)?[['💾 Bewaar je voortgang','alt',()=>emailEntry(false)]]:[]),

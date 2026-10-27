@@ -2,6 +2,7 @@
    Rijen: [nederlands, engels, spaans]. "{}" is een invulplek (getal, naam, ...). */
 (function(){
 const ROWS=[
+["Je voortgang staat nu alleen op dit toestel. Bewaar hem met je e-mailadres, dan raak je hem nooit meer kwijt.","Your progress is only stored on this device right now. Save it with your email address and you will never lose it.","Tu progreso solo está guardado en este dispositivo. Guárdalo con tu correo electrónico y nunca lo perderás."],
 ["Record {}","Record {}","Récord {}"],
 ["Jij {}","You {}","Tú {}"],
 ["{} dag","{} day","{} día"],
