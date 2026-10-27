@@ -320,7 +320,7 @@ function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Ma
 function dateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 const today=()=>dateStr(new Date());
 const yesterday=()=>dateStr(new Date(Date.now()-864e5));
-const APP_VERSION='2026-10-27 i';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
+const APP_VERSION='2026-10-27 j';   // zichtbaar onderaan het taalmenu: zo zie je welke versie live staat
 let LANG='nl';
 const LOCALES={nl:'nl-NL',en:'en-US',es:'es-ES'};
 const fmt=n=>n.toLocaleString(LOCALES[LANG]);
@@ -1071,8 +1071,8 @@ function mergeProgress(c){
   if(!c||typeof c!=='object')return;
   const num=v=>typeof v==='number'&&isFinite(v)&&v>=0;
   if(num(c.unlocked)&&c.unlocked>S.unlocked)S.unlocked=Math.min(MAX_LEVEL,Math.floor(c.unlocked));
-  for(const k in (c.stars||{})){const v=c.stars[k];if(/^\d{1,2}$/.test(k)&&num(v)&&v<=3&&v>(S.stars[k]||0))S.stars[k]=v}
-  for(const k in (c.best||{})){const v=c.best[k];if(/^\d{1,2}$/.test(k)&&num(v)&&v>(S.best[k]||0))S.best[k]=v}
+  for(const k in (c.stars||{})){const v=c.stars[k];if(/^\d{1,5}$/.test(k)&&num(v)&&v<=3&&v>(S.stars[k]||0))S.stars[k]=v}
+  for(const k in (c.best||{})){const v=c.best[k];if(/^\d{1,5}$/.test(k)&&num(v)&&v>(S.best[k]||0))S.best[k]=v}
   for(const k in (c.daily||{})){const v=c.daily[k];if(/^\d{4}-\d\d-\d\d$/.test(k)&&num(v)&&v>(S.daily[k]||0))S.daily[k]=v}
   const cs=c.streak;
   if(cs&&typeof cs.last==='string'&&num(cs.count)&&(cs.last>S.streak.last||(cs.last===S.streak.last&&cs.count>S.streak.count)))S.streak={count:cs.count,last:cs.last};
