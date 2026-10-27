@@ -2,6 +2,10 @@
    Rijen: [nederlands, engels, spaans]. "{}" is een invulplek (getal, naam, ...). */
 (function(){
 const ROWS=[
+["Record {}","Record {}","Récord {}"],
+["Jij {}","You {}","Tú {}"],
+["{} dag","{} day","{} día"],
+["{} dagen","{} days","{} días"],
 ["Record: {} · 👤 Jij: {}","Record: {} · 👤 You: {}","Récord: {} · 👤 Tú: {}"],
 ["De Pinguïn-ijsvlakte","Penguin Ice Plain","Llanura helada de los pingüinos"],
 ["De Koala's","The Koalas","Los Koalas"],
