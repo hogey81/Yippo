@@ -165,9 +165,9 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 .m2play{background:#ffd23f;color:#5b3a00;box-shadow:0 5px 0 #b88a00}
 .m2daily{background:#c77dff;color:#2b0057;box-shadow:0 5px 0 #7b2cbf}
 .m2btn .t{display:block;font-weight:900;font-size:21px}
-.m2daily .s{display:flex;flex-wrap:wrap;gap:8px 10px;margin-top:8px}
-.chip{display:inline-block;border-radius:99px;padding:3px 10px;font-size:13px;font-weight:800;box-shadow:0 2px 0 rgba(43,0,87,.25)}
-.chip.rec{background:#ffd23f;color:#5a3a00}.chip.me{background:#fff;color:#4b1d8f}.chip.fire{background:#ff7a3d;color:#fff}
+.m2daily .s{display:flex;flex-wrap:wrap;gap:10px 12px;margin-top:8px}
+.dchip{display:inline-block;border-radius:99px;padding:3px 10px;font-size:13px;font-weight:800;letter-spacing:0;transform:none;box-shadow:0 2px 0 rgba(43,0,87,.25)}
+.dchip.rec{background:#ffd23f;color:#5a3a00}.dchip.me{background:#fff;color:#4b1d8f}.dchip.fire{background:#ff7a3d;color:#fff}
 .m2btn .s{display:block;font-weight:700;font-size:13px;margin-top:2px}
 .m2btn .side{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:32px}
 .m2zoo{width:min(380px,100%);border-radius:22px;overflow:hidden;border:4px solid #fff;box-shadow:0 6px 0 #3d7a1e;background:linear-gradient(#a8d86b,#6fb23e);color:#fff;position:relative;padding:0;text-align:left}
@@ -1704,7 +1704,7 @@ function renderMenu2(){
   $('#m2PlaySub').textContent=`Level ${cur} · ${CW.emoji} ${CW.name}`;
   const best=S.daily[today()];
   const wb=menuWorld.day===today()?menuWorld.score:undefined,top=Math.max(wb||0,best||0);   // dagrecord van iedereen (zonder verbinding: je eigen beste)
-  const chip=(c,t)=>`<span class="chip ${c}">${t}</span>`,st=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count;
+  const chip=(c,t)=>`<span class="dchip ${c}">${t}</span>`,st=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count;
   $('#m2DailySub').innerHTML=(best!==undefined||wb!==undefined?chip('rec',`🏆 Record ${fmt(top)}`)+chip('me',`👤 Jij ${fmt(best||0)}`):chip('me','✨ Nieuwe puzzel vandaag'))+(st?chip('fire',`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}`):'');
   if(S.auth&&menuWorld.day!==today()&&!menuWorld.busy){   // alleen met bestaand account: anders zou elk bezoek een nieuw gastaccount aanmaken
   menuWorld.busy=true;rpc('yippo_global',{p_day:today(),p_limit:1}).then(r=>{if(Array.isArray(r)&&r[0]&&typeof r[0].score==='number'){menuWorld.day=today();menuWorld.score=r[0].score;renderMenu2()}}).catch(()=>{}).then(()=>{menuWorld.busy=false})}
