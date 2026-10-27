@@ -398,7 +398,7 @@ function levelDef(L){
   const r=mulberry32(L*7919+13);
   const hard=Math.max(0,L-2);                 // level 1-2 zijn de uitleg-levels, daarna wordt het steeds pittiger
   const types=L<=2?5:6;
-  const wf=Math.max(0,(L-41)/WORLD_SIZE);   // 0 in wereld 1, loopt in wereld 2 op van 0 naar 1
+  const wf=Math.min(1,Math.max(0,(L-41)/WORLD_SIZE));   // 0 in wereld 1, loopt in wereld 2 op van 0 naar 1 en blijft daarna op 1
   let moves=L<=2?28-L:Math.max(20-Math.floor(wf*1.5),22-Math.floor(hard/4));
   const goals=[];let ice=0;
   const pickT=(ex=[])=>{let t;do{t=Math.floor(r()*types)}while(ex.includes(t));return t};
