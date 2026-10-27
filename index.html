@@ -697,8 +697,8 @@ function hud0(){
   $('#gMoves').textContent='Zetten '+G.moves;
   $('#gScore').textContent='⭐ '+fmt(G.score);
   if(G.mode==='daily'){
-    const mine=Math.max(S.daily[G.def.date]||0,G.score),best=Math.max(G.worldBest||0,mine);   // wereldrecord van vandaag (zonder verbinding: je eigen beste) en daarachter jouw eigen beste
-    $('#goals').innerHTML=`<span class="goal">🏆 Beste vandaag: ${fmt(best)} · 👤 Jij: ${fmt(mine)}</span>`;
+    const best=Math.max(G.worldBest||0,S.daily[G.def.date]||0);   // beste score van vandaag van iedereen (zonder verbinding: je eigen beste)
+    $('#goals').innerHTML=`<span class="goal">🏆 Beste vandaag: ${fmt(Math.max(best,G.score))}</span>`;
     $('#barfill').style.width=Math.round((G.def.moves-G.moves)/G.def.moves*100)+'%';
     $('#tHammer span').textContent=G.hammers;$('#tShuffle span').textContent=G.shuffles;
     $('#tHammer').classList.toggle('on',G.hammerOn);
@@ -1692,12 +1692,15 @@ $('#zooMap').onclick=()=>{sfx.ui();openMap()};
 /* --- nieuw beginscherm --- */
 function alignSide(){const p=$('#m2Play'),d=document.querySelector('.m2side');if(p&&d&&p.offsetTop)d.style.top=p.offsetTop+'px'}
 addEventListener('resize',alignSide);
+const menuWorld={day:null,score:0,busy:false};
 function renderMenu2(){
   updateMax();
   const cur=Math.min(S.unlocked,MAX_LEVEL),CW=WORLDS[worldOf(cur)-1];
   $('#m2PlaySub').textContent=`Level ${cur} · ${CW.emoji} ${CW.name}`;
   const best=S.daily[today()];
-  $('#m2DailySub').textContent=(best!==undefined?`Beste: ${fmt(best)}`:'Nieuwe puzzel vandaag')+((S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count?` · 🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}`:'');
+  const wb=menuWorld.day===today()?menuWorld.score:undefined,top=Math.max(wb||0,best||0);   // dagrecord van iedereen (zonder verbinding: je eigen beste)
+  $('#m2DailySub').textContent=(best!==undefined||wb!==undefined?`Record: ${fmt(top)} · 👤 Jij: ${fmt(best||0)}`:'Nieuwe puzzel vandaag')+((S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count?` · 🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}`:'');
+  if(menuWorld.day!==today()&&!menuWorld.busy){menuWorld.busy=true;rpc('yippo_global',{p_day:today(),p_limit:1}).then(r=>{if(Array.isArray(r)&&r[0]&&typeof r[0].score==='number'){menuWorld.day=today();menuWorld.score=r[0].score;renderMenu2()}}).catch(()=>{}).then(()=>{menuWorld.busy=false})}
   const earned=ZOO.filter(a=>hasAnimal(a.id)),next=nextAnimal();
   $('#m2Scene').innerHTML=earned.slice(-5).map(a=>`<span>${a.e}</span>`).join('')+(next?`<span class="sil">${next.e}</span>`:'')+(earned.length?'':'<span style="font-size:15px;font-weight:800;color:#fff">Verzamel je eerste dier bij level 5!</span>');
   const tot=zooTotal();

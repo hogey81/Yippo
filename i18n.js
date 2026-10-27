@@ -2,7 +2,7 @@
    Rijen: [nederlands, engels, spaans]. "{}" is een invulplek (getal, naam, ...). */
 (function(){
 const ROWS=[
-["Beste vandaag: {} · 👤 Jij: {}","Best today: {} · 👤 You: {}","Mejor de hoy: {} · 👤 Tú: {}"],
+["Record: {} · 👤 Jij: {}","Record: {} · 👤 You: {}","Récord: {} · 👤 Tú: {}"],
 ["De Pinguïn-ijsvlakte","Penguin Ice Plain","Llanura helada de los pingüinos"],
 ["De Koala's","The Koalas","Los Koalas"],
 ["Keizerpinguïn","Emperor penguin","Pingüino emperador"],
@@ -61,6 +61,7 @@ const ROWS=[
 ["gast","guest","invitado"],
 ["Nieuwe puzzel vandaag · 🔥 {} {}","New puzzle today · 🔥 {} {}","Puzzle nuevo hoy · 🔥 {} {}"],
 ["Beste: {} · 🔥 {} {}","Best: {} · 🔥 {} {}","Mejor: {} · 🔥 {} {}"],
+["Record: {} · 👤 Jij: {} · 🔥 {} {}","Record: {} · 👤 You: {} · 🔥 {} {}","Récord: {} · 👤 Tú: {} · 🔥 {} {}"],
 ["Dagelijks","Daily","Diario"],
 ["Dagelijkse puzzel","Daily puzzle","Puzzle diario"],
 ["Level {}","Level {}","Nivel {}"],
