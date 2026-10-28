@@ -593,6 +593,7 @@ async function clearSet(set,combo,spawns,nAct){
     tile.el.classList.add('pop');burst(r,c,tile.s?'#ffe066':ANIMALS[tile.t].c);
     grid[r][c]=null;const el=tile.el;setTimeout(()=>el.remove(),260);
   });
+  if(G.mult>1){pts*=G.mult;G.mult=1;comboText('SUPER COMBO x2!')}   // twee speciale dieren gecombineerd: dubbele punten
   G.score+=pts;
   const f=[...set][0];fxAt(Math.floor(f/COLS),f%COLS,'+'+pts,'#ffe066');
   sfx.match(combo);buzz(12);
@@ -771,6 +772,7 @@ async function doSwap(a,b){
     await sleep(220);G.busy=false;scheduleHint();return;
   }
   G.moves--;hud();
+  if(ta.s&&tb.s)G.mult=2;
   const initial=special?swapEffect(ta,tb):null;
   await afterMove(initial,[b,a]);
 }
