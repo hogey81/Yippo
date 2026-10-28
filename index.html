@@ -772,7 +772,7 @@ async function doSwap(a,b){
     await sleep(220);G.busy=false;scheduleHint();return;
   }
   G.moves--;hud();
-  if(ta.s&&tb.s)G.mult=2;
+  if((ta.s&&tb.s)||ta.s==='unicorn'||tb.s==='unicorn')G.mult=2;
   const initial=special?swapEffect(ta,tb):null;
   await afterMove(initial,[b,a]);
 }
