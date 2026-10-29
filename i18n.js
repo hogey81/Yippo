@@ -162,7 +162,7 @@ const ROWS=[
 ["Doe mee met mijn {}-league \"{}\"!","Join my {} league \"{}\"!","¡Únete a mi liga {} \"{}\"!"],
 ["Code: {}","Code: {}","Código: {}"],
 ["Even een vraag","Quick question","Una pregunta rápida"],
-["Voor je naam en e-mail moeten we weten hoe oud je bent.","To set your name and email we need to know how old you are.","Para tu nombre y correo necesitamos saber cuántos años tienes."],
+["Wat is je geboortejaar? Dan passen we het spel aan jouw leeftijd aan.","What is your birth year? Then we can adapt the game to your age.","¿Cuál es tu año de nacimiento? Así adaptamos el juego a tu edad."],
 ["We bewaren je geboortejaar niet.","We don't save your birth year.","No guardamos tu año de nacimiento."],
 ["Kies je geboortejaar","Choose your birth year","Elige tu año de nacimiento"],
 ["Doorgaan","Continue","Continuar"],

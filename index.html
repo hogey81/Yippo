@@ -1167,7 +1167,7 @@ function ageGate(next){
   if(S.age)return next(S.age);
   const y=new Date().getFullYear();let opts='';
   for(let i=y;i>=y-100;i--)opts+=`<option value="${i}">${i}</option>`;
-  modalRaw(`<h2>🎂 Even een vraag</h2><p>Voor je naam en e-mail moeten we weten hoe oud je bent.</p><p><small>We bewaren je geboortejaar niet.</small></p>
+  modalRaw(`<h2>🎂 Even een vraag</h2><p>Wat is je geboortejaar? Dan passen we het spel aan jouw leeftijd aan.</p><p><small>We bewaren je geboortejaar niet.</small></p>
     <select id="ageSel" class="inp"><option value="">Kies je geboortejaar</option>${opts}</select>
     <div class="row"><button class="btn" id="ageGo" disabled>Doorgaan</button><button class="btn dim" id="ageNo">Annuleren</button></div><p><small>Niemand ziet je antwoord.</small></p>`);
   $('#ageSel').onchange=()=>{$('#ageGo').disabled=!$('#ageSel').value};
