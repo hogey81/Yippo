@@ -78,6 +78,29 @@ begin
       where w is not null
     ), '[]'::jsonb)
   ) into r;
+
+  -- doelen en voortgang: echte spelers per maand en hoeveel er na 7 / 30 dagen nog spelen
+  with rp as (
+    select u.created_at, p.updated_at
+    from yippo_profiles p join auth.users u on u.id = p.user_id
+    where case when (p.data ->> 'unlocked') ~ '^[0-9]+$' then (p.data ->> 'unlocked')::int else 1 end >= 6
+       or exists (select 1 from yippo_scores s where s.player_id = p.user_id)
+       or exists (select 1 from yippo_members m where m.player_id = p.user_id)
+       or coalesce(u.email, '') <> ''
+  )
+  select r || jsonb_build_object(
+    'monthly', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'month', to_char(m, 'YYYY-MM'),
+        'new_real', (select count(*) from rp where date_trunc('month', rp.created_at) = m)
+      ) order by m)
+      from generate_series(date_trunc('month', now()) - interval '11 months', date_trunc('month', now()), interval '1 month') m
+    ), '[]'::jsonb),
+    'ret7_base',  (select count(*) from rp where created_at <= now() - interval '7 days'),
+    'ret7_kept',  (select count(*) from rp where created_at <= now() - interval '7 days'  and updated_at >= created_at + interval '7 days'),
+    'ret30_base', (select count(*) from rp where created_at <= now() - interval '30 days'),
+    'ret30_kept', (select count(*) from rp where created_at <= now() - interval '30 days' and updated_at >= created_at + interval '30 days')
+  ) into r;
   return r;
 end $$;
 

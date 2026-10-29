@@ -38,6 +38,10 @@ svg text{fill:var(--mut);font-size:11px}
 <section id="dash" hidden>
   <p class="note" id="stamp"></p>
   <div class="grid" id="cards"></div>
+  <h2>Doelen en voortgang</h2>
+  <div class="chart" id="goals"></div>
+  <h2>Nieuwe echte spelers per maand</h2>
+  <div class="chart" id="chartMonthly"></div>
   <h2>Spelers per dag (laatste 30 dagen)</h2>
   <div class="chart" id="chartPlayers"></div>
   <h2>Nieuwe accounts per dag</h2>
@@ -91,6 +95,22 @@ function bars(el,vals,labels,color,fmtv){
   labels.forEach(function(l,i){if(n<=12||i%5===0||i===n-1)s+='<text x="'+(pl+i*bw+bw/2)+'" y="'+(H-8)+'" text-anchor="middle">'+l+'</text>'});
   el.innerHTML=s+'</svg>';
 }
+// Doelen: pas startdatum, einddoel en tussendoelen hier aan
+var GOAL={start:'2026-10-26',end:'2027-10-26',target:1000000,miles:[['2027-01-26',1000],['2027-04-26',25000],['2027-07-26',150000],['2027-10-26',1000000]]};
+function renderGoals(d){
+  var n=d.real_total||0,pct=Math.min(100,n/GOAL.target*100),now=new Date(),s=new Date(GOAL.start),e=new Date(GOAL.end);
+  var left=Math.max(0,Math.ceil((e-now)/864e5)),done=Math.max(0,Math.round((now-s)/864e5));
+  var h='<p style="margin:0 0 6px"><b>'+fmt(n)+'</b> van '+fmt(GOAL.target)+' echte spelers ('+(pct<0.01?'<0,01':pct.toFixed(2).replace('.',','))+'%) · dag '+done+' · nog '+left+' dagen</p>';
+  h+='<div style="background:#00000022;border-radius:99px;height:14px;overflow:hidden"><div style="height:100%;width:'+Math.max(0.5,pct)+'%;background:var(--bar2)"></div></div>';
+  h+='<table style="margin-top:12px"><tr><th>Meetpunt</th><th>Doel</th><th>Nu</th><th>Stand</th></tr>';
+  GOAL.miles.forEach(function(m){var past=new Date(m[0])<=now,ok=n>=m[1];h+='<tr><td>'+new Date(m[0]).toLocaleDateString('nl-NL')+'</td><td>'+fmt(m[1])+'</td><td>'+fmt(n)+'</td><td>'+(ok?'✅ gehaald':past?'❌ gemist':'⏳ onderweg')+'</td></tr>'});
+  h+='</table>';
+  function r(k,b,l){var base=d[b]||0,kept=d[k]||0;return '<tr><td>'+l+'</td><td>'+fmt(base)+'</td><td>'+(base?Math.round(kept/base*100)+'%':'–')+'</td></tr>'}
+  h+='<table style="margin-top:12px"><tr><th>Terugkeer van echte spelers</th><th>Aantal</th><th>Nog actief</th></tr>'+r('ret7_kept','ret7_base','Na 7 dagen (accounts ouder dan 7 dagen)')+r('ret30_kept','ret30_base','Na 30 dagen (accounts ouder dan 30 dagen)')+'</table>';
+  h+='<p class="note">Meetpunten zijn voorstellen: pas ze bovenaan in beheer.html aan (GOAL). "Echte spelers" = voorbij level 5, een dagscore, een league of een e-mailadres; testaccounts uit oktober tellen nog mee. Downloads in de Play Store staan in Google Play Console.</p>';
+  $('goals').innerHTML=h;
+  var m=d.monthly||[];bars($('chartMonthly'),m.map(function(x){return x.new_real}),m.map(function(x){return x.month.slice(5)+'/'+x.month.slice(2,4)}),'var(--bar2)');
+}
 function render(d){
   $('stamp').textContent='Bijgewerkt: '+new Date(d.generated).toLocaleString('nl-NL');
   $('cards').innerHTML=
@@ -100,6 +120,7 @@ function render(d){
     card(d.profiles,'accounts met voortgang')+card(d.players_with_score,'spelers met een dagelijkse score')+card(d.accounts_total,'accounts in totaal')+
     card(d.accounts_guest,'gastaccounts')+card(d.accounts_email,'accounts met e-mail')+card(d.adults,'volwassenen')+card(d.children,'kinderen')+
     card(d.leagues,'leagues')+card(d.league_members,'league-leden')+card(d.scores_total,'dagscores in totaal');
+  renderGoals(d);
   var days=d.daily||[],lab=days.map(function(x){return x.day.slice(8,10)+'/'+x.day.slice(5,7)});
   bars($('chartPlayers'),days.map(function(x){return x.players}),lab,'var(--bar)');
   bars($('chartNew'),days.map(function(x){return x.new_accounts}),lab,'var(--bar2)');
