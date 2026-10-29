@@ -807,19 +807,23 @@ async function doShuffle(auto){
 }
 
 /* ============ end of turn ============ */
-async function endCheck(){
-  if(G.mode==='level'&&goalsMet()){
-    // level gehaald: speciale dieren die nog op het bord staan gaan alsnog af (met punten en eventuele nieuwe combinaties)
-    for(let i=0;i<6;i++){
-      const sp=new Set();
-      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c]&&grid[r][c].s)sp.add(r*COLS+c);
-      if(!sp.size)break;
-      clearHint();await sleep(350);
-      await resolve(sp,[]);
-    }
-    return win();
+// speciale dieren die nog op het bord staan gaan alsnog af (met punten en eventuele nieuwe combinaties)
+async function fireSpecials(){
+  for(let i=0;i<6;i++){
+    const sp=new Set();
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c]&&grid[r][c].s)sp.add(r*COLS+c);
+    if(!sp.size)break;
+    clearHint();await sleep(350);
+    await resolve(sp,[]);
   }
-  if(G.moves<=0){return G.mode==='daily'?finishDaily():lose()}
+}
+async function endCheck(){
+  if(G.mode==='level'&&goalsMet()){await fireSpecials();return win()}
+  if(G.moves<=0){
+    await fireSpecials();   // geen zetten meer: de speciale dieren op het bord gaan nog af, dat kan het level alsnog halen
+    if(G.mode==='level'&&goalsMet())return win();
+    return G.mode==='daily'?finishDaily():lose();
+  }
   if(!hasMove()){toast('Geen zetten meer, schudden!');await sleep(700);await doShuffle(true)}
 }
 function stars(){const f=G.moves/G.def.moves;return f>=.3?3:f>=.12?2:1}
