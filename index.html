@@ -590,6 +590,8 @@ function comboText(t){const e=$('#combo');e.textContent=t;e.classList.remove('go
 /* ============ clearing / gravity ============ */
 async function clearSet(set,combo,spawns,nAct){
   let pts=0;
+  // ook bij twee gecombineerde speciale dieren (die zijn al 'gebruikt', dus niet meegeteld) klinkt de boem
+  if(!nAct)[...set].forEach(k=>{const t=grid[Math.floor(k/COLS)][k%COLS];if(t&&t.s&&t.used)nAct++});
   set.forEach(k=>{
     const r=Math.floor(k/COLS),c=k%COLS,tile=grid[r][c];if(!tile)return;
     pts+=tile.s?30*combo:10*combo;
