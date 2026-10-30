@@ -165,7 +165,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 .m2play{background:#ffd23f;color:#5b3a00;box-shadow:0 5px 0 #b88a00}
 .m2daily{background:#c77dff;color:#2b0057;box-shadow:0 5px 0 #7b2cbf}
 .m2btn .t{display:block;font-weight:900;font-size:21px}
-.m2daily .s{margin-top:16px}
+.m2daily .s{margin-top:16px;white-space:nowrap}
 .dchip{display:inline-block;margin:0 8px 8px 0;border-radius:99px;padding:3px 8px;font-size:14px;font-weight:800;letter-spacing:0;transform:none;box-shadow:0 2px 0 rgba(43,0,87,.25)}
 .dchip.rec{background:#ffd23f;color:#5a3a00}.dchip.me{background:#fff;color:#4b1d8f}.dchip.fire{background:#ff7a3d;color:#fff}
 .m2btn .s{display:block;font-weight:700;font-size:13px;margin-top:2px}
@@ -1718,6 +1718,7 @@ const menuWorld={day:null,score:0,busy:false};
 function fitMenu2(){
   const m=$('#menu2');if(!m||!m.classList.contains('on'))return;
   const kids=[...m.children].filter(e=>!e.classList.contains('m2side')&&!e.classList.contains('m2desk'));
+  const ds=$('#m2DailySub');if(ds&&ds.clientWidth>0)fitRow(ds,'.dchip');   // de drie labels op één regel
   let z=1;const set=()=>kids.forEach(e=>{e.style.zoom=z<1?z:''});
   set();
   while(m.scrollHeight>m.clientHeight+1&&z>.5){z=Math.round((z-.03)*100)/100;set()}
