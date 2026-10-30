@@ -1,0 +1,64 @@
+# Bouwt de Play Store-versie (een ondertekende .aab) en zet hem op de release "android-release".
+# Nodig: twee geheimen in de repo (Settings > Secrets and variables > Actions):
+# ANDROID_UPLOAD_KEYSTORE_B64 (de uploadsleutel als base64) en ANDROID_UPLOAD_PASSWORD.
+name: Android Play Store build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Controleer de geheimen
+        env:
+          KEY: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_B64 }}
+          PASS: ${{ secrets.ANDROID_UPLOAD_PASSWORD }}
+        run: |
+          if [ -z "$KEY" ] || [ -z "$PASS" ]; then
+            echo "::error::De geheimen ANDROID_UPLOAD_KEYSTORE_B64 en ANDROID_UPLOAD_PASSWORD ontbreken (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Installeren en synchroniseren
+        working-directory: app
+        run: |
+          npm ci
+          npx cap sync android
+      - name: Uploadsleutel naar een tijdelijk bestand schrijven
+        env:
+          KEY: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_B64 }}
+        run: echo "$KEY" | tr -d ' \n\r' | base64 -d > "$RUNNER_TEMP/upload.p12"
+      - name: Bouwen
+        working-directory: app/android
+        env:
+          ANDROID_UPLOAD_KEYSTORE: ${{ runner.temp }}/upload.p12
+          ANDROID_UPLOAD_PASSWORD: ${{ secrets.ANDROID_UPLOAD_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}0
+          VERSION_NAME: 1.0.${{ github.run_number }}
+        run: ./gradlew bundleRelease --no-daemon
+      - name: Handtekening controleren
+        run: |
+          rm -f "$RUNNER_TEMP/upload.p12"
+          cp app/android/app/build/outputs/bundle/release/app-release.aab Yippo.aab
+          keytool -printcert -jarfile Yippo.aab | grep -E "Owner|SHA256:" | head -3
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-release
+          name: Android Play Store-versie
+          prerelease: true
+          overwrite_files: true
+          body: |
+            Play Store-versie 1.0.${{ github.run_number }} (versiecode ${{ github.run_number }}0), gebouwd van ${{ github.sha }}.
+            Upload Yippo.aab in Google Play Console bij Testen > Besloten test > Release maken.
+          files: Yippo.aab

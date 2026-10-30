@@ -1,19 +1,19 @@
-name: Android-app bouwen
+# Bouwt de Android-testapp (app/) en zet hem op de release "android-test",
+# zodat je hem direct vanaf GitHub op je telefoon kunt downloaden en installeren.
+name: Android testapp
 
-# Handmatig starten: GitHub > Actions > "Android-app bouwen" > Run workflow
-# Zonder geheimen: bouwt een debug-APK om op je eigen telefoon te testen.
-# Met de vier ANDROID_*-geheimen: bouwt ook een ondertekende AAB voor Google Play.
 on:
+  push:
+    branches: [main]
+    paths: ["app/**", ".github/workflows/android.yml"]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      HAS_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
-    defaults:
-      run:
-        working-directory: app
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,31 +23,23 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - run: npm ci
-      - run: npx cap sync android
-      - name: Debug-APK bouwen
-        working-directory: app/android
-        env:
-          VERSION_CODE: ${{ github.run_number }}
-        run: ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
-        with:
-          name: yippo-debug-apk
-          path: app/android/app/build/outputs/apk/debug/app-debug.apk
-      - name: Ondertekende AAB bouwen (alleen met geheimen)
-        if: ${{ env.HAS_KEY == 'true' }}
-        working-directory: app/android
-        env:
-          VERSION_CODE: ${{ github.run_number }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      - name: Installeren en synchroniseren
+        working-directory: app
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/upload.jks"
-          export ANDROID_KEYSTORE_FILE="$RUNNER_TEMP/upload.jks"
-          ./gradlew bundleRelease
-      - uses: actions/upload-artifact@v4
-        if: ${{ env.HAS_KEY == 'true' }}
+          npm ci
+          npx cap sync android
+      - name: Bouwen
+        working-directory: app/android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Bestand een naam geven
+        run: cp app/android/app/build/outputs/apk/debug/app-debug.apk Yippo-test.apk
+      - uses: softprops/action-gh-release@v2
         with:
-          name: yippo-release-aab
-          path: app/android/app/build/outputs/bundle/release/app-release.aab
+          tag_name: android-test
+          name: Android testapp
+          prerelease: true
+          overwrite_files: true
+          body: |
+            Testversie van de Yippo-app voor Android, gebouwd van ${{ github.sha }}.
+            Download Yippo-test.apk op je telefoon en open het bestand om te installeren.
+          files: Yippo-test.apk

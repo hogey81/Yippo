@@ -7,8 +7,8 @@ android {
         applicationId "com.yippogame.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode (System.getenv("VERSION_CODE") ?: "1").toInteger()
-        versionName "1.0"
+        versionCode((System.getenv("VERSION_CODE") ?: "1").toInteger())
+        versionName System.getenv("VERSION_NAME") ?: "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,21 +16,31 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Testversie: vaste (openbare) testsleutel, zodat een nieuwe build over de oude heen installeert.
     signingConfigs {
-        // Uploadsleutel voor Google Play: komt uit GitHub-geheimen (zie ../README.md); zonder die geheimen wordt alleen een debug-app gebouwd
-        upload {
-            def ks = System.getenv("ANDROID_KEYSTORE_FILE")
-            if (ks) {
-                storeFile file(ks)
-                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
-                keyAlias System.getenv("ANDROID_KEY_ALIAS")
-                keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+        test {
+            storeFile file("test-signing.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
+        // Uploadsleutel voor Google Play: staat nooit in de repo, de release-taak schrijft hem uit de GitHub-geheimen.
+        if (System.getenv("ANDROID_UPLOAD_KEYSTORE")) {
+            upload {
+                storeFile file(System.getenv("ANDROID_UPLOAD_KEYSTORE"))
+                storeType "pkcs12"
+                storePassword System.getenv("ANDROID_UPLOAD_PASSWORD")
+                keyAlias "upload"
+                keyPassword System.getenv("ANDROID_UPLOAD_PASSWORD")
             }
         }
     }
     buildTypes {
+        debug {
+            signingConfig signingConfigs.test
+        }
         release {
-            if (System.getenv("ANDROID_KEYSTORE_FILE")) { signingConfig signingConfigs.upload }
+            if (System.getenv("ANDROID_UPLOAD_KEYSTORE")) signingConfig signingConfigs.upload
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
