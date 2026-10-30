@@ -61,8 +61,6 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 
 /* game */
 #game{gap:10px;justify-content:center;background:radial-gradient(ellipse at 50% 38%,#8a3fd1 0,#5a189a 45%,#2a0a4d 100%)}
-#game::before,#game::after{content:'🐾';position:absolute;font-size:46px;opacity:.07;pointer-events:none}
-#game::before{left:6%;top:8%;transform:rotate(-20deg)}#game::after{right:7%;bottom:7%;transform:rotate(18deg)}
 .top{display:flex;justify-content:space-between;align-items:center;width:calc(var(--cell)*7);gap:6px;flex-wrap:nowrap}
 .top .pill,.goal{white-space:nowrap}
 .top .pill{background:linear-gradient(#ffffff26,#ffffff0d),#2a0a4d99;border:1.5px solid #ffffff2e;box-shadow:0 3px 0 #0004}
@@ -74,14 +72,14 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 .bar{width:calc(var(--cell)*7);height:16px;border-radius:9px;background:#0006;overflow:hidden;box-shadow:inset 0 2px 4px #0006,0 1px 0 #ffffff22}
 .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd23f,#ff9f1c);border-radius:9px;transition:width .35s}
 #boardwrap{position:relative}
-#board{position:relative;width:calc(var(--cell)*7);height:calc(var(--cell)*8);background:linear-gradient(#2a0a4dcc,#1a0633cc);border-radius:20px;overflow:hidden;touch-action:none;box-shadow:0 0 0 3px #ffffff38,0 10px 30px #0008,inset 0 0 24px #0006}
+#board{position:relative;width:calc(var(--cell)*7);height:calc(var(--cell)*8);background:linear-gradient(#2a0a4dcc,#1a0633cc);border-radius:20px;overflow:hidden;touch-action:none;box-shadow:0 0 0 3px #ffffff38,0 6px 14px #0007}
 #board.shake{animation:shake .38s}
 @keyframes shake{20%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-3px,-2px)}80%{transform:translate(3px,2px)}}
 .cellbg{position:absolute;width:var(--cell);height:var(--cell);padding:2px}
 .cellbg::before{content:"";display:block;width:100%;height:100%;border-radius:12px;background:#ffffff0f}
 .iceov{position:absolute;width:var(--cell);height:var(--cell);padding:1px;z-index:5;pointer-events:none}
 .iceov::before{content:"";display:block;width:100%;height:100%;border-radius:13px;background:rgba(170,225,255,.5);border:2px solid #ffffffaa;box-shadow:inset 0 0 10px #fff9}
-.tile{position:absolute;left:0;top:0;width:var(--cell);height:var(--cell);padding:3px;transition:transform .22s ease-in;will-change:transform;z-index:2}
+.tile{position:absolute;left:0;top:0;width:var(--cell);height:var(--cell);padding:3px;transition:transform .16s ease-out;will-change:transform;z-index:2}
 .tile .t{width:100%;height:100%;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*.6);
   box-shadow:inset 0 -4px 0 #0003,0 2px 3px #0003;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;position:relative}
 .tile.sel .t{transform:scale(1.14);outline:3px solid #fff;filter:brightness(1.2)}
@@ -103,8 +101,8 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 #combo.go{animation:combo .9s ease-out}
 @keyframes combo{0%{opacity:0;transform:rotate(-6deg) scale(.3)}25%{opacity:1;transform:rotate(-6deg) scale(1.2)}70%{opacity:1}100%{opacity:0;transform:rotate(-6deg) translateY(-30px) scale(1)}}
 .tools{display:flex;gap:14px;margin-top:6px}
-.tools .btn{position:relative;width:64px;height:60px;padding:0;font-size:28px;border-radius:18px;line-height:1}
-.tools .btn span{position:absolute;right:5px;top:5px;min-width:24px;height:24px;border-radius:12px;background:#ff6b6b;color:#fff;font-size:14px;font-weight:900;line-height:24px;text-align:center;box-shadow:0 2px 0 #0005;border:2px solid #fff}
+.tools .btn{width:auto;min-width:72px;height:56px;padding:0 18px;font-size:26px;border-radius:18px;line-height:1;display:flex;align-items:center;justify-content:center;gap:6px}
+.tools .btn span{font-size:20px;font-weight:900}
 .tools .btn.dim{background:#ffffff26;color:#fff;box-shadow:0 4px 0 #0004}
 .tools .on{background:#ff6b6b;color:#fff;box-shadow:0 4px 0 #b02a2a}
 #toast{position:fixed;left:50%;top:14%;transform:translateX(-50%);background:#000b;padding:10px 18px;border-radius:14px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s;z-index:60;text-align:center}
@@ -606,7 +604,7 @@ async function clearSet(set,combo,spawns,nAct){
   sfx.match(combo);buzz(12);
   if(nAct){sfx.special();board.classList.remove('shake');void board.offsetWidth;board.classList.add('shake');buzz(60)}
   if(combo>=2)comboText(GAME_NAME.toUpperCase()+' x'+combo+'!');
-  await sleep(230);
+  await sleep(170);
   spawns.forEach(s=>{
     const t=mkTile(-1,s.s,s.dir);grid[s.r][s.c]=t;attach(t,s.r,s.c,true);
     G.specialsMade++;G.made[s.s]++;G.score+=50;sfx.born();
@@ -637,7 +635,7 @@ async function resolve(initial,swapCells){
     await clearSet(set,combo,groups.filter(g=>g.spawn).map(g=>g.spawn),nAct);
     swapCells=[];
     gravity();
-    await sleep(300);
+    await sleep(230);
   }
 }
 
@@ -773,11 +771,11 @@ async function doSwap(a,b){
   G.busy=true;clearHint();
   const ta=grid[a.r][a.c],tb=grid[b.r][b.c];
   swapG(a,b);place(ta,b.r,b.c);place(tb,a.r,a.c);sfx.swap();
-  await sleep(220);
+  await sleep(160);
   const special=ta.s||tb.s;
   if(!special&&!findGroups().length){
     swapG(a,b);place(ta,a.r,a.c);place(tb,b.r,b.c);sfx.bad();buzz(30);
-    await sleep(220);G.busy=false;scheduleHint();return;
+    await sleep(160);G.busy=false;scheduleHint();return;
   }
   G.moves--;hud();
   if((ta.s&&tb.s)||ta.s==='unicorn'||tb.s==='unicorn')G.mult=2;
@@ -836,14 +834,16 @@ async function endCheck(){
 }
 function stars(){const f=G.moves/G.def.moves;return f>=.3?3:f>=.12?2:1}
 // Delen: in de Android-app het deelvenster van Android (WhatsApp enz.), in de browser Web Share, anders kopiëren
-async function shareText(text){
+async function nativeShare(text){
+  const C=window.Capacitor;let why='';
   try{
     // de pagina komt van internet, dus de plugin niet uit een bundel maar via de brug van Capacitor aanspreken
-    const C=window.Capacitor,cap=C&&(C.Plugins&&C.Plugins.Share||(C.registerPlugin&&C.registerPlugin('Share')));
+    const cap=C&&(C.Plugins&&C.Plugins.Share||(C.registerPlugin&&C.registerPlugin('Share')));
     if(cap&&cap.share){await cap.share({text,dialogTitle:'Yippo'});return}
+    why='geen Share-plugin ('+(C?'Capacitor '+(C.getPlatform?C.getPlatform():'?'):'geen Capacitor')+')';
     if(navigator.share){await navigator.share({text});return}
-    await navigator.clipboard.writeText(text);toast('Gekopieerd! Plak het in je chat.');
-  }catch(e){if(e&&e.name==='AbortError')return;try{await navigator.clipboard.writeText(text);toast('Gekopieerd! Plak het in je chat.')}catch(_){}}
+  }catch(e){if(e&&(e.name==='AbortError'||/cancel/i.test(String(e.message))))return;why='fout: '+(e&&e.message||e)}
+  try{await navigator.clipboard.writeText(text);toast('Gekopieerd! Plak het in je chat.'+(why&&C?' ['+why+']':''))}catch(_){toast('Delen mislukt'+(why?' ['+why+']':''))}
 }
 function win(){
   G.over=true;sfx.win();buzz([60,40,60]);
@@ -997,7 +997,7 @@ function askName(cb){
 const inviteUrl=code=>location.origin+location.pathname+'?league='+code;
 async function shareText(text){
   text=I18N.trLines(text);
-  await shareText(text);
+  await nativeShare(text);
 }
 function inviteLeague(code,name){
   shareText(`Doe mee met mijn ${GAME_NAME}-league "${name}"! 🐾\nCode: ${code}\n${inviteUrl(code)}`);
