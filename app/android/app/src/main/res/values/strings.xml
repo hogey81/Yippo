@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Yippo</string>
+    <string name="title_activity_main">Yippo</string>
+    <string name="package_name">com.yippogame.app</string>
+    <string name="custom_url_scheme">com.yippogame.app</string>
+</resources>

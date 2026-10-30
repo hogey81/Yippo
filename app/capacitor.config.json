@@ -1,0 +1,15 @@
+{
+  "appId": "com.yippogame.app",
+  "appName": "Yippo",
+  "webDir": "www",
+  "backgroundColor": "#5a189a",
+  "server": {
+    "url": "https://www.yippogame.com/?app=1",
+    "cleartext": false,
+    "errorPath": "offline.html",
+    "allowNavigation": ["www.yippogame.com", "yippogame.com", "*.supabase.co"]
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
