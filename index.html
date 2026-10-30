@@ -1714,6 +1714,15 @@ $('#zooMap').onclick=()=>{sfx.ui();openMap()};
 function alignSide(){const p=$('#m2Play'),d=document.querySelector('.m2side');if(p&&d&&p.offsetTop)d.style.top=p.offsetTop+'px'}
 addEventListener('resize',alignSide);
 const menuWorld={day:null,score:0,busy:false};
+// Hele beginscherm op één scherm: past het niet (kleine telefoon of groot systeemlettertype), dan alles stapsgewijs verkleinen
+function fitMenu2(){
+  const m=$('#menu2');if(!m||!m.classList.contains('on'))return;
+  const kids=[...m.children].filter(e=>!e.classList.contains('m2side')&&!e.classList.contains('m2desk'));
+  let z=1;const set=()=>kids.forEach(e=>{e.style.zoom=z<1?z:''});
+  set();
+  while(m.scrollHeight>m.clientHeight+1&&z>.5){z=Math.round((z-.03)*100)/100;set()}
+}
+addEventListener('resize',()=>{fitMenu2()});
 function renderMenu2(){
   updateMax();
   const cur=Math.min(S.unlocked,MAX_LEVEL),CW=WORLDS[worldOf(cur)-1];
@@ -1735,6 +1744,7 @@ function renderMenu2(){
   $('#m2Board').style.display=on?'':'none';$('#m2League').style.display=on?'':'none';$('#m2Account').style.display=on?'':'none';
   $('#m2Login').style.display=isGuest()?'':'none';
   alignSide();setTimeout(alignSide,150);
+  fitMenu2();setTimeout(fitMenu2,300);setTimeout(fitMenu2,1500)
 }
 $('#m2Play').onclick=e=>{sfx.ui();if(e.target.id==='m2Map')openMap();else startLevel(Math.min(S.unlocked,MAX_LEVEL))};
 $('#m2Daily').onclick=()=>{sfx.ui();startGame(dailyDef(),'daily')};
