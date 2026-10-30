@@ -1743,7 +1743,7 @@ $('#zooMap').onclick=()=>{sfx.ui();openMap()};
 /* --- nieuw beginscherm --- */
 function alignSide(){const p=$('#m2Play'),d=document.querySelector('.m2side');if(p&&d&&p.offsetTop)d.style.top=p.offsetTop+'px'}
 addEventListener('resize',alignSide);
-const menuWorld={day:null,score:0,busy:false};
+const menuWorld={day:null,score:0,busy:false,t:0};
 // Hele beginscherm op één scherm: past het niet (kleine telefoon of groot systeemlettertype), dan alles stapsgewijs verkleinen
 function fitMenu2(){
   const m=$('#menu2');if(!m||!m.classList.contains('on'))return;
@@ -1762,7 +1762,8 @@ function renderMenu2(){
   const wb=menuWorld.day===today()?menuWorld.score:undefined,top=Math.max(wb||0,best||0);   // dagrecord van iedereen (zonder verbinding: je eigen beste)
   const chip=(c,t)=>`<span class="dchip ${c}">${t}</span>`,st=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count;
   $('#m2DailySub').innerHTML=(best!==undefined||wb!==undefined?chip('rec',`🏆 Record ${fmt(top)}`)+chip('me',`👤 Jij ${fmt(best||0)}`):chip('me','✨ Nieuwe puzzel vandaag'))+(st?chip('fire',`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}`):'');
-  if(S.auth&&menuWorld.day!==today()&&!menuWorld.busy){   // alleen met bestaand account: anders zou elk bezoek een nieuw gastaccount aanmaken
+  if(S.auth&&!menuWorld.busy&&Date.now()-(menuWorld.t||0)>8000){   // elke keer dat het menu verschijnt het actuele dagrecord ophalen (niet vaker dan om de 8 seconden)
+    menuWorld.t=Date.now();   // alleen met bestaand account: anders zou elk bezoek een nieuw gastaccount aanmaken
   menuWorld.busy=true;rpc('yippo_global',{p_day:today(),p_limit:1}).then(r=>{if(Array.isArray(r)&&r[0]&&typeof r[0].score==='number'){menuWorld.day=today();menuWorld.score=r[0].score;renderMenu2()}}).catch(()=>{}).then(()=>{menuWorld.busy=false})}
   const earned=ZOO.filter(a=>hasAnimal(a.id)),next=nextAnimal();
   $('#m2Scene').innerHTML=earned.slice(-5).map(a=>`<span>${a.e}</span>`).join('')+(next?`<span class="sil">${next.e}</span>`:'')+(earned.length?'':'<span style="font-size:15px;font-weight:800;color:#fff">Verzamel je eerste dier bij level 5!</span>');
