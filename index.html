@@ -1891,6 +1891,16 @@ function onBack(){
     default: return false;   // beginscherm
   }
 }
+// Android-app: de terugknop van de telefoon gaat via de app-plugin (de geschiedenis van een webpagina is daar niet betrouwbaar)
+try{
+  const C=window.Capacitor,A=C&&(C.Plugins&&C.Plugins.App||(C.registerPlugin&&C.registerPlugin('App')));
+  if(A&&A.addListener)A.addListener('backButton',()=>{
+    if(onBack())return;
+    if(exitArmed){exitArmed=false;clearTimeout(exitT);A.exitApp();return}
+    exitArmed=true;toast('Druk nogmaals op terug om af te sluiten');
+    exitT=setTimeout(()=>{exitArmed=false},2500);
+  });
+}catch(e){}
 try{history.replaceState({yippo:0},'');pushNav()}catch(e){}
 addEventListener('popstate',()=>{
   if(onBack()){pushNav();return}
