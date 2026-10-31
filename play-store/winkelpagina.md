@@ -1,28 +1,10 @@
-# Yippo: winkelpagina Google Play (concept)
+# Yippo: store listing Google Play (concept)
 
 Limieten van Google Play: naam max. 30 tekens, korte beschrijving max. 80, lange beschrijving max. 4000.
 
-## Nederlands (hoofdtaal)
-**Naam:** Yippo: dierenpuzzel
+**Default language: English (United States).** Add Dutch and Spanish as translations. All store assets (feature graphic, screenshots) are in English.
 
-**Korte beschrijving (80):**
-Schuif dieren, maak vette combo's en bouw je eigen dierentuin!
-
-**Lange beschrijving:**
-Yippo is een vrolijk puzzelspel voor het hele gezin. Wissel dieren om, maak rijen van drie of meer en verzamel dieren voor je eigen dierentuin.
-
-🦁 Speciale dieren: maak een leeuw, olifant, draak of eenhoorn en laat het bord ontploffen. Combineer twee speciale dieren voor een superknal met dubbele punten!
-🌍 Elke week een nieuwe wereld: reis van de zebra's in Afrika naar de lama's in de bergen en de pinguïns op het ijs. Op de kaart zie je waar elk dier leeft.
-🏡 Je eigen dierentuin: verdien dieren door levels te halen en leer er leuke weetjes over.
-📅 Dagelijkse puzzel: iedereen krijgt dezelfde puzzel. Kun jij het wereldrecord van vandaag verslaan?
-👨‍👩‍👧 Speel met vrienden en familie: maak een league en zie wie de beste is.
-🔥 Houd je reeks vast door elke dag te spelen.
-
-Veilig en gratis: geen advertenties, je kiest een dierennaam, en kinderen delen geen persoonlijke gegevens. Je voortgang bewaar je met een e-mailadres, dan raak je hem nooit kwijt.
-
-Beschikbaar in het Nederlands, Engels en Spaans.
-
-## English
+## English (default language of the store listing)
 **Name:** Yippo: Animal Puzzle
 
 **Short description (80):**
@@ -42,7 +24,27 @@ Safe and free: no ads, you pick an animal name, and children do not share person
 
 Available in Dutch, English and Spanish.
 
-## Español
+## Nederlands (vertaling)
+**Naam:** Yippo: dierenpuzzel
+
+**Korte beschrijving (80):**
+Schuif dieren, maak vette combo's en bouw je eigen dierentuin!
+
+**Lange beschrijving:**
+Yippo is een vrolijk puzzelspel voor het hele gezin. Wissel dieren om, maak rijen van drie of meer en verzamel dieren voor je eigen dierentuin.
+
+🦁 Speciale dieren: maak een leeuw, olifant, draak of eenhoorn en laat het bord ontploffen. Combineer twee speciale dieren voor een superknal met dubbele punten!
+🌍 Elke week een nieuwe wereld: reis van de zebra's in Afrika naar de lama's in de bergen en de pinguïns op het ijs. Op de kaart zie je waar elk dier leeft.
+🏡 Je eigen dierentuin: verdien dieren door levels te halen en leer er leuke weetjes over.
+📅 Dagelijkse puzzel: iedereen krijgt dezelfde puzzel. Kun jij het wereldrecord van vandaag verslaan?
+👨‍👩‍👧 Speel met vrienden en familie: maak een league en zie wie de beste is.
+🔥 Houd je reeks vast door elke dag te spelen.
+
+Veilig en gratis: geen advertenties, je kiest een dierennaam, en kinderen delen geen persoonlijke gegevens. Je voortgang bewaar je met een e-mailadres, dan raak je hem nooit kwijt.
+
+Beschikbaar in het Nederlands, Engels en Spaans.
+
+## Español (traducción)
 **Nombre:** Yippo: puzle de animales
 
 **Descripción corta (80):**
@@ -70,3 +72,11 @@ Disponible en neerlandés, inglés y español.
 - Icoon: icons/icon-512.png (512x512)
 - Feature graphic (1024x500) en screenshots (minimaal 2, telefoon): nog te maken
 - Let op: de tekst "geen advertenties" moet kloppen op het moment van indienen; verander dit zodra je beloonde advertenties toevoegt.
+
+## English release notes (for the closed test / first release)
+- First release of Yippo: match animals, build your zoo, new world every week.
+- Daily puzzle with a world record to beat.
+- Available in English, Dutch and Spanish.
+
+## Testers invitation (English, for WhatsApp / social)
+Hi! I made a free animal puzzle game called Yippo and I need testers on Android for 14 days. Join here: [TEST LINK]. You need a Google account. Thanks a lot!
