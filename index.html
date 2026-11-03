@@ -198,8 +198,10 @@ body.land #game .tools{grid-column:3;grid-row:1/4;flex-direction:column;align-se
 .sil{filter:grayscale(1) brightness(0) opacity(.3)}
 #zooScreen{justify-content:flex-start;gap:8px;overflow-y:auto}
 .zhead{display:flex;gap:8px;align-items:center;justify-content:center}
-.zchips{display:flex;gap:6px;justify-content:center}
-.zchip{background:#ffffff33;border-radius:14px;padding:6px 12px;font-size:20px}
+.zchips{flex:none;display:flex;gap:6px;justify-content:flex-start;width:100%;max-width:420px;overflow-x:auto;padding:2px 12px;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-x;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 30px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 30px),transparent)}
+.zchips::-webkit-scrollbar{display:none}
+.zchips>:first-child{margin-left:auto}.zchips>:last-child{margin-right:30px}
+.zchip{flex:0 0 auto;scroll-snap-align:center;background:#ffffff33;border-radius:14px;padding:6px 12px;font-size:20px}
 .zchip.on{background:#ffd23f}.zchip.lock{opacity:.4}
 .pen{width:min(400px,100%);border-radius:22px;padding:34px 10px 10px;position:relative;border:5px dashed #7a5230}
 .pen h3{position:absolute;left:10px;top:6px;margin:0;font-size:14px;background:#ffffffd0;color:#2b0057;border-radius:10px;padding:2px 9px}
@@ -1756,6 +1758,7 @@ function openZoo(){
   pens+=`<div class="pen" style="background:#d9b8f2;border-color:#8a5fb8"><h3>✨ Fantasiedieren · ${FANTASY.filter(a=>hasAnimal(a.id)).length}/${FANTASY.length}</h3><div class="grid">${FANTASY.map(a=>cell(a,a.how)).join('')}</div></div>`;
   $('#zooPens').innerHTML=pens;if(BETA)fillZooWorld();
   $('#zooChips').innerHTML=WORLDS.map(W=>`<button class="zchip${worldOpen(W.id)?' on':' lock'}" data-w="${W.id}">${W.emoji}</button>`).join('')+COMING.map(c=>`<span class="zchip lock">${c.emoji}</span>`).join('');
+  {const zc=$('#zooChips'),on=[...zc.querySelectorAll('.zchip.on')].pop();if(on)setTimeout(()=>{zc.scrollLeft=Math.max(0,on.offsetLeft+on.offsetWidth-zc.clientWidth+70)},0)}   // de laatst geopende wereld in beeld; rechts zijn er meer om naar te vegen
   $('#zooChips').querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{const e=document.getElementById('pen-'+b.dataset.w);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})});
   $('#zooPens').querySelectorAll('.an').forEach(b=>b.onclick=()=>{
     const a=ALL_ANIMALS.find(x=>x.id===b.dataset.a);sfx.ui();
