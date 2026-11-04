@@ -38,7 +38,15 @@
 - [ ] Gefaseerd uitrollen en recensies en crashes volgen
 - [ ] Doelen volgen op /beheer (maandelijks)
 
-## Later
+## Later (na de lancering)
+- [ ] Pushmeldingen voor het dagrecord in leagues (zie supabase/push.md; vraagt nieuwe app-bouw; 1 tot 2 uur)
+- [ ] info@yippogame.com instellen (herinnering 25 jan 2027)
+- [ ] Beheeradres wijzigen naar een eigen adres
+- [ ] Game Stats van Google onderzoeken
+- [ ] Beloonde advertenties voor volwassenen (pas bij genoeg spelers)
+- [ ] Ontwikkelaarsnaam wijzigen (nu Hunting4Cards)
+
+## Overig later
 - [ ] Beloonde advertenties voor volwassenen (pas bij genoeg dagelijkse spelers)
 - [ ] Pushmeldingen als iemand het dagrecord verbetert
 - [ ] info@yippogame.com instellen (herinnering 25 jan 2027)
