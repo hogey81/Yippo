@@ -25,6 +25,10 @@
 
         </activity>
 
+        <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_stat_yippo" />
+        <meta-data android:name="com.google.firebase.messaging.default_notification_color" android:resource="@color/colorPrimary" />
+        <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="daily-record" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -39,4 +43,6 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 13+: toestemming voor meldingen (pas gevraagd als de speler meldingen aanzet) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

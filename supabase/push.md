@@ -1,5 +1,7 @@
 # Pushmeldingen (dagrecord verbeterd): opzet en checklist
 
+> De code voor app en site is klaar (staat uit via `PUSH_ENABLED`). Wat jij moet doen staat uitgeschreven in `push-stappen.md`. Teksten voor privacy en Data safety: `../play-store/push-privacy-en-datasafety.md`.
+
 Melding: wie in een league zit krijgt een bericht als een ander lid van die league het dagrecord van de league verbetert ("🏆 Nieuw dagrecord in <leaguenaam>"). Wie in geen league zit, krijgt niets.
 
 Wat al klaar staat in de code:

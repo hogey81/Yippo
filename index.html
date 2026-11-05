@@ -1153,7 +1153,7 @@ async function bootOnline(){
   try{
     const cloud=await rpc('yippo_load_progress');
     mergeProgress(cloud);
-    booted=true;save();syncUp();
+    booted=true;save();syncUp();pushResume();
     if($('#menu').classList.contains('on'))toMenu();
   }catch(e){/* offline of gastaccounts staan uit: het spel werkt gewoon lokaal door */}
 }
@@ -1360,8 +1360,46 @@ async function switchAccount(guestTok){
 }
 async function logout(){
   try{await syncUp()}catch(e){}
+  try{if(S.pushToken)await rpc('yippo_unregister_device',{p_token:S.pushToken})}catch(e){}
   try{localStorage.removeItem('dm_save');localStorage.removeItem('dm_best')}catch(e){}
   location.href=location.pathname;
+}
+
+/* --- pushmeldingen: "iemand in je league heeft het dagrecord verbeterd" ---
+   Alleen in de Android-app, alleen voor volwassen accounts die het zelf aanzetten, en uit tot Firebase en Supabase zijn ingericht (zie supabase/push-stappen.md). */
+const PUSH_ENABLED=false;   // op true zetten als alles is ingericht
+const pushPlugin=()=>{const C=window.Capacitor;if(!C||!C.isNativePlatform||!C.isNativePlatform())return null;return (C.Plugins&&C.Plugins.PushNotifications)||(C.registerPlugin&&C.registerPlugin('PushNotifications'))||null};
+const pushAvailable=()=>PUSH_ENABLED&&online()&&S.age==='adult'&&!!S.auth&&!!pushPlugin();
+let pushWired=false;
+function pushWire(P){
+  if(pushWired)return;pushWired=true;
+  P.addListener('registration',async t=>{
+    try{await rpc('yippo_register_device',{p_token:t.value,p_lang:LANG});S.pushToken=t.value;S.push=true;save()}
+    catch(e){S.push=false;save();toast(errText(e))}
+  });
+  P.addListener('registrationError',()=>toast('Meldingen aanzetten is niet gelukt.'));
+  P.addListener('pushNotificationActionPerformed',()=>{try{openLB('world')}catch(e){}});   // tikken op de melding opent het scorebord
+}
+async function enablePush(){
+  const P=pushPlugin();if(!P)return;
+  try{
+    pushWire(P);
+    let perm=await P.checkPermissions();
+    if(perm.receive!=='granted')perm=await P.requestPermissions();
+    if(perm.receive!=='granted'){toast('Meldingen zijn niet toegestaan. Je kunt dit aanzetten in de instellingen van je telefoon.');return}
+    try{await P.createChannel({id:'daily-record',name:'Daily record',description:'Daily record in your leagues',importance:3})}catch(e){}
+    await P.register();toast('🔔 Meldingen staan aan');
+  }catch(e){toast('Meldingen aanzetten is niet gelukt.')}
+}
+async function disablePush(){
+  const t=S.pushToken;S.push=false;S.pushToken=null;save();
+  try{if(t)await rpc('yippo_unregister_device',{p_token:t})}catch(e){}
+  try{const P=pushPlugin();if(P)await P.unregister()}catch(e){}
+  toast('🔕 Meldingen staan uit');
+}
+async function pushResume(){   // bij het opstarten: het token van een telefoon kan veranderen, dus stil opnieuw aanmelden
+  if(!S.push||!pushAvailable())return;
+  try{const P=pushPlugin();pushWire(P);const perm=await P.checkPermissions();if(perm.receive==='granted')await P.register()}catch(e){}
 }
 
 function accountDialog(){
@@ -1376,6 +1414,7 @@ function accountDialog(){
            :`<p>Je speelt als <b>gast</b></p>`}`,
     [[KIDSAFE?nameBtn:'✏️ Naam wijzigen',KIDSAFE?'':'dim',()=>KIDSAFE?nameDialog():askName(()=>{})],
      ...(email?[]:[['💾 Bewaar mijn voortgang','alt',()=>emailEntry(false)],['🔑 Ik heb al een account','dim',()=>emailEntry(true)]]),
+     ...(pushAvailable()?[[S.push?'🔕 Meldingen uit':'🔔 Meldingen aan','alt',()=>S.push?disablePush():enablePush()]]:[]),
      ...(email?[['Uitloggen','dim',()=>modal('<h2>Uitloggen?</h2><p>Je voortgang blijft bewaard in je account.</p>',[['Ja, uitloggen','',logout],['Annuleren','dim',()=>{}]])]]:[]),
      ['🗑 Account verwijderen','dim',()=>modal(`<h2>Account verwijderen?</h2><p>Je naam, scores, leagues en voortgang worden definitief verwijderd. Dit kan niet ongedaan worden gemaakt.</p>`,
         [['Ja, alles verwijderen','',async()=>{
