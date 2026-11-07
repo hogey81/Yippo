@@ -86,7 +86,7 @@ body.land #game .tools{grid-column:3;grid-row:1/4;flex-direction:column;align-se
 .cellbg::before{content:"";display:block;width:100%;height:100%;border-radius:12px;background:#ffffff0f}
 .iceov{position:absolute;width:var(--cell);height:var(--cell);padding:1px;z-index:5;pointer-events:none}
 .iceov::before{content:"";display:block;width:100%;height:100%;border-radius:13px;background:rgba(170,225,255,.5);border:2px solid #ffffffaa;box-shadow:inset 0 0 10px #fff9}
-.tile{position:absolute;left:0;top:0;width:var(--cell);height:var(--cell);padding:3px;transition:transform .16s ease-out;will-change:transform;z-index:2}
+.tile{position:absolute;left:0;top:0;width:var(--cell);height:var(--cell);padding:3px;transition:transform .21s ease-out;will-change:transform;z-index:2}
 .tile .t{width:100%;height:100%;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell)*.6);
   box-shadow:inset 0 -4px 0 #0003,0 2px 3px #0003;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;position:relative}
 .tile.sel .t{transform:scale(1.14);outline:3px solid #fff;filter:brightness(1.2)}
@@ -586,7 +586,7 @@ function fxAt(r,c,text,color){
   const e=document.createElement('div');e.className='fx';e.textContent=text;
   e.style.cssText=`left:${c*cell+cell*.2}px;top:${r*cell+cell*.2}px;color:${color||'#fff'};font-size:${cell*.4}px`;
   board.appendChild(e);
-  e.animate([{transform:'translateY(0)',opacity:1},{transform:`translateY(${-cell*.9}px)`,opacity:0}],{duration:800,easing:'ease-out'}).onfinish=()=>e.remove();
+  e.animate([{transform:'translateY(0)',opacity:1},{transform:`translateY(${-cell*.9}px)`,opacity:0}],{duration:950,easing:'ease-out'}).onfinish=()=>e.remove();
 }
 function burst(r,c,color){
   for(let i=0;i<4;i++){
@@ -650,7 +650,7 @@ async function resolve(initial,swapCells){
     await clearSet(set,combo,groups.filter(g=>g.spawn).map(g=>g.spawn),nAct);
     swapCells=[];
     gravity();
-    await sleep(170);
+    await sleep(235);
   }
 }
 
