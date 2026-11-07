@@ -92,7 +92,7 @@ body.land #game .tools{grid-column:3;grid-row:1/4;flex-direction:column;align-se
 .tile.sel .t{transform:scale(1.14);outline:3px solid #fff;filter:brightness(1.2)}
 .tile.hint .t{animation:wig .6s ease-in-out infinite}
 @keyframes wig{25%{transform:scale(1.12) rotate(-6deg)}75%{transform:scale(1.12) rotate(6deg)}}
-.tile.pop .t{animation:pop .26s ease-out forwards}
+.tile.pop .t{animation:pop .2s ease-out forwards}
 @keyframes pop{30%{transform:scale(1.3)}100%{transform:scale(0);opacity:0}}
 .tile.born .t{animation:born .38s cubic-bezier(.3,1.7,.5,1)}
 @keyframes born{from{transform:scale(0)}}
@@ -589,7 +589,7 @@ function fxAt(r,c,text,color){
   e.animate([{transform:'translateY(0)',opacity:1},{transform:`translateY(${-cell*.9}px)`,opacity:0}],{duration:800,easing:'ease-out'}).onfinish=()=>e.remove();
 }
 function burst(r,c,color){
-  for(let i=0;i<5;i++){
+  for(let i=0;i<4;i++){
     const p=document.createElement('div');p.className='fx';const s=cell*.16;
     p.style.cssText=`left:${c*cell+cell/2}px;top:${r*cell+cell/2}px;width:${s}px;height:${s}px;border-radius:50%;background:${color}`;
     board.appendChild(p);
@@ -601,7 +601,7 @@ function comboText(t){const e=$('#combo');e.textContent=t;e.classList.remove('go
 
 /* ============ clearing / gravity ============ */
 async function clearSet(set,combo,spawns,nAct){
-  let pts=0;
+  let pts=0,nb=0;
   // ook bij twee gecombineerde speciale dieren (die zijn al 'gebruikt', dus niet meegeteld) klinkt de boem
   if(!nAct)[...set].forEach(k=>{const t=grid[Math.floor(k/COLS)][k%COLS];if(t&&t.s&&t.used)nAct++});
   set.forEach(k=>{
@@ -609,8 +609,8 @@ async function clearSet(set,combo,spawns,nAct){
     pts+=tile.s?30*combo:10*combo;
     if(!tile.s)G.collected[tile.t]=(G.collected[tile.t]||0)+1;
     if(ice[r][c]){ice[r][c]=0;G.iceNow--;const el=$('#ice'+r+'_'+c);if(el)el.remove();pts+=20}
-    tile.el.classList.add('pop');burst(r,c,tile.s?'#ffe066':ANIMALS[tile.t].c);
-    grid[r][c]=null;const el=tile.el;setTimeout(()=>el.remove(),260);
+    tile.el.classList.add('pop');if(nb++<12)burst(r,c,tile.s?'#ffe066':ANIMALS[tile.t].c);
+    grid[r][c]=null;const el=tile.el;setTimeout(()=>el.remove(),200);
   });
   if(G.mult>1){pts*=G.mult;G.mult=1;comboText('SUPER COMBO x2!')}   // twee speciale dieren gecombineerd: dubbele punten
   G.score+=pts;
@@ -618,7 +618,6 @@ async function clearSet(set,combo,spawns,nAct){
   sfx.match(combo);buzz(12);
   if(nAct){sfx.special();board.classList.remove('shake');void board.offsetWidth;board.classList.add('shake');buzz(60)}
   if(combo>=2)comboText(GAME_NAME.toUpperCase()+' x'+combo+'!');
-  await sleep(170);
   spawns.forEach(s=>{
     const t=mkTile(-1,s.s,s.dir);grid[s.r][s.c]=t;attach(t,s.r,s.c,true);
     G.specialsMade++;G.made[s.s]++;G.score+=50;sfx.born();
@@ -649,7 +648,7 @@ async function resolve(initial,swapCells){
     await clearSet(set,combo,groups.filter(g=>g.spawn).map(g=>g.spawn),nAct);
     swapCells=[];
     gravity();
-    await sleep(230);
+    await sleep(170);
   }
 }
 
