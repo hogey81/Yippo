@@ -548,9 +548,11 @@ function blastOf(tile,add){
   else if(tile.s==='unicorn'){const t=commonType();for(let i=0;i<ROWS;i++)for(let j=0;j<COLS;j++)if(T(i,j)===t)add(i,j);add(r,c)}
 }
 const inb=(r,c)=>r>=0&&r<ROWS&&c>=0&&c<COLS;
+// Een tweede eenhoorn op het bord blijft staan als hij alleen door een ontploffing wordt geraakt; hij gaat alleen af als de speler er zelf mee speelt
+const spareUnicorn=t=>t.s==='unicorn'&&!(G.own&&G.own.includes(t));
 function expand(set){
   let n=0;const queue=[...set];G.chainN=0;
-  const add=(r,c)=>{if(inb(r,c)&&grid[r][c]){const k=r*COLS+c;if(!set.has(k)){set.add(k);queue.push(k)}}};
+  const add=(r,c)=>{if(inb(r,c)&&grid[r][c]){if(spareUnicorn(grid[r][c]))return;const k=r*COLS+c;if(!set.has(k)){set.add(k);queue.push(k)}}};
   while(queue.length){
     const k=queue.pop(),t=grid[Math.floor(k/COLS)][k%COLS];
     if(!t||!t.s||t.used)continue;
@@ -559,7 +561,7 @@ function expand(set){
   return n;
 }
 function swapEffect(ta,tb){
-  const set=new Set(),add=(r,c)=>{if(inb(r,c)&&grid[r][c])set.add(r*COLS+c)};
+  const set=new Set(),add=(r,c)=>{if(inb(r,c)&&grid[r][c]&&!spareUnicorn(grid[r][c]))set.add(r*COLS+c)};
   const sa=ta.s,sb=tb.s;
   if(sa==='unicorn'||sb==='unicorn'){
     const u=sa==='unicorn'?ta:tb,o=u===ta?tb:ta;
