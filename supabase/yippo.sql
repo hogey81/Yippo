@@ -11,7 +11,7 @@ create table if not exists yippo_scores (
   day        date        not null,
   player_id  uuid        not null,
   name       text        not null check (char_length(name) between 1 and 20),
-  score      int         not null check (score between 0 and 50000),
+  score      int         not null check (score between 0 and 100000),
   updated_at timestamptz not null default now(),
   primary key (day, player_id)
 );
@@ -76,7 +76,7 @@ begin
   if v_uid is null then raise exception 'not_signed_in'; end if;
   if v_name = '' then raise exception 'bad_name'; end if;
   if p_day is null or p_day < v_today - 1 or p_day > v_today + 1 then raise exception 'bad_day'; end if;
-  if p_score is null or p_score < 0 or p_score > 50000 then raise exception 'bad_score'; end if;
+  if p_score is null or p_score < 0 or p_score > 100000 then raise exception 'bad_score'; end if;
 
   insert into yippo_scores as s (day, player_id, name, score)
   values (p_day, v_uid, v_name, p_score)
