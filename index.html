@@ -549,12 +549,12 @@ function blastOf(tile,add){
 }
 const inb=(r,c)=>r>=0&&r<ROWS&&c>=0&&c<COLS;
 function expand(set){
-  let n=0;const queue=[...set];
+  let n=0;const queue=[...set];G.chainN=0;
   const add=(r,c)=>{if(inb(r,c)&&grid[r][c]){const k=r*COLS+c;if(!set.has(k)){set.add(k);queue.push(k)}}};
   while(queue.length){
     const k=queue.pop(),t=grid[Math.floor(k/COLS)][k%COLS];
     if(!t||!t.s||t.used)continue;
-    t.used=true;n++;blastOf(t,add);
+    t.used=true;n++;if(!t.conv&&!(G.own&&G.own.includes(t)))G.chainN++;blastOf(t,add);   // meegenomen speciaal dier: telt als bonus (G.own = de dieren waar de speler zelf mee speelt)
   }
   return n;
 }
@@ -567,7 +567,7 @@ function swapEffect(ta,tb){
     if(o.s==='unicorn'){o.used=true;for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)add(r,c)}
     else if(o.s){
       const t=commonType();o.used=true;add(o.r,o.c);
-      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(T(r,c)===t){const x=grid[r][c];x.s=o.s;x.t=-1;x.dir=Math.random()<.5?'h':'v';look(x);add(r,c)}
+      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(T(r,c)===t){const x=grid[r][c];x.s=o.s;x.t=-1;x.conv=true;x.dir=Math.random()<.5?'h':'v';look(x);add(r,c)}
     }else{for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(T(r,c)===o.t)add(r,c);add(o.r,o.c)}
   }else if(sa&&sb){
     ta.used=tb.used=true;add(ta.r,ta.c);add(tb.r,tb.c);
@@ -612,6 +612,8 @@ async function clearSet(set,combo,spawns,nAct){
     tile.el.classList.add('pop');if(nb++<12)burst(r,c,tile.s?'#ffe066':ANIMALS[tile.t].c);
     grid[r][c]=null;const el=tile.el;setTimeout(()=>el.remove(),200);
   });
+  const chain=G.chainN||0;G.chainN=0;
+  if(chain)pts+=chain*50*combo;   // elk speciaal dier dat door een ontploffing meeverdwijnt levert de 50 punten op die het waard is
   if(G.mult>1){pts*=G.mult;G.mult=1;comboText('SUPER COMBO x2!')}   // twee speciale dieren gecombineerd: dubbele punten
   G.score+=pts;
   const f=[...set][0];fxAt(Math.floor(f/COLS),f%COLS,'+'+pts,'#ffe066');
@@ -775,7 +777,7 @@ addEventListener('pointerup',()=>{drag=null});
 
 /* ============ turns ============ */
 async function afterMove(initial,swapCells){
-  await resolve(initial,swapCells);
+  await resolve(initial,swapCells);G.own=[];
   await endCheck();
   if(!G.over){G.busy=false;scheduleHint()}
 }
@@ -786,6 +788,7 @@ async function doSwap(a,b){
   swapG(a,b);place(ta,b.r,b.c);place(tb,a.r,a.c);sfx.swap();
   await sleep(160);
   const special=ta.s||tb.s;
+  G.own=[ta,tb].filter(t=>t.s);
   if(!special&&!findGroups().length){
     swapG(a,b);place(ta,a.r,a.c);place(tb,b.r,b.c);sfx.bad();buzz(30);
     await sleep(160);G.busy=false;scheduleHint();return;
@@ -797,12 +800,12 @@ async function doSwap(a,b){
 }
 async function activateAlone(p){
   if(G.busy||G.over)return;
-  G.busy=true;G.moves--;hud();
+  G.busy=true;G.moves--;hud();G.own=[grid[p.r][p.c]];
   await afterMove(new Set([p.r*COLS+p.c]),[]);
 }
 async function useHammer(p){
   if(G.hammers<=0||!grid[p.r][p.c])return;
-  G.hammers--;G.hammerOn=false;G.busy=true;hud();
+  G.hammers--;G.hammerOn=false;G.busy=true;hud();G.own=[grid[p.r][p.c]];
   await afterMove(new Set([p.r*COLS+p.c]),[]);
 }
 async function doShuffle(auto){
