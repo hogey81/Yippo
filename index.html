@@ -1436,8 +1436,9 @@ const WORLDS=[
   {id:2,name:"De Lama's", emoji:'🦙',pen:'De Lama-bergen',color:'#d9b8f2',release:'2026-10-23T18:00:00'},
   {id:3,name:'De Pinguïns',emoji:'🐧',pen:'De Pinguïn-ijsvlakte',color:'#bfe6ff',release:'2026-10-30T18:00:00'},
   {id:4,name:"De Panda's",emoji:'🐼',pen:'De Panda-bamboebos',color:'#c9e8b0',release:'2026-11-06T18:00:00'},
+  {id:5,name:"De Flamingo's",emoji:'🦩',pen:'De Flamingo-meren',color:'#ffc9de',release:'2026-11-13T18:00:00'},
 ];
-const COMING=[{name:"De Flamingo's",emoji:'🦩'},{name:"De Koala's",emoji:'🐨'},{name:'De Dolfijnen',emoji:'🐬'}];   // teasers voor wereld 3 en verder
+const COMING=[{name:"De Koala's",emoji:'🐨'},{name:'De Dolfijnen',emoji:'🐬'},{name:'De Kangoeroes',emoji:'🦘'}];   // teasers voor wereld 3 en verder
 const WORLD1=WORLDS[0];
 const worldOf=L=>Math.min(WORLDS.length,Math.max(1,Math.ceil(L/WORLD_SIZE)));
 const worldOpen=w=>{const W=WORLDS[w-1];return !!W&&(PREVIEW||!W.release||new Date()>=new Date(W.release))};
@@ -1481,6 +1482,14 @@ const ZOO=[
   {id:'w4-150', e:'🦚',n:'Pauw', lvl:150, fact:'Alleen de mannetjespauw heeft de grote waaier van veren, met glinsterende ogen erop.'},
   {id:'w4-155', e:'🐫',n:'Bactrische kameel', lvl:155, fact:'Een Bactrische kameel heeft twee bulten. Ze zijn gemaakt van vet, niet van water.'},
   {id:'w4-160', e:'🐍',n:'Koningscobra', lvl:160, fact:'De koningscobra is de langste giftige slang ter wereld en eet vooral andere slangen.'},
+  {id:'w5-165', e:'🦩',n:'Caribische flamingo', lvl:165, fact:'De Caribische flamingo is roze door het eten dat hij eet: kleine kreeftjes en algen.'},
+  {id:'w5-170', e:'🦢',n:'Knobbelzwaan', lvl:170, fact:'Jonge knobbelzwaantjes klimmen soms op de rug van hun ouders om te rusten.'},
+  {id:'w5-175', e:'🐊',n:'Nijlkrokodil', lvl:175, fact:'Een nijlkrokodil draagt haar net uitgekomen jongen voorzichtig in haar bek naar het water.'},
+  {id:'w5-180', e:'🦦',n:'Europese otter', lvl:180, fact:'Een otter kan tot wel acht minuten onder water blijven en sluit dan zijn oren en neus.'},
+  {id:'w5-185', e:'🦫',n:'Amerikaanse bever', lvl:185, fact:'Een bever bouwt dammen en burchten van takken. Zijn voortanden zijn oranje door ijzer.'},
+  {id:'w5-190', e:'🐢',n:'Europese moerasschildpad', lvl:190, fact:'Een Europese moerasschildpad kan 40 tot 60 jaar oud worden.'},
+  {id:'w5-195', e:'🦅',n:'Amerikaanse zeearend', lvl:195, fact:'De Amerikaanse zeearend bouwt het grootste nest van alle vogels in Noord-Amerika.'},
+  {id:'w5-200', e:'🦆',n:'Wilde eend', lvl:200, fact:'Een wilde eend onderhoudt zijn veren met olie uit een klier bij zijn staart.'},
 ];
 const wOf=a=>+a.id[1];
 const FANTASY=[
@@ -1520,6 +1529,14 @@ const HAB={
  'w4-150':{t:["🌿 Vooral planten", "🌳 Bos en savanne"],r:"India en buurlanden",n:"",c:["India", "Pakistan", "Nepal", "Bhutan", "Bangladesh", "Sri Lanka"]},
  'w4-155':{t:["🌿 Planteneter", "🏜️ Woestijn"],r:"Gobi-woestijn in China en Mongolië",n:"De wilde Bactrische kameel is erg zeldzaam. De meeste kamelen worden door mensen gehouden.",c:["China", "Mongolia"],k:{"China": [86, 37, 98, 43], "Mongolia": [90, 41, 108, 46]}},
  'w4-160':{t:["🍖 Vleeseter", "🌴 Regenwoud"],r:"Zuid- en Zuidoost-Azië",n:"",c:["India", "Nepal", "Bhutan", "Bangladesh", "Myanmar", "Thailand", "Laos", "Cambodia", "Vietnam", "Malaysia", "Indonesia", "China"],k:{"China": [97, 18, 123, 31]}},
+ 'w5-165':{t:["🦐 Kreeftjes en algen", "🌊 Ondiep zout water"],r:"Kusten van de Caribische Zee en de Galápagoseilanden",n:"",c:["Mexico", "Belize", "Cuba", "Bahamas", "Dominican Rep.", "Haiti", "Colombia", "Venezuela", "Brazil", "Ecuador", "United States of America"],k:{"Ecuador": [-92, -1.5, -89, 1], "United States of America": [-82.5, 24.5, -80, 28]}},
+ 'w5-170':{t:["🌿 Vooral planten", "💧 Zoet water"],r:"Europa en delen van Azië",n:"",c:["United Kingdom", "Ireland", "Netherlands", "Belgium", "Germany", "Denmark", "Sweden", "Norway", "Finland", "Poland", "Lithuania", "Latvia", "Estonia", "Ukraine", "Belarus", "Russia", "Kazakhstan", "France", "Spain", "Italy", "Greece", "Turkey"]},
+ 'w5-175':{t:["🍖 Vleeseter", "💧 Zoet water"],r:"Afrika onder de Sahara en Madagaskar",n:"",c:["Egypt", "Sudan", "Ethiopia", "Kenya", "Uganda", "Tanzania", "Rwanda", "Burundi", "Dem. Rep. Congo", "Congo", "Gabon", "Cameroon", "Central African Rep.", "Chad", "Nigeria", "Niger", "Mali", "Senegal", "Gambia", "Ghana", "Angola", "Zambia", "Zimbabwe", "Botswana", "Namibia", "Mozambique", "South Africa", "Malawi", "Madagascar", "Somalia"]},
+ 'w5-180':{t:["🍖 Vleeseter", "💧 Zoet water"],r:"Europa, Noord-Afrika en delen van Azië",n:"",c:["United Kingdom", "Ireland", "Portugal", "Spain", "France", "Netherlands", "Germany", "Poland", "Sweden", "Norway", "Finland", "Russia", "Italy", "Greece", "Turkey", "Iran", "India", "China", "Mongolia", "Morocco", "Algeria", "Tunisia"]},
+ 'w5-185':{t:["🌿 Planteneter", "💧 Zoet water"],r:"Canada en de Verenigde Staten",n:"",c:["Canada", "United States of America"]},
+ 'w5-190':{t:["🍖 Vleeseter", "💧 Zoet water"],r:"Zuid- en Midden-Europa, Noord-Afrika en West-Azië",n:"",c:["Spain", "France", "Italy", "Germany", "Poland", "Lithuania", "Latvia", "Croatia", "Greece", "Turkey", "Romania", "Bulgaria", "Hungary", "Ukraine", "Azerbaijan", "Iran", "Morocco", "Algeria", "Tunisia"]},
+ 'w5-195':{t:["🍖 Vleeseter", "💧 Zoet water"],r:"Canada, de Verenigde Staten en het noorden van Mexico",n:"",c:["Canada", "United States of America", "Mexico"],k:{"Mexico": [-118, 22, -97, 32.7]}},
+ 'w5-200':{t:["🌿 Vooral planten", "💧 Zoet water"],r:"Het hele noordelijk halfrond",n:"",c:["Canada", "United States of America", "Mexico", "Iceland", "Ireland", "United Kingdom", "Netherlands", "Germany", "France", "Spain", "Italy", "Poland", "Sweden", "Norway", "Finland", "Russia", "Ukraine", "Turkey", "Iran", "Kazakhstan", "China", "Mongolia", "Japan", "India", "Pakistan", "Egypt"]},
 };
 const ALL_ANIMALS=ZOO.concat(FANTASY);
 const zooTotal=()=>ZOO.filter(a=>worldOpen(wOf(a))).length+FANTASY.length;
@@ -1564,6 +1581,7 @@ const THEMES={
   1:{amp:100,phase:.25,decor:['🌳','🦒','🌾','🐘','🌳','🦁','🌿','🦓','🌳','🦛','🪨','🐆','🌴','🦏','🌾','🦍']},
   3:{amp:104,phase:2.1,decor:['🐧','🧊','❄️','🏔️','🐧','⛄','🧊','🐋','❄️','🐧','🌨️','🦭']},
   4:{amp:102,phase:4.1,decor:['🎍','🐼','🏮','🎋','🐼','🌸','🎍','🏯','🐼','🎋','🏮','🐼']},
+  5:{amp:100,phase:5.2,decor:['🦩','🌸','💧','🌿','🦢','🌊','🌸','🦩','💧','🌿','🦆','🌊']},
   2:{amp:108,phase:1.3,decor:['🦙','🌼','🌷','🏔️','🦙','🌸','🪨','🦙','🌼','🌷','☁️','🦙'],bridges:[14,28]},
 };
 const mapX=(i,w)=>{const t=THEMES[w]||THEMES[1];return 210+t.amp*Math.sin((i-1)*.9+t.phase)};
@@ -1578,6 +1596,15 @@ function smoothPath(pts){
   return d;
 }
 function mapBackground(w,H){
+  if(w===5){
+    let h=`<defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe3ef"/><stop offset=".25" stop-color="#ffd0e3"/><stop offset=".6" stop-color="#bfe8ef"/><stop offset="1" stop-color="#6fcfd8"/></linearGradient>
+      <pattern id="cow" patternUnits="objectBoundingBox" width="1" height="1"><image href="icons/icon-192.png" width="58" height="58" preserveAspectRatio="xMidYMid slice"/></pattern></defs><rect width="${MAP_W}" height="${H}" fill="url(#mg)"/>`;
+    for(let y=240;y<H-100;y+=330)h+=`<ellipse cx="${(y*13)%260+80}" cy="${y}" rx="150" ry="34" fill="#ffffff" opacity=".32"/><ellipse cx="${(y*7)%300+60}" cy="${y+170}" rx="110" ry="26" fill="#ffffff" opacity=".28"/>`;
+    for(let y=300;y<H-100;y+=240)h+=`<path d="M${(y*5)%120} ${y} q20 -10 40 0 t40 0 t40 0" fill="none" stroke="#ffffff" stroke-width="3" opacity=".55"/><path d="M${300-(y*3)%120} ${y+90} q20 -10 40 0 t40 0 t40 0" fill="none" stroke="#ffffff" stroke-width="3" opacity=".55"/>`;
+    for(let y=330;y<H-100;y+=520)h+=`<ellipse cx="${(y*11)%250+90}" cy="${y}" rx="58" ry="15" fill="#fff" opacity=".7"/>`;
+    h+=`<path d="M0,${H-110} C100,${H-160} 200,${H-120} 300,${H-148} C360,${H-160} 400,${H-152} 420,${H-157} L420,${H} L0,${H} Z" fill="#8fd9c6"/>`;
+    return h;
+  }
   if(w===4){
     let h=`<defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4fbe8"/><stop offset=".2" stop-color="#d9f0c4"/><stop offset=".6" stop-color="#a6d98f"/><stop offset="1" stop-color="#5fa86a"/></linearGradient>
       <pattern id="cow" patternUnits="objectBoundingBox" width="1" height="1"><image href="icons/icon-192.png" width="58" height="58" preserveAspectRatio="xMidYMid slice"/></pattern></defs><rect width="${MAP_W}" height="${H}" fill="url(#mg)"/>`;
@@ -1609,6 +1636,7 @@ function mapBackground(w,H){
 }
 function mapRoad(w,pts){
   const road=smoothPath(pts);
+  if(w===5)return `<path d="${road}" fill="none" stroke="#7a4a2a" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#e8c79a" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#b98b5a" stroke-width="30" stroke-dasharray="5 9" stroke-linecap="round" stroke-linejoin="round"/>`;
   if(w===4)return `<path d="${road}" fill="none" stroke="#3d6b3a" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#e9d9a8" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#c9b27a" stroke-width="30" stroke-dasharray="3 11" stroke-linecap="round" stroke-linejoin="round"/>`;
   if(w===3)return `<path d="${road}" fill="none" stroke="#2b5d8a" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#e8f6ff" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#9fd0f0" stroke-width="30" stroke-dasharray="4 12" stroke-linecap="round" stroke-linejoin="round"/>`;
   if(w===2){
