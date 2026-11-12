@@ -232,7 +232,7 @@ select.inp{appearance:auto}
 table.help{width:100%;border-collapse:collapse;text-align:left;font-size:14px;margin-top:8px}
 table.help td{padding:5px 4px;border-bottom:1px solid #ffffff22;vertical-align:top}
 table.help td:first-child{white-space:nowrap}
-.calh::before{content:attr(data-d);display:inline-block;vertical-align:middle;min-width:1.45em;padding:.28em .1em .05em;margin-right:.35em;border-radius:.22em;border-top:.3em solid #e53935;background:#fff;color:#26103f;font-size:.8em;font-weight:800;line-height:1.1;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.calh[data-d]::before{content:attr(data-d);display:inline-block;vertical-align:middle;min-width:1.45em;padding:.28em .1em .05em;margin-right:.35em;border-radius:.22em;border-top:.3em solid #e53935;background:#fff;color:#26103f;font-size:.8em;font-weight:800;line-height:1.1;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.25)}
 </style>
 </head>
 <body>
@@ -242,7 +242,7 @@ table.help td:first-child{white-space:nowrap}
   <h1 id="gameName">Yippo</h1>
   <p class="sub">Wissel dieren, maak setjes, bouw een dierentuin vol combo's!</p>
   <button class="btn" id="mPlay">▶ Spelen</button>
-  <button class="btn alt" id="mDaily">📅 Dagelijkse puzzel</button>
+  <button class="btn alt calh" id="mDaily">Dagelijkse puzzel</button>
   <div class="streak" id="streakTxt"></div>
   <button class="btn dim" id="mBoard" style="display:none">🏅 Scorebord &amp; leagues</button>
   <button class="btn dim" id="mAccount" style="display:none">👤 Account</button>
@@ -256,7 +256,7 @@ table.help td:first-child{white-space:nowrap}
 <div id="menu2" class="screen">
   <div class="m2head"><img src="icons/icon-192.png" alt=""><h1 id="m2Title">Yippo</h1></div>
   <button class="m2btn m2play" id="m2Play"><span class="t">▶ Spelen</span><span class="s" id="m2PlaySub"></span><span class="side" id="m2Map">🗺</span></button>
-  <button class="m2btn m2daily" id="m2Daily"><span class="t">📅 Dagelijkse puzzel</span><span class="s" id="m2DailySub"></span></button>
+  <button class="m2btn m2daily" id="m2Daily"><span class="t calh">Dagelijkse puzzel</span><span class="s" id="m2DailySub"></span></button>
   <button class="m2zoo" id="m2Zoo"><div class="scene" id="m2Scene"></div><div class="foot"><b>🏡 Bekijk je dierentuin</b><div class="bar2"><div><i id="m2ZooBar"></i></div><span id="m2ZooTxt"></span></div></div></button>
   <div class="m2row"><button class="m2btn" id="m2Board"><span class="t">🏅 Scorebord</span><span class="s" id="m2BoardSub">Wereldwijd</span></button><button class="m2btn" id="m2League"><span class="t">👨‍👩‍👧 Leagues</span><span class="s" id="m2LeagueSub">Met vrienden</span></button></div>
   <div class="m2links"><button class="linkbtn" id="m2Account">👤 Account</button><button class="linkbtn" id="m2Help">❓ Hoe werkt het?</button><button class="linkbtn" id="m2Sound">🔊 Geluid</button><button class="linkbtn" id="m2Lang"></button><button class="linkbtn" id="m2Privacy">🔒 Privacy</button><a class="linkbtn" id="m2Contact" href="mailto:info@hunting4cards.com?subject=Yippo" style="text-decoration:underline">✉️ Contact</a></div>
@@ -395,6 +395,7 @@ const sfx={
 const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch(e){}};
 
 /* ============ screens / toast / modal ============ */
+function setCal(root){(root||document).querySelectorAll('.calh').forEach(e=>{e.dataset.d=new Date().getDate()})}
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id))}
 let toastT;
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),1800)}
@@ -720,7 +721,7 @@ function hud(){
   fitRow($('#game .top'),'.pill');fitRow($('#goals'),'.goal');
 }
 function hud0(){
-  $('#gLevel').textContent=G.mode==='daily'?'📅 Dagelijks':'Level '+G.def.L;
+  $('#gLevel').textContent=G.mode==='daily'?'Dagelijks':'Level '+G.def.L;$('#gLevel').classList.toggle('calh',G.mode==='daily');setCal();
   $('#gMoves').textContent='Zetten '+G.moves;
   $('#gMoves').classList.toggle('low',G.moves<=5&&G.moves>0);
   $('#gScore').textContent='⭐ '+fmt(G.score);
@@ -1044,7 +1045,7 @@ async function renderWorld(body,tok){
   const day=today(),rows=await rpc('yippo_global',{p_day:day,p_limit:50});
   if(tok!==lbTok)return;
   const total=rows.length?+rows[0].total:0,me=myId();
-  let h=`<div class="lbhead"><span>📅 Vandaag</span><small>${fmt(total)} ${total===1?'speler':'spelers'}</small></div>`;
+  let h=`<div class="lbhead"><span class="calh" data-d="${new Date().getDate()}">Vandaag</span><small>${fmt(total)} ${total===1?'speler':'spelers'}</small></div>`;
   if(!rows.length)h+='<p class="muted">Nog niemand vandaag. Wees de eerste!</p>';
   rows.forEach(r=>{h+=`<div class="lbrow${r.player_id===me?' me':''}"><span class="rk">${medal(+r.rank)}</span><span class="nm">${esc(prettyName(r.name))}</span><span class="sc">${fmt(+r.score)}</span></div>`});
   if(S.daily[day]===undefined)h+='<div class="lbact"><button class="btn" id="lbPlay">▶ Speel de dagelijkse puzzel</button></div>';
@@ -1864,7 +1865,7 @@ function renderMenu2(){
   const best=S.daily[today()];
   const wb=menuWorld.day===today()?menuWorld.score:undefined,top=Math.max(wb||0,best||0);   // dagrecord van iedereen (zonder verbinding: je eigen beste)
   const chip=(c,t)=>`<span class="dchip ${c}">${t}</span>`,st=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count;
-  $('#m2DailySub').innerHTML=(chip('rec',`🏆 Record ${fmt(top)}`)+chip('me',`👤 Jij ${fmt(best||0)}`))+(st?chip('fire',`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}`):'');
+  setCal();$('#m2DailySub').innerHTML=(chip('rec',`🏆 Record ${fmt(top)}`)+chip('me',`👤 Jij ${fmt(best||0)}`))+(st?chip('fire',`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}`):'');
   if(S.auth&&!menuWorld.busy&&Date.now()-(menuWorld.t||0)>8000){   // elke keer dat het menu verschijnt het actuele dagrecord ophalen (niet vaker dan om de 8 seconden)
     menuWorld.t=Date.now();   // alleen met bestaand account: anders zou elk bezoek een nieuw gastaccount aanmaken
   menuWorld.busy=true;rpc('yippo_global',{p_day:today(),p_limit:1}).then(r=>{if(Array.isArray(r)&&r[0]&&typeof r[0].score==='number'){menuWorld.day=today();menuWorld.score=r[0].score;renderMenu2()}}).catch(()=>{}).then(()=>{menuWorld.busy=false})}
@@ -1926,9 +1927,9 @@ function toMenu(){
   if(KIDSAFE&&!S.nameFixed){S.nameFixed=true;ensurePlayer();if(S.player.name&&!isAutoName(S.player.name)&&S.age!=='adult'&&!(S.auth&&S.auth.email))S.player.name=autoName();save()}
   if(BETA){
     syncZooFromProgress();show('menu2');renderMenu2();submitPending();return}
-  show('menu');
+  setCal();show('menu');
   $('#streakTxt').textContent=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count?`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'} op rij`:'';
-  $('#mDaily').textContent=S.daily[today()]!==undefined?`📅 Dagelijks (beste: ${fmt(S.daily[today()])})`:'📅 Dagelijkse puzzel';
+  $('#mDaily').textContent=S.daily[today()]!==undefined?`Dagelijks (beste: ${fmt(S.daily[today()])})`:'Dagelijkse puzzel';setCal();
   $('#mSound').textContent=S.sound?'🔊 Geluid aan':'🔇 Geluid uit';
   $('#mBoard').style.display=online()?'':'none';
   $('#mAccount').style.display=online()?'':'none';
@@ -2027,7 +2028,7 @@ function restoreBackup(){try{const b=JSON.parse(localStorage.getItem('dm_best')|
 updateMax();restoreBackup();backupProgress();
 // Nieuwe dag (om middernacht, of als de app overnacht open of op de achtergrond bleef): het dagrecord en je eigen score in het menu beginnen weer op 0
 let lastDay=today();
-function checkNewDay(){
+function checkNewDay(){setCal();
   const d=today();if(d===lastDay)return;
   lastDay=d;menuWorld.day=null;menuWorld.score=0;menuWorld.t=0;
   if(currentScreen()==='menu2')renderMenu2();
