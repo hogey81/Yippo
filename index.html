@@ -551,7 +551,8 @@ function blastOf(tile,add){
 }
 const inb=(r,c)=>r>=0&&r<ROWS&&c>=0&&c<COLS;
 // Een tweede eenhoorn op het bord blijft staan als hij alleen door een ontploffing wordt geraakt; hij gaat alleen af als de speler er zelf mee speelt
-const spareUnicorn=t=>t.s==='unicorn'&&!(G.own&&G.own.includes(t));
+// Combineert de speler twee speciale dieren (G.spareAll), dan blijven ALLE andere speciale dieren op het bord staan
+const spareUnicorn=t=>t.s&&(t.s==='unicorn'||G.spareAll)&&!(G.own&&G.own.includes(t));
 function expand(set){
   let n=0;const queue=[...set];G.chainN=0;
   const add=(r,c)=>{if(inb(r,c)&&grid[r][c]){if(spareUnicorn(grid[r][c]))return;const k=r*COLS+c;if(!set.has(k)){set.add(k);queue.push(k)}}};
@@ -781,7 +782,7 @@ addEventListener('pointerup',()=>{drag=null});
 
 /* ============ turns ============ */
 async function afterMove(initial,swapCells){
-  await resolve(initial,swapCells);G.own=[];
+  await resolve(initial,swapCells);G.own=[];G.spareAll=false;
   await endCheck();
   if(!G.over){G.busy=false;scheduleHint()}
 }
@@ -792,7 +793,7 @@ async function doSwap(a,b){
   swapG(a,b);place(ta,b.r,b.c);place(tb,a.r,a.c);sfx.swap();
   await sleep(160);
   const special=ta.s||tb.s;
-  G.own=[ta,tb].filter(t=>t.s);
+  G.own=[ta,tb].filter(t=>t.s);G.spareAll=!!(ta.s&&tb.s);
   if(!special&&!findGroups().length){
     swapG(a,b);place(ta,a.r,a.c);place(tb,b.r,b.c);sfx.bad();buzz(30);
     await sleep(160);G.busy=false;scheduleHint();return;
@@ -800,16 +801,16 @@ async function doSwap(a,b){
   G.moves--;hud();
   if((ta.s&&tb.s)||ta.s==='unicorn'||tb.s==='unicorn')G.mult=2;
   const initial=special?swapEffect(ta,tb):null;
-  await afterMove(initial,[b,a]);
+  await afterMove(initial,[b,a]);G.spareAll=false;
 }
 async function activateAlone(p){
   if(G.busy||G.over)return;
-  G.busy=true;G.moves--;hud();G.own=[grid[p.r][p.c]];
+  G.busy=true;G.moves--;hud();G.own=[grid[p.r][p.c]];G.spareAll=false;
   await afterMove(new Set([p.r*COLS+p.c]),[]);
 }
 async function useHammer(p){
   if(G.hammers<=0||!grid[p.r][p.c])return;
-  G.hammers--;G.hammerOn=false;G.busy=true;hud();G.own=[grid[p.r][p.c]];
+  G.hammers--;G.hammerOn=false;G.busy=true;hud();G.own=[grid[p.r][p.c]];G.spareAll=false;
   await afterMove(new Set([p.r*COLS+p.c]),[]);
 }
 async function doShuffle(auto){
@@ -835,6 +836,7 @@ async function doShuffle(auto){
 /* ============ end of turn ============ */
 // speciale dieren die nog op het bord staan gaan alsnog af (met punten en eventuele nieuwe combinaties)
 async function fireSpecials(){
+  G.spareAll=false;G.own=[];
   for(let i=0;i<6;i++){
     const sp=new Set();
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c]&&grid[r][c].s)sp.add(r*COLS+c);
