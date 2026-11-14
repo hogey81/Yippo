@@ -9,6 +9,6 @@ Officiële Google-pop-up (in-app review) via plug-in `@capacitor-community/in-ap
 
 **Wanneer:** na het winnen van level 10, 20 of 40 (2,2 s na het scherm "Level gehaald"), alleen als:
 - speler is volwassen (`S.age==='adult'`), minstens 2 verschillende speeldagen, minstens 1 dier in de dierentuin;
-- laatste verzoek ≥ 30 dagen geleden en maximaal 3 keer in totaal.
+- maximaal 1 keer per toestel.
 
 Data safety en privacyverklaring hoeven niet te veranderen: de plug-in verzamelt niets.
