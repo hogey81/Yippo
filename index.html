@@ -875,6 +875,7 @@ function win(){
   S.unlocked=Math.max(S.unlocked,Math.min(MAX_LEVEL,L+1));save();
   const last=L>=MAX_LEVEL;
   const az=BETA?ZOO.find(a=>a.lvl===L):null,newA=az?awardAnimal(az.id):null;
+  setTimeout(()=>askReview(L),2200);   // pas na de overwinning, als de speler het scherm heeft gezien
   setTimeout(()=>modal(`<h2>🎉 Level gehaald!</h2><div class="stars">${'⭐'.repeat(st)}${'☆'.repeat(3-st)}</div>
     <p>Score: <b>${fmt(G.score)}</b>${bonus?`<br><small>(inclusief ${fmt(bonus)} bonus voor overgebleven zetten)</small>`:''}</p>${newA?animalBlock(newA):''}${BETA&&L%WORLD_SIZE===0?worldDoneBlock(L/WORLD_SIZE):''}${isGuest()&&(L===10||L%20===0)?'<p style="background:#ffffff1f;border-radius:12px;padding:8px 10px;font-size:14px">💾 Je voortgang staat nu alleen op dit toestel. Bewaar hem met je e-mailadres, dan raak je hem nooit meer kwijt.</p>':''}`,
     [...(newA?[['🏡 Naar de dierentuin','alt',()=>openZoo()]]:[]),
@@ -1375,6 +1376,23 @@ async function logout(){
 
 /* --- pushmeldingen: "iemand in je league heeft het dagrecord verbeterd" ---
    Alleen in de Android-app, alleen voor volwassen accounts die het zelf aanzetten, en uit tot Firebase en Supabase zijn ingericht (zie supabase/push-stappen.md). */
+// ---- Beoordeling vragen (officiële Google-pop-up) ----
+// Staat uit tot de eerste release is goedgekeurd en de app met de plug-in in de Play Store staat. Dan REVIEW_ENABLED op true.
+const REVIEW_ENABLED=false;
+const REVIEW_LEVELS=[10,20,40],REVIEW_GAP_DAYS=30,REVIEW_MAX=3,REVIEW_MIN_DAYS=2;
+const reviewPlugin=()=>{const C=window.Capacitor;if(!C||!C.isNativePlatform||!C.isNativePlatform())return null;return (C.Plugins&&C.Plugins.InAppReview)||(C.registerPlugin&&C.registerPlugin('InAppReview'))||null};
+function noteDay(){try{const d=today();S.days=S.days||[];if(S.days[S.days.length-1]!==d){S.days.push(d);if(S.days.length>60)S.days.shift();save()}}catch(e){}}
+function reviewDue(L){
+  if(!REVIEW_ENABLED||!REVIEW_LEVELS.includes(L)||S.age!=='adult'||!reviewPlugin())return false;
+  const rv=S.review||{n:0,last:0};
+  if(rv.n>=REVIEW_MAX||(S.days||[]).length<REVIEW_MIN_DAYS||(S.zoo||[]).length<1)return false;
+  return Date.now()-rv.last>=REVIEW_GAP_DAYS*864e5;
+}
+function askReview(L){
+  if(!reviewDue(L))return;
+  S.review={n:((S.review||{}).n||0)+1,last:Date.now()};save();
+  try{const p=reviewPlugin();p.requestReview&&p.requestReview().catch(()=>{})}catch(e){}
+}
 const PUSH_ENABLED=false;   // op true zetten als alles is ingericht
 const pushPlugin=()=>{const C=window.Capacitor;if(!C||!C.isNativePlatform||!C.isNativePlatform())return null;return (C.Plugins&&C.Plugins.PushNotifications)||(C.registerPlugin&&C.registerPlugin('PushNotifications'))||null};
 const pushAvailable=()=>PUSH_ENABLED&&online()&&S.age==='adult'&&!!S.auth&&!!pushPlugin();
@@ -1929,7 +1947,7 @@ function toMenu(){
   if(KIDSAFE&&!S.nameFixed){S.nameFixed=true;ensurePlayer();if(S.player.name&&!isAutoName(S.player.name)&&S.age!=='adult'&&!(S.auth&&S.auth.email))S.player.name=autoName();save()}
   if(BETA){
     syncZooFromProgress();show('menu2');renderMenu2();submitPending();return}
-  setCal();show('menu');
+  setCal();noteDay();show('menu');
   $('#streakTxt').textContent=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count?`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'} op rij`:'';
   $('#mDaily').textContent=S.daily[today()]!==undefined?`Dagelijks (beste: ${fmt(S.daily[today()])})`:'Dagelijkse puzzel';setCal();
   $('#mSound').textContent=S.sound?'🔊 Geluid aan':'🔇 Geluid uit';
@@ -2030,7 +2048,7 @@ function restoreBackup(){try{const b=JSON.parse(localStorage.getItem('dm_best')|
 updateMax();restoreBackup();backupProgress();
 // Nieuwe dag (om middernacht, of als de app overnacht open of op de achtergrond bleef): het dagrecord en je eigen score in het menu beginnen weer op 0
 let lastDay=today();
-function checkNewDay(){setCal();
+function checkNewDay(){setCal();noteDay();
   const d=today();if(d===lastDay)return;
   lastDay=d;menuWorld.day=null;menuWorld.score=0;menuWorld.t=0;
   if(currentScreen()==='menu2')renderMenu2();
