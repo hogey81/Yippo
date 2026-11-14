@@ -572,7 +572,7 @@ function swapEffect(ta,tb){
     if(o.s==='unicorn'){o.used=true;for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)add(r,c)}
     else if(o.s){
       const t=commonType();o.used=true;add(o.r,o.c);
-      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(T(r,c)===t){const x=grid[r][c];x.s=o.s;x.t=-1;x.dir=Math.random()<.5?'h':'v';look(x);add(r,c)}
+      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(T(r,c)===t){const x=grid[r][c];x.s=o.s;x.t=-1;x.dir=Math.random()<.5?'h':'v';look(x);set.add(r*COLS+c)}   // door de eenhoorn omgezette dieren gaan altijd af
     }else{for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(T(r,c)===o.t)add(r,c);add(o.r,o.c)}
   }else if(sa&&sb){
     ta.used=tb.used=true;add(ta.r,ta.c);add(tb.r,tb.c);
