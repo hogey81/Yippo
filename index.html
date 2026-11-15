@@ -474,6 +474,13 @@ function levelDef(L){
   else{ice=Math.min(12+Math.floor(2*wf),4+Math.floor(hard*.4));goals.push({kind:'score',n:Math.min(2800+Math.floor(300*wf),1500+L*50)},{kind:'ice',n:ice});moves+=3}
   return {L,types,moves,goals,ice,seed:L*104729+1};
 }
+// Het toernooi is een eigen spel, los van de Tijdrace. Nu nog 60 seconden; de spelregels staan hier op één plek zodat we ze later makkelijk kunnen vervangen.
+const TOUR_SECS=60;
+function tourDef(){
+  const ws=weekStart(today());
+  return {tour:true,date:today(),week:ws,types:6,moves:9999,ice:0,seed:hashStr(ws+'toernooi'),goals:[],secs:TOUR_SECS};   // elke week een ander startbord, voor iedereen gelijk
+}
+const isTimed=g=>g&&(g.mode==='race'||g.mode==='tour');
 function raceDef(){
   const d=today();
   return {race:true,date:d,types:6,moves:9999,ice:0,seed:hashStr(d+'race'),goals:[],secs:60};
@@ -722,8 +729,8 @@ function startGame(def,mode){
   closeModal();
   G={mode,def,types:def.types,moves:def.moves,score:0,collected:{},specialsMade:0,made:{lion:0,elephant:0,dragon:0,unicorn:0},
      iceNow:0,iceStart:0,busy:true,over:false,sel:null,hammerOn:false,hammers:2,shuffles:1,
-     rnd:(mode==='daily'||mode==='race')?mulberry32(def.seed^0x9e3779b9):Math.random};
-  if(mode==='race'){G.time=def.secs;G.last=Date.now();const g=G;g.tmr=setInterval(()=>raceTick(g),200)}
+     rnd:(mode==='daily'||mode==='race'||mode==='tour')?mulberry32(def.seed^0x9e3779b9):Math.random};
+  if(mode==='race'||mode==='tour'){G.time=def.secs;G.last=Date.now();const g=G;g.tmr=setInterval(()=>raceTick(g),200)}
   show('game');
   board.innerHTML='';
   const gr=mulberry32(def.seed);
@@ -744,11 +751,11 @@ function startGame(def,mode){
     };
     poll();
   }
-  if(mode==='race'&&online()){   // beste score van vandaag van iedereen: bij de start en daarna elke 20 seconden opnieuw ophalen
+  if((mode==='race'||mode==='tour')&&online()){   // beste score van iedereen: bij de start en daarna elke 20 seconden opnieuw ophalen
     const g=G,poll=()=>{
       if(G!==g||g.over)return;
       if(document.hidden||!$('#game').classList.contains('on')){setTimeout(poll,20000);return}
-      rpc('yippo_race_global',{p_day:def.date,p_limit:1}).then(r=>{if(G===g&&Array.isArray(r)&&r[0]&&typeof r[0].score==='number'&&r[0].score!==g.worldBest){g.worldBest=r[0].score;hud()}}).catch(()=>{}).then(()=>{if(G===g&&!g.over)setTimeout(poll,20000)});
+      (mode==='tour'?rpc('yippo_week_global',{p_week:def.week,p_limit:1}):rpc('yippo_race_global',{p_day:def.date,p_limit:1})).then(r=>{if(G===g&&Array.isArray(r)&&r[0]&&typeof r[0].score==='number'&&r[0].score!==g.worldBest){g.worldBest=r[0].score;hud()}}).catch(()=>{}).then(()=>{if(G===g&&!g.over)setTimeout(poll,20000)});
     };
     poll();
   }
@@ -773,14 +780,14 @@ function hud(){
   fitRow($('#game .top'),'.pill');fitRow($('#goals'),'.goal');
 }
 function hud0(){
-  if(G.mode==='race'){
-    $('#gLevel').textContent='⏱ Tijdrace';$('#gLevel').classList.remove('calh');
+  if(isTimed(G)){
+    $('#gLevel').textContent=G.mode==='tour'?'🏆 Toernooi':'⏱ Tijdrace';$('#gLevel').classList.remove('calh');
     const t=Math.ceil(G.time),m=Math.floor(t/60),sc=t%60;
     $('#gMoves').textContent='⏳ '+m+':'+(sc<10?'0':'')+sc;
     $('#gMoves').classList.toggle('low',G.time<=10);
     $('#gScore').textContent='⭐ '+fmt(G.score);
-    const best=Math.max(G.worldBest||0,(S.race||{})[G.def.date]||0);
-    $('#goals').innerHTML=`<span class="goal">🏆 Beste vandaag: ${fmt(Math.max(best,G.score))}</span>`;
+    const best=Math.max(G.worldBest||0,G.mode==='tour'?weekBest(G.def.week):(S.race||{})[G.def.date]||0);
+    $('#goals').innerHTML=`<span class="goal">🏆 ${G.mode==='tour'?'Beste deze week':'Beste vandaag'}: ${fmt(Math.max(best,G.score))}</span>`;
     $('#barfill').style.width=Math.round(Math.min(1,G.time/G.def.secs)*100)+'%';
     $('#tHammer span').textContent=G.hammers;$('#tShuffle span').textContent=G.shuffles;
     $('#tHammer').classList.toggle('on',G.hammerOn);
@@ -920,10 +927,10 @@ async function endRace(){
   if(!G||G.ending||G.over)return;
   G.ending=true;G.busy=true;clearHint();
   await fireSpecials();   // speciale dieren die nog op het bord staan gaan nog af
-  finishRace();
+  if(G.mode==='tour')finishTour();else finishRace();
 }
 async function endCheck(){
-  if(G.mode==='race'){if(G.timeUp)await endRace();return}
+  if(isTimed(G)){if(G.timeUp)await endRace();return}
   if(G.mode==='level'&&goalsMet()){await fireSpecials();return win()}
   if(G.moves<=0){
     await fireSpecials();   // geen zetten meer: de speciale dieren op het bord gaan nog af, dat kan het level alsnog halen
@@ -999,7 +1006,7 @@ function finishDaily(){
 }
 
 /* ============ toernooi (wekelijks) en prijzenkast ============ */
-// Een week loopt van maandag t/m zondag. ws = de maandag (jjjj-mm-dd). De score is je beste Tijdrace van die week.
+// Een week loopt van maandag t/m zondag. ws = de maandag (jjjj-mm-dd). De score is je beste toernooi-ronde van die week.
 const isoDay=(t)=>t.toISOString().slice(0,10);
 function dayAdd(ds,n){const [y,m,d]=ds.split('-').map(Number);return isoDay(new Date(Date.UTC(y,m-1,d+n)))}
 function weekStart(ds){const [y,m,d]=ds.split('-').map(Number),t=new Date(Date.UTC(y,m-1,d));return dayAdd(ds,-((t.getUTCDay()+6)%7))}
@@ -1008,7 +1015,8 @@ function weekLeft(ws){   // tijd tot zondagavond 24:00 (lokale tijd)
   const [y,m,d]=ws.split('-').map(Number),ms=new Date(y,m-1,d+7)-Date.now(),h=Math.max(0,Math.floor(ms/36e5)),dd=Math.floor(h/24);
   return dd>=1?`<span>nog ${dd} ${dd===1?'dag':'dagen'}</span>`:`<span>nog ${Math.max(1,h)} uur</span>`;
 }
-const weekHasScore=(ws)=>{for(let i=0;i<7;i++)if(((S.race||{})[dayAdd(ws,i)]||0)>0)return true;return false};
+const weekBest=(ws)=>{let m=0;for(let i=0;i<7;i++)m=Math.max(m,(S.tour||{})[dayAdd(ws,i)]||0);return m};
+const weekHasScore=(ws)=>weekBest(ws)>0;
 const cupIcon=r=>r===1?'🥇':r===2?'🥈':r===3?'🥉':'🎖️';
 function tourNoSetup(e){return /find the function|week_global|week_me|league_week/i.test((e&&e.message)||'')}
 // Afgelopen weken uitslag ophalen: pas twee dagen na het einde van de week, dan is elke score binnen.
@@ -1057,16 +1065,16 @@ async function renderTour(){
     const rows=await rpc('yippo_week_global',{p_week:ws,p_limit:50}),me=myId();
     if(tok!==lbTok)return;
     const total=rows.length?+rows[0].total:0;
-    let h=`<div class="tsec">Beste Tijdrace van deze week</div>`;
+    let h=`<div class="tsec">Beste score van deze week</div>`;
     if(!rows.length)h+='<p class="muted">Nog niemand deze week. Wees de eerste!</p>';
     rows.forEach(x=>{h+=`<div class="lbrow${x.player_id===me?' me':''}"><span class="rk">${medal(+x.rank)}</span><span class="nm">${esc(prettyName(x.name))}</span><span class="sc">${fmt(+x.score)}</span></div>`});
     if(total>rows.length)h+=`<p class="muted"><span>${fmt(total)} spelers</span></p>`;
     h+=`<div class="tsec">Jouw beloning aan het eind van de week</div><div class="rewards"><div><b>🥇</b>Plek 1</div><div><b>🥈</b>Plek 2</div><div><b>🥉</b>Plek 3</div><div><b>🎖️</b>Meegedaan</div></div>`;
     h+=`<div class="tsec">Kampioen in je league</div>`;
     if(!S.leagues.length)h+='<p class="muted">Doe mee met een league om kampioen te worden.</p>';
-    h+='<div id="tourLg"></div><div class="lbact"><button class="btn" id="tourPlay">▶ Speel de Tijdrace</button></div>';
+    h+='<div id="tourLg"></div><div class="lbact"><button class="btn" id="tourPlay">▶ Speel het toernooi</button></div>';
     body.innerHTML=h;
-    $('#tourPlay').onclick=()=>{sfx.ui();startGame(raceDef(),'race')};
+    $('#tourPlay').onclick=()=>{sfx.ui();startGame(tourDef(),'tour')};
     S.leagues.forEach(async l=>{
       try{
         const lr=await rpc('yippo_league_week',{p_code:l.code,p_week:ws});if(tok!==lbTok)return;
@@ -1129,6 +1137,42 @@ function finishRace(){
     });
   };
   setTimeout(()=>{ensurePlayer();(online()&&!S.player.name)?askName(showResult):showResult()},500);
+}
+function finishTour(){
+  G.over=true;clearInterval(G.tmr);
+  S.tour=S.tour||{};
+  const date=G.def.date,ws=G.def.week,prevWeek=weekBest(ws),record=G.score>prevWeek,score=G.score,prevDay=S.tour[date]||0;
+  S.tour[date]=Math.max(prevDay,score);
+  if(online()){ensurePlayer();S.pendingTour={day:date,score:S.tour[date]}}
+  save();sfx.win();
+  const txt=`🏆 Toernooi!\n⭐ ${fmt(weekBest(ws))} punten in ${G.def.secs} seconden\n🏅 Kun jij mij verslaan? 👇\nhttps://www.yippogame.com/`;
+  const showResult=()=>{
+    modal(`<h2>${record&&prevWeek?'🏆 Nieuw weekrecord!':'🏆 Tijd om!'}</h2>
+      <div class="stars">⭐ ${fmt(score)}</div><p>punten in ${G.def.secs} seconden</p>
+      <p>Beste van deze week: <b>${fmt(weekBest(ws))}</b></p>
+      ${online()?'<p id="rankLine">🌍 Score versturen…</p>':''}`,
+      [...(isGuest()?[['💾 Bewaar je voortgang','alt',()=>emailEntry(false)]]:[]),
+       ...(online()?[['🏆 Toernooi',isGuest()?'':'alt',()=>openTour()]]:[]),
+       ['📤 Delen','',async()=>{await shareText(I18N.trLines(txt))}],
+       ['↻ Nog een keer','dim',()=>startGame(tourDef(),'tour')],['Menu','dim',toMenu]]);
+    if(online())submitTour().then(async r=>{
+      const el=$('#rankLine');if(!el)return;
+      if(!r){el.textContent='📡 Geen verbinding, je score wordt later verstuurd';return}
+      try{const w=await rpc('yippo_week_me',{p_week:ws});if(w&&w[0]){S.wk={w:ws,r:+w[0].rank,n:+w[0].total};el.textContent=`🌍 Plek ${fmt(+w[0].rank)} van ${fmt(+w[0].total)} deze week`;return}}catch(e){}
+      el.textContent=`🌍 Plek ${fmt(+r.rank)} van ${fmt(+r.total)} deze week`;
+    });
+  };
+  setTimeout(()=>{ensurePlayer();(online()&&!S.player.name)?askName(showResult):showResult()},500);
+}
+async function submitTour(){
+  if(!online()||!S.pendingTour||!S.player||!S.player.name)return null;
+  try{
+    const r=await rpc('yippo_tour_submit',{p_day:S.pendingTour.day,p_name:S.player.name,p_score:S.pendingTour.score});
+    S.pendingTour=null;save();refreshWeekMe.t=0;return r&&r[0];
+  }catch(e){
+    if(['bad_day','bad_score','bad_name'].includes(e.message)){S.pendingTour=null;save()}
+    return null;
+  }
 }
 async function submitRace(){
   if(!online()||!S.pendingRace||!S.player||!S.player.name)return null;
@@ -1363,7 +1407,7 @@ function handleInvite(){
 
 /* ============ voortgang in de cloud ============ */
 function progressData(){
-  return {unlocked:S.unlocked,stars:S.stars,best:S.best,daily:S.daily,race:S.race||{},cups:S.cups||{},crowns:S.crowns||{},streak:S.streak,leagues:S.leagues,zoo:S.zoo,age:S.age,name:(S.player&&S.player.name)||''};
+  return {unlocked:S.unlocked,stars:S.stars,best:S.best,daily:S.daily,race:S.race||{},tour:S.tour||{},cups:S.cups||{},crowns:S.crowns||{},streak:S.streak,leagues:S.leagues,zoo:S.zoo,age:S.age,name:(S.player&&S.player.name)||''};
 }
 function mergeProgress(c){
   if(!c||typeof c!=='object')return;
@@ -1372,6 +1416,7 @@ function mergeProgress(c){
   for(const k in (c.stars||{})){const v=c.stars[k];if(/^\d{1,5}$/.test(k)&&num(v)&&v<=3&&v>(S.stars[k]||0))S.stars[k]=v}
   for(const k in (c.best||{})){const v=c.best[k];if(/^\d{1,5}$/.test(k)&&num(v)&&v>(S.best[k]||0))S.best[k]=v}
   for(const k in (c.daily||{})){const v=c.daily[k];if(/^\d{4}-\d\d-\d\d$/.test(k)&&num(v)&&v>(S.daily[k]||0))S.daily[k]=v}
+  S.tour=S.tour||{};for(const k in (c.tour||{})){const v=c.tour[k];if(/^\d{4}-\d\d-\d\d$/.test(k)&&num(v)&&v>(S.tour[k]||0))S.tour[k]=v}
   S.race=S.race||{};for(const k in (c.race||{})){const v=c.race[k];if(/^\d{4}-\d\d-\d\d$/.test(k)&&num(v)&&v>(S.race[k]||0))S.race[k]=v}
   S.cups=S.cups||{};S.crowns=S.crowns||{};S.cupChk=S.cupChk||{};
   for(const k in (c.cups||{})){const v=c.cups[k];if(/^\d{4}-\d\d-\d\d$/.test(k)&&v&&num(v.r)&&num(v.n)&&num(v.s)&&!S.cups[k]){S.cups[k]={r:v.r,n:v.n,s:v.s};S.cupChk[k]=1}}
@@ -2198,7 +2243,7 @@ function toMenu(){
   if(S.auth&&S.auth.email&&!S.age){S.age='adult';save()}
   if(KIDSAFE&&!S.nameFixed){S.nameFixed=true;ensurePlayer();if(S.player.name&&!isAutoName(S.player.name)&&S.age!=='adult'&&!(S.auth&&S.auth.email))S.player.name=autoName();save()}
   if(BETA){
-    syncZooFromProgress();show('menu2');renderMenu2();submitPending();submitRace().then(()=>{refreshWeekMe.t=0});checkCups();return}
+    syncZooFromProgress();show('menu2');renderMenu2();submitPending();submitRace();submitTour().then(()=>{refreshWeekMe.t=0});checkCups();return}
   setCal();noteDay();show('menu');
   $('#streakTxt').textContent=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count?`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'} op rij`:'';
   $('#mDaily').textContent=S.daily[today()]!==undefined?`Dagelijks (beste: ${fmt(S.daily[today()])})`:'Dagelijkse puzzel';setCal();
@@ -2252,7 +2297,7 @@ $('#gMenu').onclick=()=>{
   sfx.ui();
   modal('<h2>Pauze</h2>',[
     ['Verder spelen','',()=>{}],
-    ['↻ Opnieuw','dim',()=>G.mode==='daily'?startGame(dailyDef(),'daily'):G.mode==='race'?startGame(raceDef(),'race'):startLevel(G.def.L)],
+    ['↻ Opnieuw','dim',()=>G.mode==='daily'?startGame(dailyDef(),'daily'):G.mode==='race'?startGame(raceDef(),'race'):G.mode==='tour'?startGame(tourDef(),'tour'):startLevel(G.def.L)],
     [S.sound?'🔊 Geluid uit':'🔇 Geluid aan','dim',()=>{S.sound=!S.sound;save()}],
     ['Naar menu','dim',toMenu]]);
 };
@@ -2266,13 +2311,13 @@ function onBack(){
   if($('#modal').classList.contains('on')){
     const over=G&&G.over&&currentScreen()==='game';
     closeModal();
-    if(over){if(G.mode==='daily'||G.mode==='race')toMenu();else toLevels()}   // terug na het eindscherm
+    if(over){if(G.mode==='daily'||isTimed(G))toMenu();else toLevels()}   // terug na het eindscherm
     return true;
   }
   switch(currentScreen()){
     case 'game':
       if(G&&!G.busy&&!G.over)$('#gMenu').click();               // pauzemenu
-      else if(G&&G.over){if(G.mode==='daily'||G.mode==='race')toMenu();else toLevels()}
+      else if(G&&G.over){if(G.mode==='daily'||isTimed(G))toMenu();else toLevels()}
       return true;
     case 'levels': case 'map': case 'zooScreen': case 'lb': case 'tour':
       toMenu();return true;
