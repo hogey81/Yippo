@@ -127,6 +127,7 @@ const ROWS=[
 ["Week {} · {} punten · plek {} van {}","Week {} · {} points · place {} of {}","Semana {} · {} puntos · puesto {} de {}"],
 ["{} · Week {} · {} punten","{} · Week {} · {} points","{} · Semana {} · {} puntos"],
 ["← Toernooi","← Tournament","← Torneo"],
+["60 sec","60 sec","60 s"],
 ["Tijdrace","Time Attack","Contrarreloj"],
 ["Tijdrace!","Time Attack!","¡Contrarreloj!"],
 ["60 sec · Beste {}","60 sec · Best {}","60 s · Mejor {}"],

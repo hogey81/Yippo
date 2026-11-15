@@ -196,6 +196,8 @@ body.land #game .tools{grid-column:3;grid-row:1/4;flex-direction:column;align-se
 .cup.no{filter:grayscale(1) brightness(.35);opacity:.8}
 #gMoves.low{animation:none}
 .dchip{display:inline-block;margin:0 8px 8px 0;border-radius:99px;padding:3px 8px;font-size:14px;font-weight:800;letter-spacing:0;transform:none;box-shadow:0 2px 0 rgba(43,0,87,.25)}
+.dchip.tm{background:#3a1500;color:#ffd9bd}
+.m2race .s{margin-top:8px;white-space:nowrap}
 .dchip.rec{background:#ffd23f;color:#5a3a00}.dchip.me{background:#fff;color:#4b1d8f}.dchip.fire{background:#ff7a3d;color:#fff}
 .m2btn .s{display:block;font-weight:700;font-size:13px;margin-top:2px}
 .m2btn .side{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:32px}
@@ -1129,7 +1131,7 @@ async function submitRace(){
   if(!online()||!S.pendingRace||!S.player||!S.player.name)return null;
   try{
     const r=await rpc('yippo_race_submit',{p_day:S.pendingRace.day,p_name:S.player.name,p_score:S.pendingRace.score});
-    S.pendingRace=null;save();return r&&r[0];
+    S.pendingRace=null;save();menuRace.t=0;return r&&r[0];
   }catch(e){
     if(['bad_day','bad_score','bad_name'].includes(e.message)){S.pendingRace=null;save()}
     return null;
@@ -2102,7 +2104,8 @@ $('#zooMap').onclick=()=>{sfx.ui();openMap()};
 /* --- nieuw beginscherm --- */
 function alignSide(){const p=$('#m2Play'),d=document.querySelector('.m2side');if(p&&d&&p.offsetTop)d.style.top=p.offsetTop+'px'}
 addEventListener('resize',alignSide);
-const menuWorld={day:null,score:0,busy:false,t:0};
+const menuWorld={day:null,score:0,busy:false,t:0,medal:''},menuRace={day:null,score:0,busy:false,t:0,medal:''};
+const medalOf=(rows)=>{const i=(rows||[]).findIndex(x=>x.player_id===myId());return i>=0&&+rows[i].rank<=3&&+rows[i].score>0?['🥇','🥈','🥉'][+rows[i].rank-1]:''};   // medaille als je vandaag in de top 3 staat
 // Hele beginscherm op één scherm: past het niet (kleine telefoon of groot systeemlettertype), dan alles stapsgewijs verkleinen
 function fitMenu2(){
   const m=$('#menu2');if(!m||!m.classList.contains('on'))return;
@@ -2122,11 +2125,15 @@ function renderMenu2(){
   const chip=(c,t)=>`<span class="dchip ${c}">${t}</span>`,st=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count;
   {const ws=weekStart(today());$('#m2TourSub').innerHTML=`<span>Week ${weekNo(ws)}</span> · ${weekLeft(ws)}`+(S.wk&&S.wk.w===ws&&S.wk.r?` · <span>Plek ${S.wk.r}</span>`:'');
    const cp=Object.keys(S.cups||{}).sort().slice(-3).map(w=>cupIcon(S.cups[w].r)).join('');$('#m2TourCups').textContent=cp;$('#m2Tour').style.display=online()?'':'none';refreshWeekMe()}
-  $('#m2RaceSub').textContent=`60 sec · Beste ${fmt((S.race||{})[today()]||0)}`;
-  setCal();$('#m2DailySub').innerHTML=(chip('rec',`🏆 Record ${fmt(top)}`)+chip('me',`👤 Jij ${fmt(best||0)}`))+(st?chip('fire',`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}`):'');
+  {const rb=(S.race||{})[today()]||0,rw=menuRace.day===today()?menuRace.score:0,rtop=Math.max(rw,rb),ch=(c,t)=>`<span class="dchip ${c}">${t}</span>`;
+   $('#m2RaceSub').innerHTML=ch('rec',`🏆 Record ${fmt(rtop)}`)+ch('me',`${menuRace.day===today()&&menuRace.medal?menuRace.medal+' ':'👤 '}Jij ${fmt(rb)}`)+'<span class="dchip tm">⏱ 60 sec</span>';
+   const rs=$('#m2RaceSub');if(rs&&rs.clientWidth>0)fitRow(rs,'.dchip');
+   if(S.auth&&!menuRace.busy&&Date.now()-menuRace.t>8000){menuRace.t=Date.now();menuRace.busy=true;
+    rpc('yippo_race_global',{p_day:today(),p_limit:3}).then(x=>{if(Array.isArray(x)&&x[0]&&typeof x[0].score==='number'){menuRace.day=today();menuRace.score=x[0].score;menuRace.medal=medalOf(x);renderMenu2()}}).catch(()=>{}).then(()=>{menuRace.busy=false})}}
+  setCal();$('#m2DailySub').innerHTML=(chip('rec',`🏆 Record ${fmt(top)}`)+chip('me',`${menuWorld.day===today()&&menuWorld.medal?menuWorld.medal+' ':'👤 '}Jij ${fmt(best||0)}`))+(st?chip('fire',`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}`):'');
   if(S.auth&&!menuWorld.busy&&Date.now()-(menuWorld.t||0)>8000){   // elke keer dat het menu verschijnt het actuele dagrecord ophalen (niet vaker dan om de 8 seconden)
     menuWorld.t=Date.now();   // alleen met bestaand account: anders zou elk bezoek een nieuw gastaccount aanmaken
-  menuWorld.busy=true;rpc('yippo_global',{p_day:today(),p_limit:1}).then(r=>{if(Array.isArray(r)&&r[0]&&typeof r[0].score==='number'){menuWorld.day=today();menuWorld.score=r[0].score;renderMenu2()}}).catch(()=>{}).then(()=>{menuWorld.busy=false})}
+  menuWorld.busy=true;rpc('yippo_global',{p_day:today(),p_limit:3}).then(r=>{if(Array.isArray(r)&&r[0]&&typeof r[0].score==='number'){menuWorld.day=today();menuWorld.score=r[0].score;menuWorld.medal=medalOf(r);renderMenu2()}}).catch(()=>{}).then(()=>{menuWorld.busy=false})}
   const earned=ZOO.filter(a=>hasAnimal(a.id)),next=nextAnimal();
   $('#m2Scene').innerHTML=earned.slice(-5).map(a=>`<span>${a.e}</span>`).join('')+(next?`<span class="sil">${next.e}</span>`:'')+(earned.length?'':'<span style="font-size:15px;font-weight:800;color:#fff">Verzamel je eerste dier bij level 5!</span>');
   const tot=zooTotal();
@@ -2293,7 +2300,7 @@ updateMax();restoreBackup();backupProgress();
 let lastDay=today();
 function checkNewDay(){setCal();noteDay();
   const d=today();if(d===lastDay)return;
-  lastDay=d;menuWorld.day=null;menuWorld.score=0;menuWorld.t=0;
+  lastDay=d;menuWorld.day=null;menuWorld.score=0;menuWorld.t=0;menuWorld.medal='';menuRace.day=null;menuRace.score=0;menuRace.t=0;menuRace.medal='';
   if(currentScreen()==='menu2')renderMenu2();
 }
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkNewDay()});
