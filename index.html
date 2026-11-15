@@ -178,6 +178,9 @@ body.land #game .tools{grid-column:3;grid-row:1/4;flex-direction:column;align-se
 .m2daily{background:#c77dff;color:#2b0057;box-shadow:0 5px 0 #7b2cbf}
 .m2btn .t{display:block;font-weight:900;font-size:21px}
 .m2daily .s{margin-top:16px;white-space:nowrap}
+.m2race{background:#ff8a3d;color:#3a1500;box-shadow:0 5px 0 #b85a14;padding-block:10px}
+.m2race .t{font-size:19px}
+#gMoves.low{animation:none}
 .dchip{display:inline-block;margin:0 8px 8px 0;border-radius:99px;padding:3px 8px;font-size:14px;font-weight:800;letter-spacing:0;transform:none;box-shadow:0 2px 0 rgba(43,0,87,.25)}
 .dchip.rec{background:#ffd23f;color:#5a3a00}.dchip.me{background:#fff;color:#4b1d8f}.dchip.fire{background:#ff7a3d;color:#fff}
 .m2btn .s{display:block;font-weight:700;font-size:13px;margin-top:2px}
@@ -257,6 +260,7 @@ table.help td:first-child{white-space:nowrap}
   <div class="m2head"><img src="icons/icon-192.png" alt=""><h1 id="m2Title">Yippo</h1></div>
   <button class="m2btn m2play" id="m2Play"><span class="t">▶ Spelen</span><span class="s" id="m2PlaySub"></span><span class="side" id="m2Map">🗺</span></button>
   <button class="m2btn m2daily" id="m2Daily"><span class="t calh">Dagelijkse puzzel</span><span class="s" id="m2DailySub"></span></button>
+  <button class="m2btn m2race" id="m2Race"><span class="t">⏱ Tijdrace</span><span class="s" id="m2RaceSub"></span></button>
   <button class="m2zoo" id="m2Zoo"><div class="scene" id="m2Scene"></div><div class="foot"><b>🏡 Bekijk je dierentuin</b><div class="bar2"><div><i id="m2ZooBar"></i></div><span id="m2ZooTxt"></span></div></div></button>
   <div class="m2row"><button class="m2btn" id="m2Board"><span class="t">🏅 Scorebord</span><span class="s" id="m2BoardSub">Wereldwijd</span></button><button class="m2btn" id="m2League"><span class="t">👨‍👩‍👧 Leagues</span><span class="s" id="m2LeagueSub">Met vrienden</span></button></div>
   <div class="m2links"><button class="linkbtn" id="m2Account">👤 Account</button><button class="linkbtn" id="m2Help">❓ Hoe werkt het?</button><button class="linkbtn" id="m2Sound">🔊 Geluid</button><button class="linkbtn" id="m2Lang"></button><button class="linkbtn" id="m2Privacy">🔒 Privacy</button><a class="linkbtn" id="m2Contact" href="mailto:info@hunting4cards.com?subject=Yippo" style="text-decoration:underline">✉️ Contact</a></div>
@@ -292,7 +296,7 @@ table.help td:first-child{white-space:nowrap}
 
 <div id="lb" class="screen">
   <h2>🏅 Scorebord</h2>
-  <div class="tabs"><button class="tab on" id="tabWorld">🌍 Wereld</button><button class="tab" id="tabLeagues">👨‍👩‍👧 Mijn leagues</button></div>
+  <div class="tabs"><button class="tab on" id="tabWorld">🌍 Wereld</button><button class="tab" id="tabRace">⏱ Tijdrace</button><button class="tab" id="tabLeagues">👨‍👩‍👧 Mijn leagues</button></div>
   <div class="lbBody" id="lbBody"></div>
   <div class="lbBtns"><button class="btn dim" id="lbName">✏️ Naam</button><button class="btn dim" id="lbBack">← Menu</button></div>
 </div>
@@ -435,6 +439,10 @@ function levelDef(L){
   else if(k===4){const sk=SPECIAL_GOALS[Math.floor((L-4)/5)%SPECIAL_GOALS.length],sn=Math.min(6,3+Math.floor(hard/6));goals.push({kind:'special',s:sk,n:sk==='elephant'?Math.min(3,Math.max(2,sn-3)):Math.min(4,Math.max(2,sn-2))},{kind:'collect',type:pickT(),n:base-2});moves+=sk==='elephant'?3:2}
   else{ice=Math.min(12+Math.floor(2*wf),4+Math.floor(hard*.4));goals.push({kind:'score',n:Math.min(2800+Math.floor(300*wf),1500+L*50)},{kind:'ice',n:ice});moves+=3}
   return {L,types,moves,goals,ice,seed:L*104729+1};
+}
+function raceDef(){
+  const d=today();
+  return {race:true,date:d,types:6,moves:9999,ice:0,seed:hashStr(d+'race'),goals:[],secs:60};
 }
 function dailyDef(){
   const d=today(),h=hashStr(d);
@@ -625,7 +633,9 @@ async function clearSet(set,combo,spawns,nAct){
   sfx.match(combo);buzz(12);
   if(nAct){sfx.special();board.classList.remove('shake');void board.offsetWidth;board.classList.add('shake');buzz(60)}
   if(combo>=2)comboText(GAME_NAME.toUpperCase()+' x'+combo+'!');
+  if(G.mode==='race'&&combo>=2)addTime(1,Math.floor(f/COLS),f%COLS);   // elke extra stap in een ketting: 1 seconde erbij
   spawns.forEach(s=>{
+    if(G.mode==='race')addTime(2,s.r,s.c);   // een nieuw speciaal dier: 2 seconden erbij
     const t=mkTile(-1,s.s,s.dir);grid[s.r][s.c]=t;attach(t,s.r,s.c,true);
     G.specialsMade++;G.made[s.s]++;G.score+=50;sfx.born();
   });
@@ -680,7 +690,8 @@ function startGame(def,mode){
   closeModal();
   G={mode,def,types:def.types,moves:def.moves,score:0,collected:{},specialsMade:0,made:{lion:0,elephant:0,dragon:0,unicorn:0},
      iceNow:0,iceStart:0,busy:true,over:false,sel:null,hammerOn:false,hammers:2,shuffles:1,
-     rnd:mode==='daily'?mulberry32(def.seed^0x9e3779b9):Math.random};
+     rnd:(mode==='daily'||mode==='race')?mulberry32(def.seed^0x9e3779b9):Math.random};
+  if(mode==='race'){G.time=def.secs;G.last=Date.now();const g=G;g.tmr=setInterval(()=>raceTick(g),200)}
   show('game');
   board.innerHTML='';
   const gr=mulberry32(def.seed);
@@ -698,6 +709,14 @@ function startGame(def,mode){
       if(G!==g||g.over)return;
       if(document.hidden||!$('#game').classList.contains('on')){setTimeout(poll,20000);return}   // niet zichtbaar: niets ophalen
       rpc('yippo_global',{p_day:def.date,p_limit:1}).then(r=>{if(G===g&&Array.isArray(r)&&r[0]&&typeof r[0].score==='number'&&r[0].score!==g.worldBest){g.worldBest=r[0].score;hud()}}).catch(()=>{}).then(()=>{if(G===g&&!g.over)setTimeout(poll,20000)});
+    };
+    poll();
+  }
+  if(mode==='race'&&online()){   // beste score van vandaag van iedereen: bij de start en daarna elke 20 seconden opnieuw ophalen
+    const g=G,poll=()=>{
+      if(G!==g||g.over)return;
+      if(document.hidden||!$('#game').classList.contains('on')){setTimeout(poll,20000);return}
+      rpc('yippo_race_global',{p_day:def.date,p_limit:1}).then(r=>{if(G===g&&Array.isArray(r)&&r[0]&&typeof r[0].score==='number'&&r[0].score!==g.worldBest){g.worldBest=r[0].score;hud()}}).catch(()=>{}).then(()=>{if(G===g&&!g.over)setTimeout(poll,20000)});
     };
     poll();
   }
@@ -722,6 +741,19 @@ function hud(){
   fitRow($('#game .top'),'.pill');fitRow($('#goals'),'.goal');
 }
 function hud0(){
+  if(G.mode==='race'){
+    $('#gLevel').textContent='⏱ Tijdrace';$('#gLevel').classList.remove('calh');
+    const t=Math.ceil(G.time),m=Math.floor(t/60),sc=t%60;
+    $('#gMoves').textContent='⏳ '+m+':'+(sc<10?'0':'')+sc;
+    $('#gMoves').classList.toggle('low',G.time<=10);
+    $('#gScore').textContent='⭐ '+fmt(G.score);
+    const best=Math.max(G.worldBest||0,(S.race||{})[G.def.date]||0);
+    $('#goals').innerHTML=`<span class="goal">🏆 Beste vandaag: ${fmt(Math.max(best,G.score))}</span>`;
+    $('#barfill').style.width=Math.round(Math.min(1,G.time/G.def.secs)*100)+'%';
+    $('#tHammer span').textContent=G.hammers;$('#tShuffle span').textContent=G.shuffles;
+    $('#tHammer').classList.toggle('on',G.hammerOn);
+    return;
+  }
   $('#gLevel').textContent=G.mode==='daily'?'Dagelijks':'Level '+G.def.L;$('#gLevel').classList.toggle('calh',G.mode==='daily');setCal();
   $('#gMoves').textContent='Zetten '+G.moves;
   $('#gMoves').classList.toggle('low',G.moves<=5&&G.moves>0);
@@ -845,7 +877,26 @@ async function fireSpecials(){
     await resolve(sp,[]);
   }
 }
+function addTime(sec,r,c){
+  if(!G||G.over||G.timeUp)return;
+  const before=G.time;G.time=Math.min(90,G.time+sec);
+  if(G.time>before)fxAt(r,c,'+'+Math.round(G.time-before)+'s','#7ee8ff');
+}
+function raceTick(g){
+  if(G!==g||g.over){clearInterval(g.tmr);return}
+  const now=Date.now(),dt=Math.min(now-g.last,500);g.last=now;
+  if(document.hidden||$('#modal').classList.contains('on')||!$('#game').classList.contains('on'))return;   // pauze: de tijd loopt niet door
+  if(!g.timeUp){g.time-=dt/1000;if(g.time<=0){g.time=0;g.timeUp=true}hud0()}
+  if(g.timeUp&&!g.busy&&!g.ending)endRace();
+}
+async function endRace(){
+  if(!G||G.ending||G.over)return;
+  G.ending=true;G.busy=true;clearHint();
+  await fireSpecials();   // speciale dieren die nog op het bord staan gaan nog af
+  finishRace();
+}
 async function endCheck(){
+  if(G.mode==='race'){if(G.timeUp)await endRace();return}
   if(G.mode==='level'&&goalsMet()){await fireSpecials();return win()}
   if(G.moves<=0){
     await fireSpecials();   // geen zetten meer: de speciale dieren op het bord gaan nog af, dat kan het level alsnog halen
@@ -918,6 +969,41 @@ function finishDaily(){
     });
   };
   setTimeout(()=>{ensurePlayer();(online()&&!S.player.name)?askName(showResult):showResult()},500);
+}
+
+function finishRace(){
+  G.over=true;clearInterval(G.tmr);
+  S.race=S.race||{};
+  const date=G.def.date,prev=S.race[date]||0,record=G.score>prev,score=G.score;
+  S.race[date]=Math.max(prev,score);
+  if(online()){ensurePlayer();S.pendingRace={day:date,score:S.race[date]}}
+  save();sfx.win();
+  const txt=`⏱ Tijdrace!\n⭐ ${fmt(S.race[date])} punten in 60 seconden\n🏆 Kun jij mij verslaan? 👇\nhttps://www.yippogame.com/`;
+  const showResult=()=>{
+    modal(`<h2>${record&&prev?'🏆 Nieuw record!':'⏱ Tijd om!'}</h2>
+      <div class="stars">⭐ ${fmt(score)}</div><p>punten in 60 seconden</p>
+      <p>Beste van vandaag: <b>${fmt(S.race[date])}</b></p>
+      ${online()?'<p id="rankLine">🌍 Score versturen…</p>':''}`,
+      [...(isGuest()?[['💾 Bewaar je voortgang','alt',()=>emailEntry(false)]]:[]),
+       ...(online()?[['🏅 Scorebord',isGuest()?'':'alt',()=>openLB('race')]]:[]),
+       ['📤 Delen','',async()=>{await shareText(I18N.trLines(txt))}],
+       ['↻ Nog een keer','dim',()=>startGame(raceDef(),'race')],['Menu','dim',toMenu]]);
+    if(online())submitRace().then(r=>{
+      const el=$('#rankLine');if(!el)return;
+      el.textContent=r?`🌍 Plek ${fmt(+r.rank)} van ${fmt(+r.total)} wereldwijd`:'📡 Geen verbinding, je score wordt later verstuurd';
+    });
+  };
+  setTimeout(()=>{ensurePlayer();(online()&&!S.player.name)?askName(showResult):showResult()},500);
+}
+async function submitRace(){
+  if(!online()||!S.pendingRace||!S.player||!S.player.name)return null;
+  try{
+    const r=await rpc('yippo_race_submit',{p_day:S.pendingRace.day,p_name:S.player.name,p_score:S.pendingRace.score});
+    S.pendingRace=null;save();return r&&r[0];
+  }catch(e){
+    if(['bad_day','bad_score','bad_name'].includes(e.message)){S.pendingRace=null;save()}
+    return null;
+  }
 }
 
 /* ============ hints ============ */
@@ -1035,10 +1121,12 @@ function openLB(tab){show('lb');lbTab=tab||'world';renderLB()}
 async function renderLB(){
   const tok=++lbTok,body=$('#lbBody');
   $('#tabWorld').classList.toggle('on',lbTab==='world');
-  $('#tabLeagues').classList.toggle('on',lbTab!=='world');
+  $('#tabRace').classList.toggle('on',lbTab==='race');
+  $('#tabLeagues').classList.toggle('on',lbTab!=='world'&&lbTab!=='race');
   body.innerHTML='<p class="muted">Laden…</p>';
   try{
     if(lbTab==='world')await renderWorld(body,tok);
+    else if(lbTab==='race')await renderRace(body,tok);
     else if(lbTab.startsWith('league:'))await renderLeague(body,lbTab.slice(7),tok);
     else renderLeagues(body);
   }catch(e){if(tok===lbTok)body.innerHTML=`<p class="muted">${esc(errText(e))}</p><div class="lbact"><button class="btn" id="lbRetry">↻ Opnieuw</button></div>`;const b=$('#lbRetry');if(b)b.onclick=renderLB}
@@ -1054,6 +1142,19 @@ async function renderWorld(body,tok){
   if(S.daily[day]===undefined)h+='<div class="lbact"><button class="btn" id="lbPlay">▶ Speel de dagelijkse puzzel</button></div>';
   body.innerHTML=h;
   const b=$('#lbPlay');if(b)b.onclick=()=>{sfx.ui();startGame(dailyDef(),'daily')};
+}
+async function renderRace(body,tok){
+  const day=today();let rows;
+  try{rows=await rpc('yippo_race_global',{p_day:day,p_limit:50})}
+  catch(e){if(/find the function|race_global/i.test(e.message||'')){if(tok===lbTok)body.innerHTML='<p class="muted">Het Tijdrace-scorebord komt binnenkort.</p>';return}throw e}
+  if(tok!==lbTok)return;
+  const total=rows.length?+rows[0].total:0,me=myId();
+  let h=`<div class="lbhead"><span>⏱ Tijdrace vandaag</span><small>${fmt(total)} ${total===1?'speler':'spelers'}</small></div>`;
+  if(!rows.length)h+='<p class="muted">Nog niemand vandaag. Wees de eerste!</p>';
+  rows.forEach(r=>{h+=`<div class="lbrow${r.player_id===me?' me':''}"><span class="rk">${medal(+r.rank)}</span><span class="nm">${esc(prettyName(r.name))}</span><span class="sc">${fmt(+r.score)}</span></div>`});
+  h+='<div class="lbact"><button class="btn" id="lbPlay">▶ Speel de Tijdrace</button></div>';
+  body.innerHTML=h;
+  $('#lbPlay').onclick=()=>{sfx.ui();startGame(raceDef(),'race')};
 }
 function renderLeagues(body){
   let h='<div class="lbhead"><span>Jouw leagues</span></div>';
@@ -1127,7 +1228,7 @@ function handleInvite(){
 
 /* ============ voortgang in de cloud ============ */
 function progressData(){
-  return {unlocked:S.unlocked,stars:S.stars,best:S.best,daily:S.daily,streak:S.streak,leagues:S.leagues,zoo:S.zoo,age:S.age,name:(S.player&&S.player.name)||''};
+  return {unlocked:S.unlocked,stars:S.stars,best:S.best,daily:S.daily,race:S.race||{},streak:S.streak,leagues:S.leagues,zoo:S.zoo,age:S.age,name:(S.player&&S.player.name)||''};
 }
 function mergeProgress(c){
   if(!c||typeof c!=='object')return;
@@ -1136,6 +1237,7 @@ function mergeProgress(c){
   for(const k in (c.stars||{})){const v=c.stars[k];if(/^\d{1,5}$/.test(k)&&num(v)&&v<=3&&v>(S.stars[k]||0))S.stars[k]=v}
   for(const k in (c.best||{})){const v=c.best[k];if(/^\d{1,5}$/.test(k)&&num(v)&&v>(S.best[k]||0))S.best[k]=v}
   for(const k in (c.daily||{})){const v=c.daily[k];if(/^\d{4}-\d\d-\d\d$/.test(k)&&num(v)&&v>(S.daily[k]||0))S.daily[k]=v}
+  S.race=S.race||{};for(const k in (c.race||{})){const v=c.race[k];if(/^\d{4}-\d\d-\d\d$/.test(k)&&num(v)&&v>(S.race[k]||0))S.race[k]=v}
   const cs=c.streak;
   if(cs&&typeof cs.last==='string'&&num(cs.count)&&(cs.last>S.streak.last||(cs.last===S.streak.last&&cs.count>S.streak.count)))S.streak={count:cs.count,last:cs.last};
   (Array.isArray(c.leagues)?c.leagues:[]).forEach(l=>{
@@ -1885,6 +1987,7 @@ function renderMenu2(){
   const best=S.daily[today()];
   const wb=menuWorld.day===today()?menuWorld.score:undefined,top=Math.max(wb||0,best||0);   // dagrecord van iedereen (zonder verbinding: je eigen beste)
   const chip=(c,t)=>`<span class="dchip ${c}">${t}</span>`,st=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count;
+  $('#m2RaceSub').textContent=`60 sec · Beste ${fmt((S.race||{})[today()]||0)}`;
   setCal();$('#m2DailySub').innerHTML=(chip('rec',`🏆 Record ${fmt(top)}`)+chip('me',`👤 Jij ${fmt(best||0)}`))+(st?chip('fire',`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'}`):'');
   if(S.auth&&!menuWorld.busy&&Date.now()-(menuWorld.t||0)>8000){   // elke keer dat het menu verschijnt het actuele dagrecord ophalen (niet vaker dan om de 8 seconden)
     menuWorld.t=Date.now();   // alleen met bestaand account: anders zou elk bezoek een nieuw gastaccount aanmaken
@@ -1904,6 +2007,7 @@ function renderMenu2(){
 }
 $('#m2Play').onclick=e=>{sfx.ui();if(e.target.id==='m2Map')openMap();else startLevel(Math.min(S.unlocked,MAX_LEVEL))};
 $('#m2Daily').onclick=()=>{sfx.ui();startGame(dailyDef(),'daily')};
+$('#m2Race').onclick=()=>{sfx.ui();startGame(raceDef(),'race')};
 $('#m2Zoo').onclick=()=>{sfx.ui();openZoo()};
 $('#m2Board').onclick=()=>{sfx.ui();openLB('world')};
 $('#m2League').onclick=()=>{sfx.ui();openLB('leagues')};
@@ -1946,7 +2050,7 @@ function toMenu(){
   if(S.auth&&S.auth.email&&!S.age){S.age='adult';save()}
   if(KIDSAFE&&!S.nameFixed){S.nameFixed=true;ensurePlayer();if(S.player.name&&!isAutoName(S.player.name)&&S.age!=='adult'&&!(S.auth&&S.auth.email))S.player.name=autoName();save()}
   if(BETA){
-    syncZooFromProgress();show('menu2');renderMenu2();submitPending();return}
+    syncZooFromProgress();show('menu2');renderMenu2();submitPending();submitRace();return}
   setCal();noteDay();show('menu');
   $('#streakTxt').textContent=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count?`🔥 ${S.streak.count} ${S.streak.count===1?'dag':'dagen'} op rij`:'';
   $('#mDaily').textContent=S.daily[today()]!==undefined?`Dagelijks (beste: ${fmt(S.daily[today()])})`:'Dagelijkse puzzel';setCal();
@@ -1977,6 +2081,7 @@ $('#mBoard').onclick=()=>{sfx.ui();openLB('world')};
 $('#mAccount').onclick=()=>{sfx.ui();accountDialog()};
 $('#mLogin').onclick=()=>{sfx.ui();emailEntry(true)};
 $('#tabWorld').onclick=()=>{sfx.ui();lbTab='world';renderLB()};
+$('#tabRace').onclick=()=>{sfx.ui();lbTab='race';renderLB()};
 $('#tabLeagues').onclick=()=>{sfx.ui();lbTab='leagues';renderLB()};
 $('#lbBack').onclick=toMenu;
 $('#lbName').onclick=()=>{sfx.ui();ensurePlayer();KIDSAFE?nameDialog():askName(()=>{})};
@@ -1999,7 +2104,7 @@ $('#gMenu').onclick=()=>{
   sfx.ui();
   modal('<h2>Pauze</h2>',[
     ['Verder spelen','',()=>{}],
-    ['↻ Opnieuw','dim',()=>G.mode==='daily'?startGame(dailyDef(),'daily'):startLevel(G.def.L)],
+    ['↻ Opnieuw','dim',()=>G.mode==='daily'?startGame(dailyDef(),'daily'):G.mode==='race'?startGame(raceDef(),'race'):startLevel(G.def.L)],
     [S.sound?'🔊 Geluid uit':'🔇 Geluid aan','dim',()=>{S.sound=!S.sound;save()}],
     ['Naar menu','dim',toMenu]]);
 };
@@ -2013,13 +2118,13 @@ function onBack(){
   if($('#modal').classList.contains('on')){
     const over=G&&G.over&&currentScreen()==='game';
     closeModal();
-    if(over){if(G.mode==='daily')toMenu();else toLevels()}   // terug na het eindscherm
+    if(over){if(G.mode==='daily'||G.mode==='race')toMenu();else toLevels()}   // terug na het eindscherm
     return true;
   }
   switch(currentScreen()){
     case 'game':
       if(G&&!G.busy&&!G.over)$('#gMenu').click();               // pauzemenu
-      else if(G&&G.over){if(G.mode==='daily')toMenu();else toLevels()}
+      else if(G&&G.over){if(G.mode==='daily'||G.mode==='race')toMenu();else toLevels()}
       return true;
     case 'levels': case 'map': case 'zooScreen': case 'lb':
       toMenu();return true;
