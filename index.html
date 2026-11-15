@@ -181,8 +181,8 @@ body.land #game .tools{grid-column:3;grid-row:1/4;flex-direction:column;align-se
 .m2race{background:#ff8a3d;color:#3a1500;box-shadow:0 5px 0 #b85a14;padding-block:10px}
 .m2race .t{font-size:19px}
 .m2tour{background:#2fb8a6;color:#04332d;box-shadow:0 5px 0 #1b7d70;padding-block:10px}
-.m2tour .t{font-size:19px}
-.m2tour .tcups{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:24px;letter-spacing:2px}
+.m2tour .t{font-size:19px;display:block;margin-bottom:6px}
+.m2tour .tcups{position:absolute;right:16px;top:8px;font-size:24px;letter-spacing:2px}
 .tourweek{text-align:center;margin:4px 0 6px;font-weight:800}
 .tourweek span{display:inline-block;background:#ffffff2e;border-radius:99px;padding:3px 12px;font-size:14px;margin:0 3px}
 .tsec{font-weight:900;font-size:14px;letter-spacing:.04em;text-transform:uppercase;margin:14px 2px 6px;opacity:.9}
@@ -197,6 +197,9 @@ body.land #game .tools{grid-column:3;grid-row:1/4;flex-direction:column;align-se
 #gMoves.low{animation:none}
 .dchip{display:inline-block;margin:0 8px 8px 0;border-radius:99px;padding:3px 8px;font-size:14px;font-weight:800;letter-spacing:0;transform:none;box-shadow:0 2px 0 rgba(43,0,87,.25)}
 .dchip.tm{background:#3a1500;color:#ffd9bd}
+.dchip.tw{background:#04332d;color:#c9fff6}
+#m2DailySub,#m2RaceSub,#m2TourSub{display:flex;gap:8px;width:100%}   /* chips verdelen de volle breedte van de knop */
+#m2DailySub .dchip,#m2RaceSub .dchip,#m2TourSub .dchip{flex:1 1 auto;margin:0 0 6px;text-align:center;white-space:nowrap}
 .m2race .s{margin-top:8px;white-space:nowrap}
 .dchip.rec{background:#ffd23f;color:#5a3a00}.dchip.me{background:#fff;color:#4b1d8f}.dchip.fire{background:#ff7a3d;color:#fff}
 .m2btn .s{display:block;font-weight:700;font-size:13px;margin-top:2px}
@@ -2123,7 +2126,8 @@ function renderMenu2(){
   const best=S.daily[today()];
   const wb=menuWorld.day===today()?menuWorld.score:undefined,top=Math.max(wb||0,best||0);   // dagrecord van iedereen (zonder verbinding: je eigen beste)
   const chip=(c,t)=>`<span class="dchip ${c}">${t}</span>`,st=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count;
-  {const ws=weekStart(today());$('#m2TourSub').innerHTML=`<span>Week ${weekNo(ws)}</span> · ${weekLeft(ws)}`+(S.wk&&S.wk.w===ws&&S.wk.r?` · <span>Plek ${S.wk.r}</span>`:'');
+  {const ws=weekStart(today());$('#m2TourSub').innerHTML=`<span class="dchip tw">Week ${weekNo(ws)}</span>`+weekLeft(ws).replace('<span>','<span class="dchip me">')+(S.wk&&S.wk.w===ws&&S.wk.r?`<span class="dchip rec">${S.wk.r<=3?['🥇','🥈','🥉'][S.wk.r-1]+' ':''}Plek ${S.wk.r}</span>`:'');
+   {const ts=$('#m2TourSub');if(ts&&ts.clientWidth>0)fitRow(ts,'.dchip')}
    const cp=Object.keys(S.cups||{}).sort().slice(-3).map(w=>cupIcon(S.cups[w].r)).join('');$('#m2TourCups').textContent=cp;$('#m2Tour').style.display=online()?'':'none';refreshWeekMe()}
   {const rb=(S.race||{})[today()]||0,rw=menuRace.day===today()?menuRace.score:0,rtop=Math.max(rw,rb),ch=(c,t)=>`<span class="dchip ${c}">${t}</span>`;
    $('#m2RaceSub').innerHTML=ch('rec',`🏆 Record ${fmt(rtop)}`)+ch('me',`${menuRace.day===today()&&menuRace.medal?menuRace.medal+' ':'👤 '}Jij ${fmt(rb)}`)+'<span class="dchip tm">⏱ 60 sec</span>';
