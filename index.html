@@ -182,7 +182,6 @@ body.land #game .tools{grid-column:3;grid-row:1/4;flex-direction:column;align-se
 .m2race .t{font-size:19px}
 .m2tour{background:#2fb8a6;color:#04332d;box-shadow:0 5px 0 #1b7d70;padding-block:10px}
 .m2tour .t{font-size:19px;display:block;margin-bottom:6px}
-.m2tour .tcups{position:absolute;right:16px;top:8px;font-size:24px;letter-spacing:2px}
 .tourweek{text-align:center;margin:4px 0 6px;font-weight:800}
 .tourweek span{display:inline-block;background:#ffffff2e;border-radius:99px;padding:3px 12px;font-size:14px;margin:0 3px}
 .tsec{font-weight:900;font-size:14px;letter-spacing:.04em;text-transform:uppercase;margin:14px 2px 6px;opacity:.9}
@@ -280,7 +279,7 @@ table.help td:first-child{white-space:nowrap}
   <button class="m2btn m2play" id="m2Play"><span class="t">▶ Spelen</span><span class="s" id="m2PlaySub"></span><span class="side" id="m2Map">🗺</span></button>
   <button class="m2btn m2daily" id="m2Daily"><span class="t calh">Dagelijkse puzzel</span><span class="s" id="m2DailySub"></span></button>
   <button class="m2btn m2race" id="m2Race"><span class="t">⏱ Tijdrace</span><span class="s" id="m2RaceSub"></span></button>
-  <button class="m2btn m2tour" id="m2Tour"><span class="t">🏆 Toernooi</span><span class="s" id="m2TourSub"></span><span class="tcups" id="m2TourCups"></span></button>
+  <button class="m2btn m2tour" id="m2Tour"><span class="t">🏆 Toernooi</span><span class="s" id="m2TourSub"></span></button>
   <button class="m2zoo" id="m2Zoo"><div class="scene" id="m2Scene"></div><div class="foot"><b>🏡 Bekijk je dierentuin</b><div class="bar2"><div><i id="m2ZooBar"></i></div><span id="m2ZooTxt"></span></div></div></button>
   <div class="m2row"><button class="m2btn" id="m2Board"><span class="t">🏅 Scorebord</span><span class="s" id="m2BoardSub">Wereldwijd</span></button><button class="m2btn" id="m2League"><span class="t">👨‍👩‍👧 Leagues</span><span class="s" id="m2LeagueSub">Met vrienden</span></button></div>
   <div class="m2links"><button class="linkbtn" id="m2Account">👤 Account</button><button class="linkbtn" id="m2Help">❓ Hoe werkt het?</button><button class="linkbtn" id="m2Sound">🔊 Geluid</button><button class="linkbtn" id="m2Lang"></button><button class="linkbtn" id="m2Privacy">🔒 Privacy</button><a class="linkbtn" id="m2Contact" href="mailto:info@hunting4cards.com?subject=Yippo" style="text-decoration:underline">✉️ Contact</a></div>
@@ -2200,7 +2199,7 @@ function renderMenu2(){
   const chip=(c,t)=>`<span class="dchip ${c}">${t}</span>`,st=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count;
   {const ws=weekStart(today());$('#m2TourSub').innerHTML=`<span class="dchip tw">Week ${weekNo(ws)}</span>`+weekLeft(ws).replace('<span>','<span class="dchip me">')+(S.wk&&S.wk.w===ws&&S.wk.r?`<span class="dchip rec">${S.wk.r<=3?['🥇','🥈','🥉'][S.wk.r-1]+' ':''}Plek ${S.wk.r}</span>`:'');
    {const ts=$('#m2TourSub');if(ts&&ts.clientWidth>0)fitRow(ts,'.dchip')}
-   const cp=Object.keys(S.cups||{}).sort().slice(-3).map(w=>cupIcon(S.cups[w].r)).join('');$('#m2TourCups').textContent=cp;$('#m2Tour').style.display=online()?'':'none';refreshWeekMe()}
+   $('#m2Tour').style.display=online()?'':'none';refreshWeekMe()}
   {const rb=(S.race||{})[today()]||0,rw=menuRace.day===today()?menuRace.score:0,rtop=Math.max(rw,rb),ch=(c,t)=>`<span class="dchip ${c}">${t}</span>`;
    $('#m2RaceSub').innerHTML=ch('rec',`🏆 Record ${fmt(rtop)}`)+ch('me',`${menuRace.day===today()&&menuRace.medal?menuRace.medal+' ':'👤 '}Jij ${fmt(rb)}`)+'<span class="dchip tm">⏱ 60 sec</span>';
    const rs=$('#m2RaceSub');if(rs&&rs.clientWidth>0)fitRow(rs,'.dchip');
