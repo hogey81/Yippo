@@ -184,6 +184,21 @@ body.land #game .tools{grid-column:3;grid-row:1/4;flex-direction:column;align-se
 .m2tour .t{font-size:19px;display:block;margin-bottom:6px}
 .tourweek{text-align:center;margin:4px 0 6px;font-weight:800}
 .tourweek span{display:inline-block;background:#ffffff2e;border-radius:99px;padding:3px 12px;font-size:14px;margin:0 3px}
+.bkt{display:flex;gap:6px;align-items:stretch;margin:6px 0 4px;width:100%}
+.bcol{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-around;gap:8px}
+.bcol h4{margin:0;font-size:10px;letter-spacing:.05em;text-transform:uppercase;text-align:center;opacity:.85}
+.bm{background:#ffffff1f;border-radius:10px;overflow:hidden;font-size:12px;font-weight:800}
+.bm div{display:flex;justify-content:space-between;gap:4px;padding:5px 6px}.bm div+div{border-top:1px solid #ffffff22}
+.bm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.bm .w{background:#2fb8a655}.bm .me{background:#ffd23f;color:#3a2500}.bm .lo{opacity:.5}.bm .by{opacity:.55;font-style:italic}
+.bphases{display:flex;gap:5px;margin:8px 0;font-size:11px;font-weight:900;text-align:center;width:100%}
+.bphases div{flex:1;border-radius:9px;padding:5px 2px;background:#ffffff1f;opacity:.7}.bphases .on{background:#ffd23f;color:#3a2500;opacity:1}.bphases .dn{opacity:.45;text-decoration:line-through}
+.mybox{background:#ffffff2a;border-radius:16px;padding:12px;margin-top:10px;text-align:center;width:100%}
+.mybox small{display:block;opacity:.85;margin-top:3px;font-size:13px;font-weight:600}
+.lbrow.cut{border-bottom:2px dashed #ffd23f}
+.champ{background:linear-gradient(#ffd23f,#ffb300);color:#3a2500;border-radius:16px;padding:10px;text-align:center;font-weight:900;margin-top:8px;width:100%}
+.dchip.turn{background:#ffd23f;color:#3a2500;animation:turnp 1.4s ease-in-out infinite}
+@keyframes turnp{50%{transform:scale(1.06)}}
 .tsec{font-weight:900;font-size:14px;letter-spacing:.04em;text-transform:uppercase;margin:14px 2px 6px;opacity:.9}
 .rewards{display:flex;justify-content:space-around;background:#ffffff1f;border-radius:14px;padding:10px 6px;text-align:center;font-size:12px;font-weight:800}
 .rewards b{display:block;font-size:28px;line-height:1.2}
@@ -479,7 +494,11 @@ function tourDef(){
   const ws=weekStart(today());
   return {tour:true,date:today(),week:ws,types:6,moves:9999,ice:0,seed:hashStr(ws+'toernooi'),goals:[],secs:TOUR_SECS};   // elke week een ander startbord, voor iedereen gelijk
 }
-const isTimed=g=>g&&(g.mode==='race'||g.mode==='tour');
+const BRACKET_START='2026-11-23';   // vanaf deze maandag werkt het toernooi met een bracket
+function brkDef(week,round,opp){return {brk:true,week,round,opp,date:today(),types:6,moves:9999,ice:0,goals:[],secs:TOUR_SECS,seed:hashStr(week+'bracket'+round)}}   // alle spelers in een ronde krijgen hetzelfde bord
+const isTimed=g=>g&&(g.mode==='race'||g.mode==='tour'||g.mode==='brk');
+const ROUND_NAME={1:'Kwartfinale',2:'Halve finale',3:'Finale'};
+let BRK=null;   // laatst opgehaalde stand van het toernooi (voor het hoofdscherm)
 function raceDef(){
   const d=today();
   return {race:true,date:d,types:6,moves:9999,ice:0,seed:hashStr(d+'race'),goals:[],secs:60};
@@ -728,8 +747,8 @@ function startGame(def,mode){
   closeModal();
   G={mode,def,types:def.types,moves:def.moves,score:0,collected:{},specialsMade:0,made:{lion:0,elephant:0,dragon:0,unicorn:0},
      iceNow:0,iceStart:0,busy:true,over:false,sel:null,hammerOn:false,hammers:2,shuffles:1,
-     rnd:(mode==='daily'||mode==='race'||mode==='tour')?mulberry32(def.seed^0x9e3779b9):Math.random};
-  if(mode==='race'||mode==='tour'){G.time=def.secs;G.last=Date.now();const g=G;g.tmr=setInterval(()=>raceTick(g),200)}
+     rnd:(mode==='daily'||mode==='race'||mode==='tour'||mode==='brk')?mulberry32(def.seed^0x9e3779b9):Math.random};
+  if(mode==='race'||mode==='tour'||mode==='brk'){G.time=def.secs;G.last=Date.now();const g=G;g.tmr=setInterval(()=>raceTick(g),200)}
   show('game');
   board.innerHTML='';
   const gr=mulberry32(def.seed);
@@ -780,13 +799,13 @@ function hud(){
 }
 function hud0(){
   if(isTimed(G)){
-    $('#gLevel').textContent=G.mode==='tour'?'🏆 Toernooi':'⏱ Tijdrace';$('#gLevel').classList.remove('calh');
+    $('#gLevel').textContent=G.mode==='brk'?'⚔️ '+ROUND_NAME[G.def.round]:G.mode==='tour'?'🏆 Toernooi':'⏱ Tijdrace';$('#gLevel').classList.remove('calh');
     const t=Math.ceil(G.time),m=Math.floor(t/60),sc=t%60;
     $('#gMoves').textContent='⏳ '+m+':'+(sc<10?'0':'')+sc;
     $('#gMoves').classList.toggle('low',G.time<=10);
     $('#gScore').textContent='⭐ '+fmt(G.score);
     const best=Math.max(G.worldBest||0,G.mode==='tour'?weekBest(G.def.week):(S.race||{})[G.def.date]||0);
-    $('#goals').innerHTML=`<span class="goal">🏆 ${G.mode==='tour'?'Beste deze week':'Beste vandaag'}: ${fmt(Math.max(best,G.score))}</span>`;
+    $('#goals').innerHTML=G.mode==='brk'?`<span class="goal">⚔️ <span>Tegen</span> ${esc(prettyName(G.def.opp))}</span>`:`<span class="goal">🏆 ${G.mode==='tour'?'Beste deze week':'Beste vandaag'}: ${fmt(Math.max(best,G.score))}</span>`;
     $('#barfill').style.width=Math.round(Math.min(1,G.time/G.def.secs)*100)+'%';
     $('#tHammer span').textContent=G.hammers;$('#tShuffle span').textContent=G.shuffles;
     $('#tHammer').classList.toggle('on',G.hammerOn);
@@ -918,7 +937,7 @@ async function fireSpecials(){
 function raceTick(g){
   if(G!==g||g.over){clearInterval(g.tmr);return}
   const now=Date.now(),dt=Math.min(now-g.last,500);g.last=now;
-  if(document.hidden||$('#modal').classList.contains('on')||!$('#game').classList.contains('on'))return;   // pauze: de tijd loopt niet door
+  if(document.hidden||(g.mode!=='brk'&&$('#modal').classList.contains('on'))||!$('#game').classList.contains('on'))return;   // pauze: de tijd loopt niet door (behalve in een bracket-wedstrijd: daar loopt de klok altijd door)
   if(!g.timeUp){g.time-=dt/1000;if(g.time<=0){g.time=0;g.timeUp=true}hud0()}
   if(g.timeUp&&!g.busy&&!g.ending)endRace();
 }
@@ -926,7 +945,7 @@ async function endRace(){
   if(!G||G.ending||G.over)return;
   G.ending=true;G.busy=true;clearHint();
   await fireSpecials();   // speciale dieren die nog op het bord staan gaan nog af
-  if(G.mode==='tour')finishTour();else finishRace();
+  if(G.mode==='brk')finishBrk();else if(G.mode==='tour')finishTour();else finishRace();
 }
 async function endCheck(){
   if(isTimed(G)){if(G.timeUp)await endRace();return}
@@ -1028,8 +1047,13 @@ async function checkCups(){
       const w=dayAdd(cur,-7*k);if(today()<dayAdd(w,8))continue;
       if(!S.cupChk[w]){
         if(weekHasScore(w)){
-          const rows=await rpc('yippo_week_me',{p_week:w});
-          if(rows&&rows[0]){S.cups[w]={r:+rows[0].rank,n:+rows[0].total,s:+rows[0].score};S.cupNew.push('c|'+w)}
+          if(w>=BRACKET_START){   // bracket-toernooi: 1 kampioen, 2 finalist, 3 halve finale, 4 meegedaan
+            const rows=await rpc('yippo_bracket_result',{p_week:w});
+            if(rows&&rows[0]){S.cups[w]={r:+rows[0].r,n:0,s:+rows[0].s,b:1};S.cupNew.push('c|'+w)}
+          }else{
+            const rows=await rpc('yippo_week_me',{p_week:w});
+            if(rows&&rows[0]){S.cups[w]={r:+rows[0].rank,n:+rows[0].total,s:+rows[0].score};S.cupNew.push('c|'+w)}
+          }
         }
         S.cupChk[w]=1;changed=true;
       }
@@ -1048,7 +1072,7 @@ async function checkCups(){
 function showNewCups(){
   const n=S.cupNew.splice(0);save();if(!n.length)return;
   const lines=n.map(k=>{
-    if(k[0]==='c'){const w=k.slice(2),c=S.cups[w];return c?`<p><b>${cupIcon(c.r)}</b> <span>Week ${weekNo(w)}</span>: <span>Plek ${c.r} van ${c.n}</span></p>`:''}
+    if(k[0]==='c'){const w=k.slice(2),c=S.cups[w];return c?`<p><b>${cupIcon(c.r)}</b> <span>Week ${weekNo(w)}</span>: ${c.b?`<span>${CUP_LABEL[c.r]||CUP_LABEL[4]}</span>`:`<span>Plek ${c.r} van ${c.n}</span>`}</p>`:''}
     const c=S.crowns[k.slice(2)];return c?`<p><b>👑</b> ${esc(c.n)} · <span>Week ${weekNo(c.w)}</span></p>`:'';
   }).join('');
   modal(`<h2>🏆 Nieuwe beker!</h2>${lines}`,[['🏆 Naar de prijzenkast','',()=>openCab()],['OK','dim',()=>{}]]);
@@ -1056,8 +1080,8 @@ function showNewCups(){
 async function openTour(){
   show('tour');renderTour();
 }
-async function renderTour(){
-  const body=$('#tourBody'),ws=weekStart(today()),tok=++lbTok;
+async function renderTourLegacy(tok){
+  const body=$('#tourBody'),ws=weekStart(today());
   $('#tourWeek').innerHTML=`<span>Week ${weekNo(ws)}</span>${weekLeft(ws)}`;
   body.innerHTML='<p class="muted">Laden…</p>';
   try{
@@ -1087,6 +1111,121 @@ async function renderTour(){
     const b=$('#tourRetry');if(b)b.onclick=renderTour;
   }
 }
+
+const leftSpan=sec=>{const d=Math.floor(sec/86400),h=Math.floor(sec/3600);return d>=1?`<span>nog ${d} ${d===1?'dag':'dagen'}</span>`:h>=1?`<span>nog ${h} uur</span>`:`<span>nog ${Math.max(1,Math.ceil(sec/60))} min</span>`};
+const PHASE_NAME={qual:'Kwalificatie',r1:'Kwartfinale',r2:'Halve finale',r3:'Finale',done:'Uitslag',none:'Geen bracket'};
+const CUP_LABEL={1:'Kampioen',2:'Finalist',3:'Halve finale',4:'Meegedaan'};
+function bracketHtml(st){
+  const rounds=st.size===8?[1,2,3]:st.size===4?[2,3]:[3],mp={};
+  (st.matches||[]).forEach(m=>{mp[m.round+'-'+m.slot]=m});
+  const row=(n,seed,sc,me,win,played,dec,bye)=>{
+    const nm=bye?'<i>Bye</i>':esc(prettyName(n||'…'));
+    const cls=(me?'me ':'')+(dec?(win?'w':'lo'):'')+(bye?' by':'');
+    return `<div class="${cls}"><span>${seed?seed+' ':''}${nm}</span><b>${dec&&sc!=null?fmt(sc):played?'✓':''}</b></div>`;
+  };
+  return '<div class="bkt">'+rounds.map(r=>{
+    const cnt=r===1?4:r===2?2:1;let h=`<div class="bcol"><h4>${ROUND_NAME[r]}</h4>`;
+    for(let k=1;k<=cnt;k++){
+      const m=mp[r+'-'+k];
+      if(!m){h+='<div class="bm"><div><span>…</span></div><div><span>…</span></div></div>';continue}
+      const dec=m.win!=null;
+      h+=`<div class="bm">${row(m.n1,m.seed1,m.s1,m.me1,m.win===1,m.pl1,dec,false)}${row(m.n2,m.seed2,m.s2,m.me2,m.win===2,m.pl2,dec,!m.n2)}</div>`;
+    }
+    return h+'</div>';
+  }).join('')+'</div>';
+}
+function startBracketMatch(st){
+  const my=st.my;
+  modal(`<h2>⚔️ ${ROUND_NAME[my.round]}</h2><p><span>Jij tegen</span> <b>${esc(prettyName(my.opponent))}</b></p><p>Je hebt één poging van 60 seconden. Klaar?</p>`,
+    [['▶ Start','',async()=>{
+      try{await rpc('yippo_bracket_start',{p_week:st.week});startGame(brkDef(st.week,my.round,my.opponent),'brk')}
+      catch(e){toast(errText(e));renderTour()}
+    }],['Terug','dim',()=>{}]]);
+}
+async function renderTour(){
+  const body=$('#tourBody'),tok=++lbTok;
+  body.innerHTML='<p class="muted">Laden…</p>';
+  let st=null;
+  try{st=await rpc('yippo_bracket',{p_week:null})}
+  catch(e){
+    if(tok!==lbTok)return;
+    if(!tourNoSetup(e)&&!/yippo_bracket/i.test(e.message||'')){body.innerHTML=`<p class="muted">${esc(errText(e))}</p><div class="lbact"><button class="btn" id="tourRetry">↻ Opnieuw</button></div>`;const b=$('#tourRetry');if(b)b.onclick=renderTour;return}
+  }
+  if(tok!==lbTok)return;
+  BRK=st;
+  if(!st||st.phase==='legacy'){
+    const ws=weekStart(today());
+    $('#tourWeek').innerHTML=`<span>Week ${weekNo(ws)}</span>${weekLeft(ws)}`;
+    await renderTourLegacy(tok);
+    if(st&&tok===lbTok)body.insertAdjacentHTML('afterbegin','<div class="mybox"><b>Nieuw: toernooi met bracket</b><small>Vanaf maandag 23 november: kwalificatie, kwartfinale, halve finale en finale!</small></div>');
+    return;
+  }
+  const ph=st.phase,me=myId();
+  $('#tourWeek').innerHTML=`<span>Week ${weekNo(st.week)}</span><span>${PHASE_NAME[ph]}</span>${leftSpan(st.left_s)}`;
+  const rounds=st.size===8?[1,2,3]:st.size===4?[2,3]:st.size===2?[3]:[];
+  let h='';
+  if(ph!=='qual'&&ph!=='none'){
+    const cur=ph[0]==='r'?+ph[1]:99;
+    h+='<div class="bphases"><div class="dn">Kwalificatie</div>'+rounds.map(r=>`<div class="${r<cur?'dn':r===cur?'on':''}">${ROUND_NAME[r]}</div>`).join('')+'</div>';
+    h+=bracketHtml(st);
+    const my=st.my;
+    if(ph==='done'){
+      const fin=(st.matches||[]).find(m=>m.round===3&&m.win);
+      if(fin)h+=`<div class="champ">🏆 <span>Kampioen</span>: ${esc(prettyName(fin.win===1?fin.n1:fin.n2))}</div>`;
+    }else if(my&&my.alive){
+      if(my.bye)h+='<div class="mybox"><b>Bye</b><small>Je gaat automatisch door naar de volgende ronde.</small></div>';
+      else if(my.can_play)h+=`<div class="mybox"><b>⚔️ <span>Jouw ${ROUND_NAME[my.round].toLowerCase()}</span>: <span>jij tegen</span> ${esc(prettyName(my.opponent))}</b><small>Eén poging van 60 seconden, vandaag t/m 23:59. Wie de meeste punten haalt, gaat door.</small></div><div class="lbact"><button class="btn" id="tourBrk">▶ Speel je wedstrijd</button></div>`;
+      else h+='<div class="mybox"><b>✓ Gespeeld</b><small>De uitslag komt zodra de ronde is afgelopen.</small></div>';
+    }else if(my&&my.in_bracket)h+='<div class="mybox"><b>Je bent uitgeschakeld</b><small>Volg de rest van het toernooi hier.</small></div>';
+    else h+='<div class="mybox"><b>Je zit niet in de bracket</b><small>Speel volgende week de kwalificatie mee, de eerste 8 gaan door.</small></div>';
+  }else{
+    if(ph==='none')h+='<div class="mybox"><b>Deze week geen bracket</b><small>Er waren te weinig spelers. Volgende week weer!</small></div>';
+    else h+='<div class="mybox"><b>Kwalificatie</b><small>Maandag t/m woensdag: speel zo vaak je wilt, je beste score telt. De beste 8 spelers gaan door naar de kwartfinale.</small></div>';
+    h+=`<div class="tsec">Beste score van deze week</div>`;
+    const q=st.qual||[];
+    if(!q.length)h+='<p class="muted">Nog niemand deze week. Wees de eerste!</p>';
+    q.forEach(x=>{h+=`<div class="lbrow${x.me?' me':''}${x.rank===8&&ph==='qual'?' cut':''}"><span class="rk">${medal(+x.rank)}</span><span class="nm">${esc(prettyName(x.name))}</span><span class="sc">${fmt(+x.score)}</span></div>`});
+    if(st.my_rank&&st.my_rank>20)h+=`<div class="lbrow me"><span class="rk">${st.my_rank}</span><span class="nm">${esc(prettyName((S.player&&S.player.name)||''))}</span><span class="sc">${fmt(+st.my_score)}</span></div>`;
+    if(st.qual_total>q.length)h+=`<p class="muted"><span>${fmt(st.qual_total)} spelers</span></p>`;
+    if(ph==='qual')h+='<div class="lbact"><button class="btn" id="tourPlay">▶ Speel de kwalificatie</button></div>';
+  }
+  h+=`<div class="tsec">Jouw beloning aan het eind van de week</div><div class="rewards"><div><b>🥇</b>Kampioen</div><div><b>🥈</b>Finalist</div><div><b>🥉</b>Halve finale</div><div><b>🎖️</b>Meegedaan</div></div>`;
+  h+=`<div class="tsec">Kampioen in je league</div>`;
+  if(!S.leagues.length)h+='<p class="muted">Doe mee met een league om kampioen te worden.</p>';
+  h+='<div id="tourLg"></div>';
+  body.innerHTML=h;
+  const pb=$('#tourPlay');if(pb)pb.onclick=()=>{sfx.ui();startGame(tourDef(),'tour')};
+  const bb=$('#tourBrk');if(bb)bb.onclick=()=>{sfx.ui();startBracketMatch(st)};
+  S.leagues.forEach(async l=>{
+    try{
+      const lr=await rpc('yippo_league_week',{p_code:l.code,p_week:st.week});if(tok!==lbTok)return;
+      const i=lr.findIndex(x=>x.player_id===me),el=$('#tourLg');if(!el)return;
+      el.insertAdjacentHTML('beforeend',`<div class="lbrow"><span class="rk">👑</span><span class="nm">${esc(l.name)}</span><span class="sc">${i>=0?`<span>Plek ${+lr[i].rank}</span>`:''}</span></div>`);
+    }catch(e){}
+  });
+}
+function finishBrk(){
+  G.over=true;clearInterval(G.tmr);
+  const score=G.score,week=G.def.week;sfx.win();
+  const show=ok=>modal(`<h2>⚔️ Gespeeld!</h2><div class="stars">⭐ ${fmt(score)}</div><p>punten in ${G.def.secs} seconden</p><p>${ok?'De uitslag komt zodra de ronde is afgelopen.':'📡 Geen verbinding: je score is niet verstuurd.'}</p>`,
+    [['🏆 Toernooi','',()=>openTour()],['Menu','dim',toMenu]]);
+  setTimeout(async()=>{
+    let ok=false;
+    for(let i=0;i<3&&!ok;i++){
+      try{await rpc('yippo_bracket_submit',{p_week:week,p_score:score});ok=true}
+      catch(e){if(e.message!=='offline')break;await new Promise(r=>setTimeout(r,1500))}
+    }
+    refreshWeekMe.t=0;show(ok);
+  },500);
+}
+
+async function refreshWeekMe(){   // stand van het toernooi voor het hoofdscherm
+  if(!online()||!S.auth||refreshWeekMe.busy||Date.now()-(refreshWeekMe.t||0)<8000)return;
+  refreshWeekMe.busy=true;refreshWeekMe.t=Date.now();
+  try{BRK=await rpc('yippo_bracket',{p_week:null});renderMenu2()}
+  catch(e){BRK=null;refreshWeekMe.busy=false;refreshWeekMe.t=0;return refreshWeekMe0()}
+  finally{refreshWeekMe.busy=false}
+}
 function openCab(){show('cab');renderCab()}
 function renderCab(){
   const cups=Object.keys(S.cups||{}).sort(),crowns=Object.keys(S.crowns||{}).sort((a,b)=>a.split('|')[1]<b.split('|')[1]?-1:1);
@@ -1102,11 +1241,11 @@ function renderCab(){
   $('#cabBody').innerHTML=`<div class="tsec">Wekelijks toernooi</div>${shelves(cupBtns,'🏆')}<div class="tsec">Kampioen in je league</div>${shelves(crownBtns,'👑')}<p class="muted"><small>Tik op een beker voor de score en de datum.</small></p>`;
   $('#cabBody').querySelectorAll('.cup[data-t]').forEach(b=>b.onclick=()=>{
     sfx.ui();const [t,...rest]=b.dataset.t.split('|');
-    if(t==='c'){const w=rest[0],c=S.cups[w];toast(I18N.trLines(`Week ${weekNo(w)} · ${fmt(c.s)} punten · plek ${c.r} van ${c.n}`))}
+    if(t==='c'){const w=rest[0],c=S.cups[w];toast(I18N.trLines(c.b?`Week ${weekNo(w)} · ${CUP_LABEL[c.r]||CUP_LABEL[4]} · ${fmt(c.s)} punten`:`Week ${weekNo(w)} · ${fmt(c.s)} punten · plek ${c.r} van ${c.n}`))}
     else{const c=S.crowns[rest.join('|')];toast(I18N.trLines(`${c.n} · Week ${weekNo(c.w)} · ${fmt(c.s)} punten`))}
   });
 }
-async function refreshWeekMe(){   // eigen plek in de weekranglijst voor het hoofdscherm
+async function refreshWeekMe0(){   // eigen plek in de weekranglijst voor het hoofdscherm
   if(!online()||!S.auth||refreshWeekMe.busy||Date.now()-(refreshWeekMe.t||0)<8000)return;
   refreshWeekMe.busy=true;refreshWeekMe.t=Date.now();
   try{const ws=weekStart(today()),r=await rpc('yippo_week_me',{p_week:ws});S.wk={w:ws,r:r&&r[0]?+r[0].rank:0,n:r&&r[0]?+r[0].total:0};renderMenu2()}catch(e){}
@@ -1253,7 +1392,7 @@ async function rpc(fn,args,tokenOverride){
     throw e;
   }finally{clearTimeout(t)}
 }
-const ERR={offline:'Geen verbinding. Probeer het later opnieuw.',league_not_found:'Die code bestaat niet.',league_full:'Deze league zit vol (max. 50 spelers).',
+const ERR={no_match:'Je hebt nu geen wedstrijd om te spelen.',already_played:'Je hebt deze ronde al gespeeld.',offline:'Geen verbinding. Probeer het later opnieuw.',league_not_found:'Die code bestaat niet.',league_full:'Deze league zit vol (max. 50 spelers).',
   too_many:'Je zit al in 10 leagues.',bad_name:'Vul een geldige naam in.',bad_day:'Deze score is te oud om te versturen.',bad_score:'Deze score kan niet worden verstuurd.',anonymous_provider_disabled:'Gastaccounts staan nog uit in Supabase.',not_signed_in:'Inloggen als gast is niet gelukt. Probeer het later opnieuw.',bad_data:'Opslaan is niet gelukt.',otp_expired:'Die code klopt niet of is verlopen. Vraag een nieuwe code aan.',validation_failed:'Dit e-mailadres lijkt niet te kloppen.',over_email_send_rate_limit:'Even geduld: je kunt over een minuutje een nieuwe code aanvragen.',over_request_rate_limit:'Even geduld: je kunt over een minuutje een nieuwe code aanvragen.',email_address_invalid:'Dit e-mailadres lijkt niet te kloppen.',otp_disabled:'Geen account gevonden met dit e-mailadres.',signup_disabled:'Geen account gevonden met dit e-mailadres.',user_not_found:'Geen account gevonden met dit e-mailadres.'};
 const errText=e=>ERR[e.message]||'Er ging iets mis. Probeer het later opnieuw.';
 
@@ -1418,7 +1557,7 @@ function mergeProgress(c){
   S.tour=S.tour||{};for(const k in (c.tour||{})){const v=c.tour[k];if(/^\d{4}-\d\d-\d\d$/.test(k)&&num(v)&&v>(S.tour[k]||0))S.tour[k]=v}
   S.race=S.race||{};for(const k in (c.race||{})){const v=c.race[k];if(/^\d{4}-\d\d-\d\d$/.test(k)&&num(v)&&v>(S.race[k]||0))S.race[k]=v}
   S.cups=S.cups||{};S.crowns=S.crowns||{};S.cupChk=S.cupChk||{};
-  for(const k in (c.cups||{})){const v=c.cups[k];if(/^\d{4}-\d\d-\d\d$/.test(k)&&v&&num(v.r)&&num(v.n)&&num(v.s)&&!S.cups[k]){S.cups[k]={r:v.r,n:v.n,s:v.s};S.cupChk[k]=1}}
+  for(const k in (c.cups||{})){const v=c.cups[k];if(/^\d{4}-\d\d-\d\d$/.test(k)&&v&&num(v.r)&&num(v.n)&&num(v.s)&&!S.cups[k]){S.cups[k]={r:v.r,n:v.n,s:v.s};if(v.b)S.cups[k].b=1;S.cupChk[k]=1}}
   for(const k in (c.crowns||{})){const v=c.crowns[k];if(/^[A-Z0-9]{5}\|\d{4}-\d\d-\d\d$/.test(k)&&v&&typeof v.n==='string'&&num(v.s)&&!S.crowns[k]){S.crowns[k]={n:v.n.slice(0,24),w:k.slice(6),s:v.s};S.cupChk['L'+k]=1}}
   const cs=c.streak;
   if(cs&&typeof cs.last==='string'&&num(cs.count)&&(cs.last>S.streak.last||(cs.last===S.streak.last&&cs.count>S.streak.count)))S.streak={count:cs.count,last:cs.last};
@@ -2197,7 +2336,15 @@ function renderMenu2(){
   const best=S.daily[today()];
   const wb=menuWorld.day===today()?menuWorld.score:undefined,top=Math.max(wb||0,best||0);   // dagrecord van iedereen (zonder verbinding: je eigen beste)
   const chip=(c,t)=>`<span class="dchip ${c}">${t}</span>`,st=(S.streak.last===today()||S.streak.last===yesterday())&&S.streak.count;
-  {const ws=weekStart(today());$('#m2TourSub').innerHTML=`<span class="dchip tw">Week ${weekNo(ws)}</span>`+weekLeft(ws).replace('<span>','<span class="dchip me">')+(S.wk&&S.wk.w===ws&&S.wk.r?`<span class="dchip rec">${S.wk.r<=3?['🥇','🥈','🥉'][S.wk.r-1]+' ':''}Plek ${S.wk.r}</span>`:'');
+  {const ws=weekStart(today()),B=BRK&&BRK.phase!=='legacy'?BRK:null;
+   if(B){   // toernooi met bracket: week, fase en jouw status
+     const my=B.my||{};let c3='';
+     if(B.phase==='qual')c3=B.my_rank?`<span class="dchip rec">${B.my_rank<=3?['🥇','🥈','🥉'][B.my_rank-1]+' ':''}Plek ${B.my_rank}</span>`:'<span class="dchip rec">Speel mee!</span>';
+     else if(my.can_play)c3='<span class="dchip turn">Jouw beurt!</span>';
+     else if(my.alive)c3=my.bye?'<span class="dchip rec">Bye</span>':'<span class="dchip rec">Gespeeld ✓</span>';
+     else if(B.phase!=='none'&&B.phase!=='done')c3=my.in_bracket?'<span class="dchip rec">Uitgeschakeld</span>':'<span class="dchip rec">Niet in bracket</span>';
+     $('#m2TourSub').innerHTML=`<span class="dchip tw">Week ${weekNo(B.week)}</span><span class="dchip me">${PHASE_NAME[B.phase]}</span>`+c3;
+   }else $('#m2TourSub').innerHTML=`<span class="dchip tw">Week ${weekNo(ws)}</span>`+weekLeft(ws).replace('<span>','<span class="dchip me">')+(S.wk&&S.wk.w===ws&&S.wk.r?`<span class="dchip rec">${S.wk.r<=3?['🥇','🥈','🥉'][S.wk.r-1]+' ':''}Plek ${S.wk.r}</span>`:'');
    {const ts=$('#m2TourSub');if(ts&&ts.clientWidth>0)fitRow(ts,'.dchip')}
    $('#m2Tour').style.display=online()?'':'none';refreshWeekMe()}
   {const rb=(S.race||{})[today()]||0,rw=menuRace.day===today()?menuRace.score:0,rtop=Math.max(rw,rb),ch=(c,t)=>`<span class="dchip ${c}">${t}</span>`;
@@ -2321,6 +2468,7 @@ $('#gMenu').onclick=()=>{
   if(G.over){sfx.ui();toMenu();return}
   if(G.busy){toast('Even wachten…');return}
   sfx.ui();
+  if(G.mode==='brk'){modal('<h2>Pauze</h2><p>De tijd loopt door!</p>',[['Verder spelen','',()=>{}]]);return}
   modal('<h2>Pauze</h2>',[
     ['Verder spelen','',()=>{}],
     ['↻ Opnieuw','dim',()=>G.mode==='daily'?startGame(dailyDef(),'daily'):G.mode==='race'?startGame(raceDef(),'race'):G.mode==='tour'?startGame(tourDef(),'tour'):startLevel(G.def.L)],
