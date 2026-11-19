@@ -1120,6 +1120,15 @@ function bracketHtml(st){
     return h+'</div>';
   }).join('')+'</div>';
 }
+// Voorbeeld van een bracket (met dieren als namen), zodat spelers zien hoe het toernooi eruitziet
+function exampleBracketHtml(){
+  const M=(round,slot,n1,seed1,s1,n2,seed2,s2,win)=>({round,slot,n1,n2,seed1,seed2,s1,s2,win,pl1:false,pl2:false,me1:false,me2:false});
+  const st={size:8,matches:[
+    M(1,1,'🦓',1,3840,'🐘',8,2100,1),M(1,2,'🐧',4,2480,'🦩',5,2900,2),M(1,3,'🐼',2,3610,'🦁',7,2300,1),M(1,4,'🐨',3,1900,'🦒',6,2550,2),
+    M(2,1,'🦓',1,4100,'🦩',5,3700,1),M(2,2,'🐼',2,null,'🦒',6,null,null)]};
+  return `<div class="tsec">Voorbeeld van de bracket</div>`+bracketHtml(st)+
+    '<p class="muted"><small>Ma t/m wo kwalificatie, do kwartfinale, vr halve finale, za finale, zo prijzen. Elke ronde speel je één keer 60 seconden tegen een andere speler. Wie de meeste punten haalt, gaat door.</small></p>';
+}
 function startBracketMatch(st){
   const my=st.my;
   modal(`<h2>⚔️ ${ROUND_NAME[my.round]}</h2><p><span>Jij tegen</span> <b>${esc(prettyName(my.opponent))}</b></p><p>Je hebt één poging van 60 seconden. Klaar?</p>`,
@@ -1143,7 +1152,7 @@ async function renderTour(){
     const ws=weekStart(today());
     $('#tourWeek').innerHTML=`<span>Week ${weekNo(ws)}</span>${weekLeft(ws)}`;
     await renderTourLegacy(tok);
-    if(st&&tok===lbTok)body.insertAdjacentHTML('afterbegin','<div class="mybox"><b>Nieuw: toernooi met bracket</b><small>Vanaf maandag 23 november: kwalificatie, kwartfinale, halve finale en finale!</small></div>');
+    if(st&&tok===lbTok){body.insertAdjacentHTML('afterbegin','<div class="mybox"><b>Nieuw: toernooi met bracket</b><small>Vanaf maandag 23 november: kwalificatie, kwartfinale, halve finale en finale!</small></div>');body.insertAdjacentHTML('beforeend',exampleBracketHtml())}
     return;
   }
   const ph=st.phase,me=myId();
@@ -1173,7 +1182,7 @@ async function renderTour(){
     q.forEach(x=>{h+=`<div class="lbrow${x.me?' me':''}${x.rank===8&&ph==='qual'?' cut':''}"><span class="rk">${medal(+x.rank)}</span><span class="nm">${esc(prettyName(x.name))}</span><span class="sc">${fmt(+x.score)}</span></div>`});
     if(st.my_rank&&st.my_rank>20)h+=`<div class="lbrow me"><span class="rk">${st.my_rank}</span><span class="nm">${esc(prettyName((S.player&&S.player.name)||''))}</span><span class="sc">${fmt(+st.my_score)}</span></div>`;
     if(st.qual_total>q.length)h+=`<p class="muted"><span>${fmt(st.qual_total)} spelers</span></p>`;
-    if(ph==='qual')h+='<div class="lbact"><button class="btn" id="tourPlay">▶ Speel de kwalificatie</button></div>';
+    if(ph==='qual')h+='<div class="lbact"><button class="btn" id="tourPlay">▶ Speel de kwalificatie</button></div>'+exampleBracketHtml();
   }
   h+=`<div class="tsec">Jouw beloning aan het eind van de week</div><div class="rewards"><div><b>🥇</b>Kampioen</div><div><b>🥈</b>Finalist</div><div><b>🥉</b>Halve finale</div><div><b>🎖️</b>Meegedaan</div></div>`;
   body.innerHTML=h;

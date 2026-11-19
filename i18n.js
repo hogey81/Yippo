@@ -218,6 +218,8 @@ const ROWS=[
 ["Speel je wedstrijd","Play your match","Juega tu partido"],
 ["Speel de kwalificatie","Play the qualifier","Jugar la clasificación"],
 ["Start","Start","Empezar"],
+["Voorbeeld van de bracket","Example of the bracket","Ejemplo del cuadro"],
+["Ma t/m wo kwalificatie, do kwartfinale, vr halve finale, za finale, zo prijzen. Elke ronde speel je één keer 60 seconden tegen een andere speler. Wie de meeste punten haalt, gaat door.","Mon–Wed qualifying, Thu quarter-final, Fri semi-final, Sat final, Sun prizes. Each round you play once for 60 seconds against another player. Whoever scores the most points goes through.","Lun–mié clasificación, jue cuartos de final, vie semifinal, sáb final, dom premios. En cada ronda juegas una vez 60 segundos contra otro jugador. Pasa quien consiga más puntos."],
 ["Tijdrace","Time Attack","Contrarreloj"],
 ["Tijdrace!","Time Attack!","¡Contrarreloj!"],
 ["60 sec · Beste {}","60 sec · Best {}","60 s · Mejor {}"],
