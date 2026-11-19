@@ -1085,26 +1085,12 @@ async function renderTourLegacy(tok){
   $('#tourWeek').innerHTML=`<span>Week ${weekNo(ws)}</span>${weekLeft(ws)}`;
   body.innerHTML='<p class="muted">Laden…</p>';
   try{
-    const rows=await rpc('yippo_week_global',{p_week:ws,p_limit:50}),me=myId();
-    if(tok!==lbTok)return;
-    const total=rows.length?+rows[0].total:0;
-    let h=`<div class="tsec">Beste score van deze week</div>`;
-    if(!rows.length)h+='<p class="muted">Nog niemand deze week. Wees de eerste!</p>';
-    rows.forEach(x=>{h+=`<div class="lbrow${x.player_id===me?' me':''}"><span class="rk">${medal(+x.rank)}</span><span class="nm">${esc(prettyName(x.name))}</span><span class="sc">${fmt(+x.score)}</span></div>`});
-    if(total>rows.length)h+=`<p class="muted"><span>${fmt(total)} spelers</span></p>`;
+    let h='';
     h+=`<div class="tsec">Jouw beloning aan het eind van de week</div><div class="rewards"><div><b>🥇</b>Plek 1</div><div><b>🥈</b>Plek 2</div><div><b>🥉</b>Plek 3</div><div><b>🎖️</b>Meegedaan</div></div>`;
-    h+=`<div class="tsec">Kampioen in je league</div>`;
-    if(!S.leagues.length)h+='<p class="muted">Doe mee met een league om kampioen te worden.</p>';
-    h+='<div id="tourLg"></div><div class="lbact"><button class="btn" id="tourPlay">▶ Speel het toernooi</button></div>';
+    h+='<div class="lbact"><button class="btn" id="tourPlay">▶ Speel het toernooi</button></div>';
+    if(tok!==lbTok)return;
     body.innerHTML=h;
     $('#tourPlay').onclick=()=>{sfx.ui();startGame(tourDef(),'tour')};
-    S.leagues.forEach(async l=>{
-      try{
-        const lr=await rpc('yippo_league_week',{p_code:l.code,p_week:ws});if(tok!==lbTok)return;
-        const i=lr.findIndex(x=>x.player_id===me),el=$('#tourLg');if(!el)return;
-        el.insertAdjacentHTML('beforeend',`<div class="lbrow"><span class="rk">👑</span><span class="nm">${esc(l.name)}</span><span class="sc">${i>=0?`<span>Plek ${+lr[i].rank}</span>`:''}</span></div>`);
-      }catch(e){}
-    });
   }catch(e){
     if(tok!==lbTok)return;
     body.innerHTML=tourNoSetup(e)?'<p class="muted">Het toernooi komt binnenkort.</p>':`<p class="muted">${esc(errText(e))}</p><div class="lbact"><button class="btn" id="tourRetry">↻ Opnieuw</button></div>`;
@@ -1190,19 +1176,9 @@ async function renderTour(){
     if(ph==='qual')h+='<div class="lbact"><button class="btn" id="tourPlay">▶ Speel de kwalificatie</button></div>';
   }
   h+=`<div class="tsec">Jouw beloning aan het eind van de week</div><div class="rewards"><div><b>🥇</b>Kampioen</div><div><b>🥈</b>Finalist</div><div><b>🥉</b>Halve finale</div><div><b>🎖️</b>Meegedaan</div></div>`;
-  h+=`<div class="tsec">Kampioen in je league</div>`;
-  if(!S.leagues.length)h+='<p class="muted">Doe mee met een league om kampioen te worden.</p>';
-  h+='<div id="tourLg"></div>';
   body.innerHTML=h;
   const pb=$('#tourPlay');if(pb)pb.onclick=()=>{sfx.ui();startGame(tourDef(),'tour')};
   const bb=$('#tourBrk');if(bb)bb.onclick=()=>{sfx.ui();startBracketMatch(st)};
-  S.leagues.forEach(async l=>{
-    try{
-      const lr=await rpc('yippo_league_week',{p_code:l.code,p_week:st.week});if(tok!==lbTok)return;
-      const i=lr.findIndex(x=>x.player_id===me),el=$('#tourLg');if(!el)return;
-      el.insertAdjacentHTML('beforeend',`<div class="lbrow"><span class="rk">👑</span><span class="nm">${esc(l.name)}</span><span class="sc">${i>=0?`<span>Plek ${+lr[i].rank}</span>`:''}</span></div>`);
-    }catch(e){}
-  });
 }
 function finishBrk(){
   G.over=true;clearInterval(G.tmr);
