@@ -103,6 +103,12 @@ body.land #game .tools{grid-column:3;grid-row:1/4;flex-direction:column;align-se
 .t.sp.lion[data-dir=h]::after{content:"↔"}
 .t.sp.lion[data-dir=v]::after{content:"↕"}
 .fx{position:absolute;pointer-events:none;z-index:9;font-weight:900;text-shadow:0 2px 0 #0007}
+#mega{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:30}
+#mega .mpl{position:absolute;border-radius:50%;pointer-events:none}
+#mega .mnum{position:absolute;left:0;right:0;top:28%;text-align:center;font-weight:900;font-size:clamp(54px,22vw,92px);line-height:1;letter-spacing:-.02em;
+ background:linear-gradient(90deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:2px #fff;paint-order:stroke fill;filter:drop-shadow(0 4px 0 #0006)}
+#mega .myip{position:absolute;left:0;right:0;top:52%;text-align:center;font-weight:900;font-size:clamp(30px,12vw,52px);letter-spacing:.04em;display:flex;justify-content:center;gap:.04em}
+#mega .myip span{display:inline-block;-webkit-text-stroke:1.5px #fff;paint-order:stroke fill;filter:drop-shadow(0 3px 0 #0006)}
 #combo{position:absolute;left:0;right:0;top:36%;text-align:center;font-size:40px;font-weight:900;color:#ffe066;
   text-shadow:0 4px 0 #b8000a,0 0 20px #ff0;pointer-events:none;opacity:0;z-index:10;transform:rotate(-6deg)}
 #combo.go{animation:combo .9s ease-out}
@@ -669,6 +675,43 @@ function burst(r,c,color){
     p.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(0)`,opacity:0}],{duration:450,easing:'ease-out'}).onfinish=()=>p.remove();
   }
 }
+// Twee unicorns gecombineerd: vuurwerk in de unicornkleuren, een teller naar 5000 en YIPPO! (duurt ± 3 seconden, blokkeert niets, geen snelle lichtflitsen)
+const MEGA_COLORS=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff'];
+function megaFlash(){
+  const host=$('#game');if(!host)return;
+  const old=$('#mega');if(old)old.remove();
+  const fx=document.createElement('div');fx.id='mega';host.appendChild(fx);
+  const mk=(cls,css,txt)=>{const e=document.createElement('div');e.className=cls;if(css)e.style.cssText=css;if(txt!=null)e.textContent=txt;fx.appendChild(e);return e};
+  const an=(e,kf,o)=>e.animate(kf,Object.assign({fill:'forwards',easing:'ease-out'},o));
+  const calm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  sfx.special();buzz([40,30,40,30,80]);
+  [[22,28],[78,24],[50,16],[30,62],[70,60]].forEach((p,i)=>{
+    const d=i*170;
+    for(let j=0;j<(calm?6:16);j++){
+      const a=j/16*6.28,rr=48+Math.random()*30,sp=mk('mpl',`left:${p[0]}%;top:${p[1]}%;width:5px;height:5px;background:${MEGA_COLORS[i]};box-shadow:0 0 8px ${MEGA_COLORS[i]}`);
+      an(sp,[{transform:'translate(0,0)',opacity:1},{transform:`translate(${Math.cos(a)*rr}px,${Math.sin(a)*rr+16}px)`,opacity:0}],{duration:800,delay:d});
+    }
+    const g=mk('mpl',`left:calc(${p[0]}% - 30px);top:calc(${p[1]}% - 30px);width:60px;height:60px;background:radial-gradient(circle,${MEGA_COLORS[i]}cc,transparent 70%)`);
+    an(g,[{transform:'scale(.2)',opacity:1},{transform:'scale(1.6)',opacity:0}],{duration:600,delay:d});
+  });
+  const n=mk('mnum',null,'0');n.style.opacity=0;
+  an(n,[{opacity:0,transform:'scale(.6)'},{opacity:1,transform:'scale(1)'}],{duration:260,delay:700});
+  const t0=performance.now()+700;
+  (function tick(now){const p=Math.max(0,Math.min(1,(now-t0)/800));n.textContent=Math.round(5000*(1-Math.pow(1-p,3)));
+    if(p<1&&fx.isConnected)requestAnimationFrame(tick);else if(p>=1&&!calm)an(n,[{transform:'scale(1.25)'},{transform:'scale(1)'}],{duration:260})})(performance.now());
+  const w=mk('myip');
+  (GAME_NAME.toUpperCase()+'!').split('').forEach((ch,i)=>{
+    const s=document.createElement('span');s.textContent=ch;s.style.color=MEGA_COLORS[i%5];s.style.opacity=0;w.appendChild(s);
+    an(s,[{opacity:0,transform:'translateY(40px) scale(.4) rotate(-12deg)'},{opacity:1,transform:'translateY(-10px) scale(1.2) rotate(4deg)',offset:.6},{opacity:1,transform:'none'}],{duration:420,delay:1550+i*90,easing:'cubic-bezier(.2,1.4,.4,1)'});
+  });
+  if(!calm)for(let i=0;i<30;i++){
+    const sz=6+Math.random()*7,c=mk('mpl',`left:50%;top:45%;width:${sz}px;height:${sz*1.4}px;border-radius:2px;background:${MEGA_COLORS[i%5]}`);
+    const a=Math.random()*6.28,rr=60+Math.random()*130;
+    an(c,[{transform:'translate(0,0) rotate(0)',opacity:1},{transform:`translate(${Math.cos(a)*rr}px,${Math.sin(a)*rr+40}px) rotate(${Math.random()*720-360}deg)`,opacity:0}],{duration:1100+Math.random()*500,delay:1550+Math.random()*80});
+  }
+  setTimeout(()=>{fx.style.transition='opacity .4s';fx.style.opacity=0},3000);
+  setTimeout(()=>fx.remove(),3500);
+}
 function comboText(t){const e=$('#combo');e.textContent=t;e.classList.remove('go');void e.offsetWidth;e.classList.add('go')}
 
 /* ============ clearing / gravity ============ */
@@ -688,6 +731,7 @@ async function clearSet(set,combo,spawns,nAct){
   if(chain)pts+=chain*50*combo;   // elk speciaal dier dat door een ontploffing meeverdwijnt levert de 50 punten op die het waard is
   if(G.mult>1){pts*=G.mult;G.mult=1;comboText('SUPER COMBO x2!')}   // twee speciale dieren gecombineerd: dubbele punten
   G.score+=pts;
+  if(G.mega){G.mega=false;G.score+=5000;megaFlash()}   // twee unicorns gecombineerd: 5000 punten erbij
   const f=[...set][0];fxAt(Math.floor(f/COLS),f%COLS,'+'+pts,'#ffe066');
   sfx.match(combo);buzz(12);
   if(nAct){sfx.special();board.classList.remove('shake');void board.offsetWidth;board.classList.add('shake');buzz(60)}
@@ -871,7 +915,7 @@ addEventListener('pointerup',()=>{drag=null});
 
 /* ============ turns ============ */
 async function afterMove(initial,swapCells){
-  await resolve(initial,swapCells);G.own=[];G.spareAll=false;
+  await resolve(initial,swapCells);G.own=[];G.spareAll=false;G.mega=false;
   await endCheck();
   if(!G.over){G.busy=false;scheduleHint()}
 }
@@ -888,7 +932,8 @@ async function doSwap(a,b){
     await sleep(160);G.busy=false;scheduleHint();return;
   }
   G.moves--;hud();
-  if((ta.s&&tb.s)||ta.s==='unicorn'||tb.s==='unicorn')G.mult=2;
+  if(ta.s==='unicorn'&&tb.s==='unicorn')G.mega=true;   // twee unicorns: 5000 punten erbij en een flits (geen x2)
+  else if((ta.s&&tb.s)||ta.s==='unicorn'||tb.s==='unicorn')G.mult=2;
   const initial=special?swapEffect(ta,tb):null;
   await afterMove(initial,[b,a]);G.spareAll=false;
 }
