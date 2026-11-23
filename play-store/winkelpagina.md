@@ -16,7 +16,9 @@ Yippo is a cheerful puzzle game for the whole family. Swap animals, match three 
 🦁 Special animals: make a lion, elephant, dragon or unicorn and blow up the board. Combine two special animals for a super blast with double points!
 🌍 A new world every week: travel from the zebras of Africa to the llamas in the mountains and the penguins on the ice. The map shows where every animal lives.
 🏡 Your own zoo: earn animals by beating levels and learn fun facts about them.
-📅 Daily puzzle: everybody gets the same puzzle. Can you beat today's world record?
+📅 Daily puzzle: everybody gets the same puzzle with 25 moves. Can you beat today's world record?
+⏱ Time Attack: 60 seconds, as many points as you can.
+🏆 Weekly tournament: qualify, then fight through the quarter-finals, semi-finals and final to win a trophy for your cabinet.
 👨‍👩‍👧 Play with friends and family: create a league and see who is best.
 🔥 Keep your streak going by playing every day.
 
@@ -36,7 +38,9 @@ Yippo is een vrolijk puzzelspel voor het hele gezin. Wissel dieren om, maak rije
 🦁 Speciale dieren: maak een leeuw, olifant, draak of eenhoorn en laat het bord ontploffen. Combineer twee speciale dieren voor een superknal met dubbele punten!
 🌍 Elke week een nieuwe wereld: reis van de zebra's in Afrika naar de lama's in de bergen en de pinguïns op het ijs. Op de kaart zie je waar elk dier leeft.
 🏡 Je eigen dierentuin: verdien dieren door levels te halen en leer er leuke weetjes over.
-📅 Dagelijkse puzzel: iedereen krijgt dezelfde puzzel. Kun jij het wereldrecord van vandaag verslaan?
+📅 Dagelijkse puzzel: iedereen krijgt dezelfde puzzel met 25 zetten. Kun jij het wereldrecord van vandaag verslaan?
+⏱ Tijdrace: 60 seconden, zoveel mogelijk punten.
+🏆 Wekelijks toernooi: kwalificeer je en vecht door de kwartfinale, halve finale en finale voor een beker in je prijzenkast.
 👨‍👩‍👧 Speel met vrienden en familie: maak een league en zie wie de beste is.
 🔥 Houd je reeks vast door elke dag te spelen.
 
@@ -56,7 +60,9 @@ Yippo es un puzle alegre para toda la familia. Cambia animales de sitio, junta t
 🦁 Animales especiales: crea un león, un elefante, un dragón o un unicornio y haz explotar el tablero. ¡Combina dos animales especiales para una super explosión con puntos dobles!
 🌍 Un mundo nuevo cada semana: viaja de las cebras de África a las llamas de las montañas y los pingüinos del hielo. En el mapa ves dónde vive cada animal.
 🏡 Tu propio zoo: consigue animales al superar niveles y descubre datos curiosos sobre ellos.
-📅 Puzle diario: todos reciben el mismo puzle. ¿Puedes batir el récord mundial de hoy?
+📅 Puzle diario: todos reciben el mismo puzle con 25 movimientos. ¿Puedes batir el récord mundial de hoy?
+⏱ Contrarreloj: 60 segundos, tantos puntos como puedas.
+🏆 Torneo semanal: clasifícate y supera los cuartos de final, las semifinales y la final para ganar un trofeo para tu vitrina.
 👨‍👩‍👧 Juega con amigos y familia: crea una liga y mira quién es el mejor.
 🔥 Mantén tu racha jugando cada día.
 
@@ -80,3 +86,10 @@ Disponible en neerlandés, inglés y español.
 
 ## Testers invitation (English, for WhatsApp / social)
 Hi! I made a free animal puzzle game called Yippo and I need testers on Android for 14 days. Join here: [TEST LINK]. You need a Google account. Thanks a lot!
+
+## Release notes tweede release (maximaal 500 tekens per taal)
+**English:** New: Time Attack (60 seconds), a weekly tournament with quarter-finals, semi-finals and a final, a trophy cabinet and league crowns. Optional notifications when your match is ready (adults). A friendly rating prompt after a few levels. Plus a new animal world every Friday and many small improvements.
+
+**Nederlands:** Nieuw: Tijdrace (60 seconden), een wekelijks toernooi met kwartfinales, halve finales en een finale, een prijzenkast en league-kronen. Optionele meldingen als je wedstrijd klaarstaat (volwassenen). Een vriendelijke vraag om een beoordeling na een paar levels. Elke vrijdag een nieuwe dierenwereld en veel kleine verbeteringen.
+
+**Español:** Novedades: contrarreloj (60 segundos), torneo semanal con cuartos de final, semifinales y final, vitrina de trofeos y coronas de liga. Avisos opcionales cuando tu partido esté listo (adultos). Una petición amable de valoración tras unos niveles. Un mundo animal nuevo cada viernes y muchas mejoras.
