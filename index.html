@@ -1913,8 +1913,9 @@ const WORLDS=[
   {id:4,name:"De Panda's",emoji:'🐼',pen:'De Panda-bamboebos',color:'#c9e8b0',release:'2026-11-06T18:00:00'},
   {id:5,name:"De Flamingo's",emoji:'🦩',pen:'De Flamingo-meren',color:'#ffc9de',release:'2026-11-13T18:00:00'},
   {id:6,name:"De Koala's",emoji:'🐨',pen:'De Eucalyptusbossen',color:'#ffd9a8',release:'2026-11-20T18:00:00'},
+  {id:7,name:'De Dolfijnen',emoji:'🐬',pen:'De Dolfijnenbaai',color:'#bfe6ff',release:'2026-11-27T18:00:00'},
 ];
-const COMING=[{name:'De Dolfijnen',emoji:'🐬'},{name:'De IJsberen',emoji:'🐻‍❄️'},{name:'De Vlinders',emoji:'🦋'}];   // teasers voor wereld 3 en verder
+const COMING=[{name:'De IJsberen',emoji:'🐻‍❄️'},{name:'De Vlinders',emoji:'🦋'},{name:'De Bosdieren',emoji:'🦌'}];   // teasers voor wereld 3 en verder
 const WORLD1=WORLDS[0];
 const worldOf=L=>Math.min(WORLDS.length,Math.max(1,Math.ceil(L/WORLD_SIZE)));
 const worldOpen=w=>{const W=WORLDS[w-1];return !!W&&(PREVIEW||!W.release||new Date()>=new Date(W.release))};
@@ -1974,6 +1975,14 @@ const ZOO=[
   {id:'w6-230', e:'🐙',n:'Blauwgeringde octopus', lvl:230, fact:'Een blauwgeringde octopus is maar zo\'n 20 centimeter groot en laat zijn blauwe ringen oplichten als waarschuwing.'},
   {id:'w6-235', e:'🦈',n:'Grote witte haai', lvl:235, fact:'Een grote witte haai heeft zo\'n 300 gekartelde tanden in meerdere rijen, en verloren tanden worden snel vervangen.'},
   {id:'w6-240', e:'🦉',n:'Boobookuil', lvl:240, fact:'De boobookuil heeft zijn naam te danken aan zijn roep: een dubbele \'boe-boek\'.'},
+  {id:'w7-245', e:'🐬',n:'Gewone tuimelaar', lvl:245, fact:'Elke gewone tuimelaar heeft een eigen fluitgeluid, een soort naam waarmee andere dolfijnen hem roepen.'},
+  {id:'w7-250', e:'🐳',n:'Orka', lvl:250, fact:'Een orka is geen walvis maar de grootste dolfijn, en leeft in een familiegroep.'},
+  {id:'w7-255', e:'🐬',n:'Amazone-rivierdolfijn', lvl:255, fact:'De Amazone-rivierdolfijn is roze en heeft een buigzame nek, waarmee hij zijn kop naar links en rechts draait tussen overstroomde bomen.'},
+  {id:'w7-260', e:'🐬',n:'Bruinvis', lvl:260, fact:'De bruinvis is de walvisachtige die je het vaakst in de Noordzee ziet, en de enige die regelmatig in de Waddenzee zwemt.'},
+  {id:'w7-265', e:'🐡',n:'Kogelvis', lvl:265, fact:'Een kogelvis zuigt water in zijn rekbare maag en wordt zo een bal, en veel soorten zijn giftig.'},
+  {id:'w7-270', e:'🦀',n:'Strandkrab', lvl:270, fact:'De kleur van een strandkrab hangt af van het vervellen: jonge krabben zijn vaak groen en oudere rood.'},
+  {id:'w7-275', e:'🦞',n:'Europese kreeft', lvl:275, fact:'Een Europese kreeft is in het wild blauwachtig en wordt pas rood als hij gekookt is.'},
+  {id:'w7-280', e:'🦐',n:'Noordzeegarnaal', lvl:280, fact:'Een Noordzeegarnaal graaft zich in het zand en past zijn kleur aan de ondergrond aan.'},
 ];
 const wOf=a=>+a.id[1];
 const FANTASY=[
@@ -2029,6 +2038,14 @@ const HAB={
  'w6-230':{t:["🍖 Vleeseter", "🌊 Warme ondiepe zee"],r:"Warme, ondiepe zee van Japan tot Australië",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],nomap:true},
  'w6-235':{t:["🍖 Vleeseter", "🌊 Kustwateren"],r:"Kustwateren van alle oceanen",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],nomap:true},
  'w6-240':{t:["🌙 Jaagt 's nachts", "🌳 Bomen met holtes"],r:"Bijna heel Australië",n:"",c:["Australia"]},
+ 'w7-245':{t:["🗣️ Eigen fluitgeluid", "🌊 Zeeën"],r:"Zeeën in veel delen van de wereld",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],nomap:true},
+ 'w7-250':{t:["👪 Leeft in familiegroepen", "🌊 Alle oceanen"],r:"Alle oceanen, van de tropen tot de poolgebieden",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],nomap:true},
+ 'w7-255':{t:["💧 Zoet water", "🌳 Overstroomd bos"],r:"De Amazone en de Orinoco",n:"",c:["Bolivia", "Brazil", "Colombia", "Ecuador", "Guyana", "Peru", "Venezuela"]},
+ 'w7-260':{t:["🌊 Noordzee", "🏝️ Waddenzee"],r:"De Noordzee en de kusten eromheen",n:"",c:["Netherlands", "Belgium", "Germany", "Denmark", "Norway", "United Kingdom"]},
+ 'w7-265':{t:["🎈 Kan zich opblazen", "🌊 Warme zeeën"],r:"Warme zeeën, vooral in de tropen",n:"Dit dier leeft op en in het water, daarom is er geen landenkaart.",c:[],nomap:true},
+ 'w7-270':{t:["🏖️ Alle soorten kust", "🌊 Ondiep tot diep water"],r:"Kusten van Europa en Noord-Afrika",n:"",c:["Norway", "Sweden", "Denmark", "Germany", "Poland", "United Kingdom", "Ireland", "Netherlands", "Belgium", "France", "Spain", "Portugal", "Morocco"]},
+ 'w7-275':{t:["🌊 Noordelijke zeeën", "🔵 Blauw van kleur"],r:"Het noordoosten van de Atlantische Oceaan",n:"",c:["Norway", "United Kingdom", "Ireland", "France"]},
+ 'w7-280':{t:["🏖️ Zandige en modderige kust", "🌊 Ondiep water"],r:"Kusten van de Middellandse Zee tot Noorwegen",n:"",c:["Norway", "Denmark", "Germany", "Netherlands", "Belgium", "France", "United Kingdom", "Spain", "Italy"]},
 };
 const ALL_ANIMALS=ZOO.concat(FANTASY);
 const zooTotal=()=>ZOO.filter(a=>worldOpen(wOf(a))).length+FANTASY.length;
@@ -2075,6 +2092,7 @@ const THEMES={
   4:{amp:102,phase:4.1,decor:['🎍','🐼','🏮','🎋','🐼','🌸','🎍','🏯','🐼','🎋','🏮','🐼']},
   5:{amp:100,phase:5.2,decor:['🦩','🌸','💧','🌿','🦢','🌊','🌸','🦩','💧','🌿','🦆','🌊']},
   6:{amp:100,phase:6.1,decor:['🐨','🌿','☀️','🦘','🌵','🌿','🐨','☀️','🦜','🌵','🌿','🦘']},
+  7:{amp:100,phase:7.3,decor:['🐬','🌊','🐚','💧','🐳','🌊','🦀','💧','🐬','🌊','🐚','🐟']},
   2:{amp:108,phase:1.3,decor:['🦙','🌼','🌷','🏔️','🦙','🌸','🪨','🦙','🌼','🌷','☁️','🦙'],bridges:[14,28]},
 };
 const mapX=(i,w)=>{const t=THEMES[w]||THEMES[1];return 210+t.amp*Math.sin((i-1)*.9+t.phase)};
@@ -2089,6 +2107,14 @@ function smoothPath(pts){
   return d;
 }
 function mapBackground(w,H){
+  if(w===7){
+    let h=`<defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4f1ff"/><stop offset=".3" stop-color="#9fdcf2"/><stop offset=".7" stop-color="#4fb7de"/><stop offset="1" stop-color="#2a8fc4"/></linearGradient>
+      <pattern id="cow" patternUnits="objectBoundingBox" width="1" height="1"><image href="icons/icon-192.png" width="58" height="58" preserveAspectRatio="xMidYMid slice"/></pattern></defs><rect width="${MAP_W}" height="${H}" fill="url(#mg)"/>`;
+    for(let y=200;y<H-100;y+=300)h+=`<path d="M${(y*5)%160+10} ${y} q20 -12 40 0 t40 0 t40 0 t40 0" fill="none" stroke="#ffffff" stroke-width="3.5" opacity=".6"/><path d="M${300-(y*3)%140} ${y+110} q20 -12 40 0 t40 0 t40 0" fill="none" stroke="#ffffff" stroke-width="3.5" opacity=".5"/>`;
+    for(let y=330;y<H-100;y+=420)h+=`<circle cx="${(y*11)%300+50}" cy="${y}" r="10" fill="#fff" opacity=".35"/><circle cx="${(y*7)%300+60}" cy="${y-26}" r="6" fill="#fff" opacity=".4"/>`;
+    h+=`<path d="M0,${H-110} C100,${H-150} 200,${H-120} 300,${H-140} C360,${H-150} 400,${H-145} 420,${H-148} L420,${H} L0,${H} Z" fill="#f3d9a0"/>`;
+    return h;
+  }
   if(w===6){
     let h=`<defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd3f4"/><stop offset=".3" stop-color="#cfeaf2"/><stop offset=".62" stop-color="#ffe2b0"/><stop offset="1" stop-color="#f0a96a"/></linearGradient>
       <pattern id="cow" patternUnits="objectBoundingBox" width="1" height="1"><image href="icons/icon-192.png" width="58" height="58" preserveAspectRatio="xMidYMid slice"/></pattern></defs><rect width="${MAP_W}" height="${H}" fill="url(#mg)"/>`;
@@ -2137,6 +2163,7 @@ function mapBackground(w,H){
 }
 function mapRoad(w,pts){
   const road=smoothPath(pts);
+  if(w===7)return `<path d="${road}" fill="none" stroke="#a9794a" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#f1d8a3" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#ffffff" stroke-width="30" stroke-dasharray="5 9" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/>`;
   if(w===6)return `<path d="${road}" fill="none" stroke="#8a3f1c" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#d2693a" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#f2b27a" stroke-width="30" stroke-dasharray="5 9" stroke-linecap="round" stroke-linejoin="round"/>`;
   if(w===5)return `<path d="${road}" fill="none" stroke="#7a4a2a" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#e8c79a" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#b98b5a" stroke-width="30" stroke-dasharray="5 9" stroke-linecap="round" stroke-linejoin="round"/>`;
   if(w===4)return `<path d="${road}" fill="none" stroke="#3d6b3a" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#e9d9a8" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/><path d="${road}" fill="none" stroke="#c9b27a" stroke-width="30" stroke-dasharray="3 11" stroke-linecap="round" stroke-linejoin="round"/>`;
