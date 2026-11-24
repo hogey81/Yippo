@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Yippo · Feedback</title>
+<style>
+:root{--bg:#190a2e;--card:#ffffff14;--fg:#fff;--mut:#cdb8ee;--acc:#ffd23f;--accfg:#3a2500;--line:#ffffff2e;--ok:#4cd37a}
+@media (prefers-color-scheme:light){:root{--bg:#f6f0ff;--card:#fff;--fg:#2b0057;--mut:#6a4a98;--acc:#7b2cbf;--accfg:#fff;--line:#d9c8f3;--ok:#1f9d55}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding-block:18px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:640px;margin:0 auto}
+header{display:flex;align-items:center;gap:12px}header img{width:48px;height:48px;border-radius:12px}header h1{font-size:24px;margin:0;flex:1}
+.lang{display:flex;gap:6px}.lang button{font:inherit;font-size:14px;font-weight:800;border:2px solid var(--line);background:transparent;color:var(--fg);border-radius:10px;padding:5px 10px;cursor:pointer}.lang button.on{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+.intro{color:var(--mut);margin:12px 0 18px}
+fieldset{border:0;margin:0 0 20px;padding:0}
+legend{font-weight:800;font-size:18px;padding:0;margin-bottom:8px}legend small{font-weight:600;color:var(--mut);font-size:14px}
+.opt{display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;min-height:52px}
+.opt input{width:24px;height:24px;margin:0;accent-color:var(--acc);flex:none}
+.opt:has(input:checked){border-color:var(--acc)}
+.rate{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.rate .opt{justify-content:center;padding:12px 0;margin:0;font-weight:800;font-size:20px}.rate .opt input{position:absolute;opacity:0;pointer-events:none}.rate .opt:has(input:checked){background:var(--acc);color:var(--accfg)}
+.rate .opt:has(input:focus-visible){outline:3px solid var(--fg);outline-offset:2px}
+input[type=text],textarea{font:inherit;width:100%;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--fg)}textarea{min-height:110px;resize:vertical}
+.go{font:inherit;font-weight:800;font-size:18px;width:100%;border:0;border-radius:16px;padding:16px;background:var(--acc);color:var(--accfg);cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.go:disabled{opacity:.6}.msg{color:#ff7a90;font-weight:700;min-height:24px;margin:6px 0}
+.done{text-align:center;padding:40px 0}.done .big{font-size:64px}
+.note{color:var(--mut);font-size:13px;margin-top:18px}
+.hp{position:absolute;left:-9999px;opacity:0}[hidden]{display:none!important}
+</style></head><body><main>
+<header><img src="icons/icon-192.png" alt=""><h1 id="title">Yippo</h1><div class="lang"><button type="button" data-l="nl">NL</button><button type="button" data-l="en">EN</button><button type="button" data-l="es">ES</button></div></header>
+<form id="f" novalidate>
+<p class="intro" id="intro"></p>
+<div id="qs"></div>
+<input class="hp" type="text" name="website" id="hp" tabindex="-1" autocomplete="off">
+<p class="msg" id="msg" role="alert"></p>
+<button class="go" id="send" type="submit"></button>
+<p class="note" id="note"></p>
+</form>
+<div class="done" id="done" hidden><div class="big">🎉</div><h2 id="thx"></h2><p id="thx2"></p></div>
+</main>
+<script>
+var SB_URL="https://ovymejnayklmcrdncpjj.supabase.co",SB_KEY="sb_publishable_m6bghNYvHTTst6N9iyVBsg_SiE6zlnk";
+var TX={
+nl:{t:'Yippo · Vragenlijst',intro:'Bedankt dat je Yippo test! Dit duurt ongeveer 2 minuten. De vragenlijst is anoniem: je hoeft geen naam of e-mailadres in te vullen.',send:'Versturen',
+ note:'Vul geen persoonlijke gegevens in. We gebruiken je antwoorden alleen om Yippo te verbeteren.',need:'Beantwoord eerst de vragen met een *.',err:'Versturen is niet gelukt. Probeer het later opnieuw.',thx:'Bedankt!',thx2:'Je antwoorden helpen om Yippo beter te maken.',
+ q:[['freq','Hoe vaak heb je Yippo de afgelopen dagen gespeeld? *','r',[['daily','Elke dag'],['weekly','Meerdere keren per week'],['few','Een paar keer'],['once','Eén keer']]],
+ ['tried','Welke onderdelen heb je geprobeerd?','c',[['levels','Levels'],['daily','Dagelijkse puzzel'],['race','Tijdrace'],['tournament','Toernooi'],['zoo','Dierentuin'],['leagues','Leagues met vrienden'],['share','Resultaat delen']]],
+ ['liked','Wat vond je het leukst?','c',[['animals','De dieren en de dierentuin'],['specials','Speciale dieren en combo\'s'],['worlds','De nieuwe wereld elke week'],['daily','De dagelijkse puzzel'],['race','De Tijdrace'],['tournament','Het toernooi'],['looks','Hoe het eruitziet'],['noads','Geen advertenties']]],
+ ['issues','Wat was vervelend of ging fout?','c',[['none','Niets, alles werkte goed'],['confusing','Iets was onduidelijk'],['bug','Een fout of crash'],['hard','Te moeilijk'],['easy','Te makkelijk'],['slow','Traag of haperend'],['sound','Geluid of trillen'],['other','Iets anders']]],
+ ['rating','Welk cijfer geef je Yippo? (1 = slecht, 10 = geweldig) *','n',[]],
+ ['recommend','Zou je Yippo aanraden aan een vriend?','r',[['yes','Ja'],['maybe','Misschien'],['no','Nee']]],
+ ['device','Op welk toestel speel je? (optioneel, bijvoorbeeld Samsung Galaxy A54, Android 14)','t',[]],
+ ['remarks','Wil je nog iets kwijt? (optioneel)','a',[]]]},
+en:{t:'Yippo · Feedback',intro:'Thanks for testing Yippo! This takes about 2 minutes. The form is anonymous: you do not need to give a name or email address.',send:'Send',
+ note:'Please do not enter personal details. We only use your answers to improve Yippo.',need:'Please answer the questions marked with *.',err:'Sending failed. Please try again later.',thx:'Thank you!',thx2:'Your answers help make Yippo better.',
+ q:[['freq','How often have you played Yippo in the past few days? *','r',[['daily','Every day'],['weekly','Several times a week'],['few','A few times'],['once','Once']]],
+ ['tried','Which parts did you try?','c',[['levels','Levels'],['daily','Daily puzzle'],['race','Time Attack'],['tournament','Tournament'],['zoo','Zoo'],['leagues','Leagues with friends'],['share','Sharing a result']]],
+ ['liked','What did you like most?','c',[['animals','The animals and the zoo'],['specials','Special animals and combos'],['worlds','The new world every week'],['daily','The daily puzzle'],['race','Time Attack'],['tournament','The tournament'],['looks','How it looks'],['noads','No ads']]],
+ ['issues','What was annoying or went wrong?','c',[['none','Nothing, it all worked well'],['confusing','Something was unclear'],['bug','A bug or crash'],['hard','Too hard'],['easy','Too easy'],['slow','Slow or laggy'],['sound','Sound or vibration'],['other','Something else']]],
+ ['rating','What rating do you give Yippo? (1 = bad, 10 = great) *','n',[]],
+ ['recommend','Would you recommend Yippo to a friend?','r',[['yes','Yes'],['maybe','Maybe'],['no','No']]],
+ ['device','Which device do you play on? (optional, e.g. Samsung Galaxy A54, Android 14)','t',[]],
+ ['remarks','Anything else you would like to tell us? (optional)','a',[]]]},
+es:{t:'Yippo · Cuestionario',intro:'¡Gracias por probar Yippo! Lleva unos 2 minutos. El cuestionario es anónimo: no tienes que dar nombre ni correo electrónico.',send:'Enviar',
+ note:'No escribas datos personales. Solo usamos tus respuestas para mejorar Yippo.',need:'Responde primero las preguntas marcadas con *.',err:'No se pudo enviar. Inténtalo de nuevo más tarde.',thx:'¡Gracias!',thx2:'Tus respuestas ayudan a mejorar Yippo.',
+ q:[['freq','¿Con qué frecuencia has jugado a Yippo estos días? *','r',[['daily','Cada día'],['weekly','Varias veces a la semana'],['few','Unas pocas veces'],['once','Una vez']]],
+ ['tried','¿Qué partes has probado?','c',[['levels','Niveles'],['daily','Puzle diario'],['race','Contrarreloj'],['tournament','Torneo'],['zoo','Zoo'],['leagues','Ligas con amigos'],['share','Compartir un resultado']]],
+ ['liked','¿Qué te gustó más?','c',[['animals','Los animales y el zoo'],['specials','Animales especiales y combos'],['worlds','El mundo nuevo cada semana'],['daily','El puzle diario'],['race','La contrarreloj'],['tournament','El torneo'],['looks','Cómo se ve'],['noads','Sin anuncios']]],
+ ['issues','¿Qué fue molesto o falló?','c',[['none','Nada, todo funcionó bien'],['confusing','Algo no estaba claro'],['bug','Un error o cierre inesperado'],['hard','Demasiado difícil'],['easy','Demasiado fácil'],['slow','Lento o con tirones'],['sound','Sonido o vibración'],['other','Otra cosa']]],
+ ['rating','¿Qué nota le das a Yippo? (1 = mala, 10 = genial) *','n',[]],
+ ['recommend','¿Recomendarías Yippo a un amigo?','r',[['yes','Sí'],['maybe','Quizás'],['no','No']]],
+ ['device','¿En qué dispositivo juegas? (opcional, p. ej. Samsung Galaxy A54, Android 14)','t',[]],
+ ['remarks','¿Quieres decirnos algo más? (opcional)','a',[]]]}};
+var $=function(i){return document.getElementById(i)},L='nl',esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var qs=(location.search.match(/[?&]lang=(nl|en|es)/)||[])[1],nav=((navigator.language||'nl').slice(0,2));L=qs||(TX[nav]?nav:'nl');
+function build(){
+  var T=TX[L],h='';document.documentElement.lang=L;document.title=T.t;$('title').textContent='Yippo';$('intro').textContent=T.intro;$('send').textContent=T.send;$('note').textContent=T.note;
+  [].forEach.call(document.querySelectorAll('.lang button'),function(b){b.className=b.dataset.l===L?'on':''});
+  T.q.forEach(function(q){
+    var k=q[0],lg=q[1].replace(/\*/,'<small>*</small>');h+='<fieldset><legend>'+lg+'</legend>';
+    if(q[2]==='r'||q[2]==='c')q[3].forEach(function(o){h+='<label class="opt"><input type="'+(q[2]==='r'?'radio':'checkbox')+'" name="'+k+'" value="'+o[0]+'"><span>'+esc(o[1])+'</span></label>'});
+    if(q[2]==='n'){h+='<div class="rate">';for(var i=1;i<=10;i++)h+='<label class="opt"><input type="radio" name="rating" value="'+i+'"><span>'+i+'</span></label>';h+='</div>'}
+    if(q[2]==='t')h+='<input type="text" name="device" maxlength="120" autocomplete="off">';
+    if(q[2]==='a')h+='<textarea name="remarks" maxlength="1500"></textarea>';
+    h+='</fieldset>';
+  });
+  $('qs').innerHTML=h;
+}
+document.querySelector('.lang').addEventListener('click',function(e){var b=e.target.closest('button');if(b){L=b.dataset.l;build()}});
+$('qs').addEventListener('change',function(e){var i=e.target;if(i.name!=='issues'||i.type!=='checkbox')return;
+  if(i.value==='none'&&i.checked)[].forEach.call($('qs').querySelectorAll('input[name=issues]'),function(x){if(x.value!=='none')x.checked=false});
+  if(i.value!=='none'&&i.checked){var n=$('qs').querySelector('input[name=issues][value=none]');if(n)n.checked=false}});
+function val(n){var e=$('f').querySelector('input[name='+n+']:checked');return e?e.value:null}
+function many(n){return [].map.call($('f').querySelectorAll('input[name='+n+']:checked'),function(x){return x.value})}
+$('f').addEventListener('submit',function(e){
+  e.preventDefault();$('msg').textContent='';
+  if($('hp').value){show();return}
+  if(!val('freq')||!val('rating')){$('msg').textContent=TX[L].need;return}
+  var body={p_answers:{lang:L,freq:val('freq'),tried:many('tried'),liked:many('liked'),issues:many('issues'),rating:+val('rating'),recommend:val('recommend'),device:$('f').querySelector('[name=device]').value,remarks:$('f').querySelector('[name=remarks]').value}};
+  $('send').disabled=true;
+  fetch(SB_URL+'/rest/v1/rpc/yippo_feedback_submit',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)})
+   .then(function(r){if(!r.ok)throw 0;show()}).catch(function(){$('msg').textContent=TX[L].err;$('send').disabled=false});
+});
+function show(){$('f').hidden=true;$('done').hidden=false;$('thx').textContent=TX[L].thx;$('thx2').textContent=TX[L].thx2;window.scrollTo(0,0)}
+build();
+</script></body></html>

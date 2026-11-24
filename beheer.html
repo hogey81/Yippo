@@ -46,6 +46,8 @@ svg text{fill:var(--mut);font-size:11px}
   <div class="chart" id="chartPlayers"></div>
   <h2>Nieuwe accounts per dag</h2>
   <div class="chart" id="chartNew"></div>
+  <h2>Feedback van testers</h2>
+  <div class="chart" id="fbBox"><p class="note">Laden…</p></div>
   <h2>Hoe ver zijn spelers? (per wereld)</h2>
   <div class="chart" id="chartWorlds"></div>
   <h2>Per dag</h2>
@@ -129,8 +131,28 @@ function render(d){
   days.slice().reverse().forEach(function(x){t+='<tr><td>'+x.day+'</td><td>'+fmt(x.players)+'</td><td>'+fmt(x.new_accounts)+'</td><td>'+(x.best==null?'–':fmt(x.best))+'</td></tr>'});
   $('tbl').innerHTML=t;
 }
+var FBL={freq:{daily:'Elke dag',weekly:'Meerdere keren per week',few:'Een paar keer',once:'Eén keer'},recommend:{yes:'Ja',maybe:'Misschien',no:'Nee'},
+ tried:{levels:'Levels',daily:'Dagelijkse puzzel',race:'Tijdrace',tournament:'Toernooi',zoo:'Dierentuin',leagues:'Leagues',share:'Delen'},
+ liked:{animals:'Dieren en dierentuin',specials:'Speciale dieren',worlds:'Wekelijkse wereld',daily:'Dagelijkse puzzel',race:'Tijdrace',tournament:'Toernooi',looks:'Uiterlijk',noads:'Geen advertenties'},
+ issues:{none:'Niets, alles werkte',confusing:'Onduidelijk',bug:'Fout of crash',hard:'Te moeilijk',easy:'Te makkelijk',slow:'Traag',sound:'Geluid of trillen',other:'Iets anders'}};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function renderFeedback(f){
+  var h='<p style="margin:0 0 8px"><b>'+fmt(f.total)+'</b> ingevulde vragenlijsten'+(f.rating_avg!=null?' · gemiddeld cijfer <b>'+String(f.rating_avg).replace('.',',')+'</b>':'')+'</p>';
+  ['freq','tried','liked','issues','recommend'].forEach(function(k){
+    var t={freq:'Hoe vaak gespeeld',tried:'Geprobeerd',liked:'Leukst',issues:'Vervelend of fout',recommend:'Zou je aanraden'}[k],o=f[k]||{},keys=Object.keys(o).sort(function(a,b){return o[b]-o[a]});
+    h+='<table style="margin-top:10px"><tr><th>'+t+'</th><th>Aantal</th></tr>'+(keys.length?keys.map(function(x){return '<tr><td>'+esc((FBL[k]||{})[x]||x)+'</td><td>'+fmt(o[x])+'</td></tr>'}).join(''):'<tr><td>nog geen antwoorden</td><td>–</td></tr>')+'</table>';
+  });
+  var rem=f.remarks||[];
+  h+='<table style="margin-top:10px"><tr><th>Opmerkingen en toestellen</th></tr>'+(rem.length?rem.map(function(x){return '<tr><td style="text-align:left"><span class="note">'+new Date(x.at).toLocaleDateString('nl-NL')+(x.device?' · '+esc(x.device):'')+'</span><br>'+esc(x.text||'')+'</td></tr>'}).join(''):'<tr><td style="text-align:left">nog geen opmerkingen</td></tr>')+'</table>';
+  h+='<p class="note">Vragenlijst: yippogame.com/feedback (anoniem, ook in het Engels en Spaans).</p>';
+  $('fbBox').innerHTML=h;
+}
+function loadFeedback(){
+  api('/rest/v1/rpc/yippo_admin_feedback',{},token).then(renderFeedback)
+   .catch(function(){$('fbBox').innerHTML='<p class="note">De vragenlijst staat nog niet aan: voer supabase/feedback.sql uit in Supabase.</p>'});
+}
 function load(){
-  api('/rest/v1/rpc/yippo_admin_stats',{},token).then(function(d){$('login').hidden=true;$('dash').hidden=false;$('logout').hidden=false;$('refresh').hidden=false;render(d)})
+  api('/rest/v1/rpc/yippo_admin_stats',{},token).then(function(d){$('login').hidden=true;$('dash').hidden=false;$('logout').hidden=false;$('refresh').hidden=false;render(d);loadFeedback()})
    .catch(function(e){
      showLogin();
      setMsg(/not_admin/.test(e.message)?'Geen toegang met dit account.':'Je sessie is verlopen. Log opnieuw in.');
