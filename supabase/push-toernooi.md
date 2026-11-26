@@ -6,7 +6,7 @@ Zie ook `push-stappen.md` en `play-store/push-privacy-en-datasafety.md`.
 ## Wat er al klaarstaat
 - `yippo_bracket_players_to_notify()` (in `bracket.sql`): geeft per ronde de spelers die nog moeten spelen, met de naam van hun tegenstander.
   Alleen aan te roepen met de service-sleutel (service_role).
-- De app kent de rondes al (kwartfinale do, halve finale vr, finale za).
+- De app kent de rondes al (kwalificatie ma t/m do, kwartfinale vr, halve finale za, finale zo).
 
 ## Wat er nog moet gebeuren bij het aanzetten
 1. Pushmeldingen inrichten zoals in `push-stappen.md` (Firebase, Supabase-functie, `PUSH_ENABLED=true`).

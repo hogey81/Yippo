@@ -259,6 +259,8 @@ const ROWS=[
 ["Start","Start","Empezar"],
 ["Voorbeeld van de bracket","Example of the bracket","Ejemplo del cuadro"],
 ["Ma t/m wo kwalificatie, do kwartfinale, vr halve finale, za finale, zo prijzen. Elke ronde speel je één keer 60 seconden tegen een andere speler. Wie de meeste punten haalt, gaat door.","Mon–Wed qualifying, Thu quarter-final, Fri semi-final, Sat final, Sun prizes. Each round you play once for 60 seconds against another player. Whoever scores the most points goes through.","Lun–mié clasificación, jue cuartos de final, vie semifinal, sáb final, dom premios. En cada ronda juegas una vez 60 segundos contra otro jugador. Pasa quien consiga más puntos."],
+["Maandag t/m donderdag: speel zo vaak je wilt, je beste score telt. De beste 8 spelers gaan door naar de kwartfinale.","Monday to Thursday: play as often as you like, your best score counts. The best 8 players go through to the quarter-finals.","De lunes a jueves: juega las veces que quieras, cuenta tu mejor puntuación. Los 8 mejores pasan a cuartos de final."],
+["Ma t/m do kwalificatie, vr kwartfinale, za halve finale, zo finale. Elke ronde speel je één keer 60 seconden tegen een andere speler. Wie de meeste punten haalt, gaat door.","Mon–Thu qualifying, Fri quarter-final, Sat semi-final, Sun final. Each round you play once for 60 seconds against another player. Whoever scores the most points goes through.","Lun–jue clasificación, vie cuartos de final, sáb semifinal, dom final. En cada ronda juegas una vez 60 segundos contra otro jugador. Pasa quien consiga más puntos."],
 ["Tijdrace","Time Attack","Contrarreloj"],
 ["Tijdrace!","Time Attack!","¡Contrarreloj!"],
 ["60 sec · Beste {}","60 sec · Best {}","60 s · Mejor {}"],

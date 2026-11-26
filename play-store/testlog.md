@@ -22,7 +22,8 @@ Plan: minstens 12 testers (liefst 15 tot 20), dagelijks gebruik, korte vragenlij
 | Datum | Wat | Aantal testers | Feedback / wat is verbeterd |
 |---|---|---|---|
 | 24 nov | Nieuwe oproep en vragenlijst klaargezet | | |
-| 26 nov | Eerste bracket-kwartfinale | | |
+| 26 nov | Kwalificatie verlengd t/m donderdag (schema: kwalificatie ma-do, kwartfinale vr, halve finale za, finale zo) | | |
+| 27 nov | Eerste bracket-kwartfinale (als er minstens 2 spelers zijn) | | |
 | 27 nov | Wereld 8 | | |
 | 30 nov | Controle halverwege | | |
 | 7 dec | Opnieuw aanvragen | | |

@@ -3,9 +3,9 @@
 -- Eerst yippo.sql en toernooi.sql draaien (de scores van de kwalificatie staan in yippo_tour_scores).
 --
 -- Schema per week (maandag t/m zondag, tijden in Europe/Amsterdam):
---   ma-wo  kwalificatie: speel zo vaak je wilt, je beste score telt. De beste 8 komen in de bracket.
---   do     kwartfinale  (1-8, 4-5, 2-7, 3-6)       za  finale
---   vr     halve finale                            zo  prijsuitreiking
+--   ma-do  kwalificatie: speel zo vaak je wilt, je beste score telt. De beste 8 komen in de bracket.
+--   vr     kwartfinale  (1-8, 4-5, 2-7, 3-6)       zo  finale
+--   za     halve finale                            ma  uitslag en bekers (de volgende maandag)
 --   Zijn er minder dan 8 spelers, dan krijgen de hoogst geplaatste spelers een bye (of de eerste ronde wordt overgeslagen).
 --   Elke ronde speel je één keer 60 seconden op hetzelfde bord als je tegenstander. Meeste punten wint.
 --   Gelijk: de hoogst geplaatste speler gaat door. Niet gespeeld: de tegenstander gaat door.
@@ -65,12 +65,12 @@ declare
 begin
   if p_week < date '2026-11-23' then return; end if;
   v_d := yippo_today() - p_week;
-  if v_d < 3 then return; end if;
+  if v_d < 4 then return; end if;
   perform pg_advisory_xact_lock(hashtext('yippo_bracket_' || p_week::text));
 
   if not exists (select 1 from yippo_bracket_meta where week = p_week) then
     select count(*) into v_n from (
-      select player_id from yippo_tour_scores where day between p_week and p_week + 2
+      select player_id from yippo_tour_scores where day between p_week and p_week + 3
       group by player_id having max(score) > 0) q;
     v_size := case when v_n >= 5 then 8 when v_n >= 3 then 4 when v_n = 2 then 2 else 0 end;
     insert into yippo_bracket_meta (week, size, qualifiers) values (p_week, v_size, v_n);
@@ -79,7 +79,7 @@ begin
       select array_agg(player_id order by rk), array_agg(nm order by rk) into v_ids, v_names from (
         select player_id, nm, row_number() over (order by sc desc, t) rk from (
           select player_id, max(score) sc, max(updated_at) t, (array_agg(name order by updated_at desc))[1] nm
-          from yippo_tour_scores where day between p_week and p_week + 2
+          from yippo_tour_scores where day between p_week and p_week + 3
           group by player_id having max(score) > 0) q) z
         where rk <= 8;
       pairs := case v_size when 8 then array[[1,8],[4,5],[2,7],[3,6]] when 4 then array[[1,4],[2,3]] else array[[1,2]] end;
@@ -97,7 +97,7 @@ begin
   v_fr := case v_size when 8 then 1 when 4 then 2 else 3 end;
 
   for r in v_fr .. 3 loop
-    exit when v_d <= 3 + (r - v_fr);   -- deze ronde is nog niet afgelopen
+    exit when v_d <= 4 + (r - v_fr);   -- deze ronde is nog niet afgelopen
     for m in select * from yippo_bracket_matches where week = p_week and round = r and winner is null loop
       select score into s1 from yippo_bracket_plays where week = p_week and round = r and player_id = m.p1;
       select score into s2 from yippo_bracket_plays where week = p_week and round = r and player_id = m.p2;
@@ -125,6 +125,13 @@ begin
   end loop;
 end $$;
 
+-- Eenmalig: de kwalificatie duurt nu t/m donderdag. Een 'geen bracket'-regel die onder het oude schema (t/m woensdag)
+-- al voor de huidige week is gemaakt, wordt verwijderd zodat de bracket alsnog kan starten.
+delete from yippo_bracket_meta m
+ where m.week = date_trunc('week', yippo_today())::date
+   and yippo_today() - m.week < 4
+   and not exists (select 1 from yippo_bracket_matches x where x.week = m.week);
+
 -- Stand van het toernooi (voor de app). p_week leeg = de huidige week.
 create or replace function yippo_bracket(p_week date default null)
 returns jsonb
@@ -146,21 +153,21 @@ begin
   v_d := v_today - v_week;
   select size into v_size from yippo_bracket_meta where week = v_week;
   v_fr := case v_size when 8 then 1 when 4 then 2 else 3 end;
-  v_cr := case when v_d >= 3 and v_size > 0 then v_fr + (v_d - 3) end;
-  v_phase := case when v_d <= 2 then 'qual'
+  v_cr := case when v_d >= 4 and v_size > 0 then v_fr + (v_d - 4) end;
+  v_phase := case when v_d <= 3 then 'qual'
                   when v_size is null or v_size = 0 then 'none'
                   when v_cr <= 3 then 'r' || v_cr
                   else 'done' end;
   -- einde van de huidige fase (middernacht Amsterdam)
-  v_end := case when v_phase = 'qual' then ((v_week + 3)::timestamp at time zone 'Europe/Amsterdam')
-                when v_phase in ('r1', 'r2', 'r3') then ((v_week + 4 + (v_cr - v_fr))::timestamp at time zone 'Europe/Amsterdam')
+  v_end := case when v_phase = 'qual' then ((v_week + 4)::timestamp at time zone 'Europe/Amsterdam')
+                when v_phase in ('r1', 'r2', 'r3') then ((v_week + 5 + (v_cr - v_fr))::timestamp at time zone 'Europe/Amsterdam')
                 when v_phase in ('done', 'none') then ((v_week + 7)::timestamp at time zone 'Europe/Amsterdam') end;
   v_left := greatest(0, extract(epoch from (v_end - yippo_now()))::int);
 
   -- kwalificatieranglijst (ma-wo): beste score van de speler
   with q as (
     select player_id, max(score) sc, max(updated_at) t, (array_agg(name order by updated_at desc))[1] nm
-    from yippo_tour_scores where day between v_week and v_week + 2
+    from yippo_tour_scores where day between v_week and v_week + 3
     group by player_id having max(score) > 0
   ), r as (select q.*, row_number() over (order by sc desc, t) rk, count(*) over () n from q)
   select coalesce(jsonb_agg(jsonb_build_object('rank', rk, 'name', nm, 'score', sc, 'me', player_id = v_uid) order by rk) filter (where rk <= 20), '[]'::jsonb),
@@ -210,9 +217,9 @@ begin
   perform yippo_bracket_ensure(p_week);
   v_d := v_today - p_week;
   select size into v_size from yippo_bracket_meta where week = p_week;
-  if v_size is null or v_size = 0 or v_d < 3 then raise exception 'no_match'; end if;
+  if v_size is null or v_size = 0 or v_d < 4 then raise exception 'no_match'; end if;
   v_fr := case v_size when 8 then 1 when 4 then 2 else 3 end;
-  v_cr := v_fr + (v_d - 3);
+  v_cr := v_fr + (v_d - 4);
   if v_cr > 3 then raise exception 'no_match'; end if;
   select * into mm from yippo_bracket_matches
     where week = p_week and round = v_cr and (p1 = v_uid or p2 = v_uid) and p2 is not null and winner is null limit 1;
@@ -234,9 +241,9 @@ begin
   if p_score is null or p_score < 0 or p_score > 100000 then raise exception 'bad_score'; end if;
   v_d := yippo_today() - p_week;
   select size into v_size from yippo_bracket_meta where week = p_week;
-  if v_size is null or v_size = 0 or v_d < 3 then raise exception 'no_match'; end if;
+  if v_size is null or v_size = 0 or v_d < 4 then raise exception 'no_match'; end if;
   v_fr := case v_size when 8 then 1 when 4 then 2 else 3 end;
-  v_cr := v_fr + (v_d - 3);
+  v_cr := v_fr + (v_d - 4);
   update yippo_bracket_plays set score = p_score
    where week = p_week and round = v_cr and player_id = v_uid and score is null
      and started_at > now() - interval '5 minutes';
@@ -251,7 +258,7 @@ begin
   if v_uid is null then raise exception 'not_signed_in'; end if;
   if p_week is null or p_week < date '2026-11-23' or yippo_today() - p_week < 7 then return; end if;
   perform yippo_bracket_ensure(p_week);
-  select max(score) into v_best from yippo_tour_scores where player_id = v_uid and day between p_week and p_week + 2;
+  select max(score) into v_best from yippo_tour_scores where player_id = v_uid and day between p_week and p_week + 3;
   if coalesce(v_best, 0) <= 0 then return; end if;
   v_r := case
     when exists (select 1 from yippo_bracket_matches where week = p_week and round = 3 and winner = v_uid) then 1
@@ -270,9 +277,9 @@ declare v_week date := date_trunc('week', yippo_today())::date;
 begin
   perform yippo_bracket_ensure(v_week);
   select size into v_size from yippo_bracket_meta where yippo_bracket_meta.week = v_week;
-  if v_size is null or v_size = 0 or v_d < 3 then return; end if;
+  if v_size is null or v_size = 0 or v_d < 4 then return; end if;
   v_fr := case v_size when 8 then 1 when 4 then 2 else 3 end;
-  v_cr := v_fr + (v_d - 3);
+  v_cr := v_fr + (v_d - 4);
   if v_cr > 3 then return; end if;
   return query
     select x.pid, v_week, v_cr, x.opp from (
